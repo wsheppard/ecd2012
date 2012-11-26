@@ -1,9 +1,5 @@
-<<<<<<< HEAD
-ecd
-===
-=======
-ecd2012
-=======
+This is the repo for the software application only.
 
-ecd2012
->>>>>>> fd29ade86a30c320a95e3f83d91c8bd1ffb34c61
+BSP code is NOT included.
+
+VHDL code is NOT included.
