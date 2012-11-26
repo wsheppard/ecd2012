@@ -23,7 +23,7 @@ int display_init(void){
 	
 	/* Create main task; return -1 on error */
 	if (xTaskCreate( display_main, 
-		"Display Thread", 
+		(const signed char*)"Display Thread",
 		configMINIMAL_STACK_SIZE, 
 		NULL, 
 		DISPLAY_PRIORITY, 
