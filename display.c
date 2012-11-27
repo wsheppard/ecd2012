@@ -7,7 +7,7 @@
  *
  */
 
-#include "display.h"
+#include <display.h>
 
 #include <stdio.h>
 #include "pwm.h"

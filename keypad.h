@@ -3,10 +3,11 @@
 
 /* Free RTOS includes */
 #include <FreeRTOS.h>
-#include "task.h"
-#include "queue.h"
-#include "timers.h"
-#include "semphr.h"
+#include <FreeRTOSConfig.h>
+#include <task.h>
+#include <queue.h>
+#include <timers.h>
+#include <semphr.h>
 
 /* Local Includes */
 #include "ECD.h"

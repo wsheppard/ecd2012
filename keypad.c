@@ -8,8 +8,9 @@
   */
 
 /* Local includes */
-#include "keypad.h"
-#include "pwm.h"
+#include <keypad.h>
+#include <pwm.h>
+
 
 /* Private functions */
 static void kp_main(void*pvParams);
