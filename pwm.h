@@ -9,10 +9,10 @@
 #include "semphr.h"
 
 /* Put in the addresses of the servos or the auto-genreated defines */
-#define ADD_SERVO1 0x10000000
-#define ADD_SERVO2 0x20000000
-#define ADD_SERVO3 0x30000000
-#define ADD_SERVO4 0x40000000
+#define ADD_SERVO1 PWM_COMPONENT_0_BASE
+#define ADD_SERVO2 PWM_COMPONENT_0_BASE+4
+#define ADD_SERVO3 PWM_COMPONENT_0_BASE+8
+#define ADD_SERVO4 PWM_COMPONENT_0_BASE+12
 
 enum {
 	PWM_SERVO1,
@@ -26,7 +26,7 @@ enum {
 	resolution are we going to use? I've assumed simple percentage but this might be 
 	too small */
 typedef struct {
-	const int address;
+	void* address;
 	int position;
 	int defaultposition;
 }pwm_servo_data_s;

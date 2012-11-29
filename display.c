@@ -7,12 +7,14 @@
  *
  */
 
-#include <display.h>
-
-#include <stdio.h>
+/* Local Includes */
+#include "display.h"
 #include "pwm.h"
 #include "movement.h"
-#include "system.h"
+
+/* System Includes */
+#include <stdio.h>
+#include <system.h>
 
 static void display_main(void*params);
 
@@ -43,36 +45,58 @@ void display_main(void*params){
 	int state[4];
 	int x, led_counter = 0 ;
 	void* pLEDS = (void*)LEDS_BASE;
+	unsigned int pwm_add = 2000;
+
+	unsigned int *p_keypad_data;
 
 	int xDelay = 1000 / portTICK_RATE_MS;
 
-	p_pwm = (unsigned int*)PWM_COMPONENT_0_BASE;
+//	p_pwm = (unsigned int*)PWM_COMPONENT_0_BASE;
+
+	p_keypad_data = (unsigned int *)KEYPAD_COMPONENT_0_BASE;
 
 	for(;;){
-	
+
+		printf("KEYPAD: %X\n",*(p_keypad_data+2));
+
+
+#if 0
 		for(x=0;x<PWM_COUNT;x++){ 
 			pwm_get_pos(x,&pos[x]);
+			pos[x]/=1000;
 			move_get_state(x,&state[x]);
 		}
+#endif
 
-		printf("Servos P:S [%u:%u],[%u:%u],[%u:%u],[%u:%u].\n",
+#if 0
+		printf("[%u:%u],[%u:%u],\n[%u:%u],[%u:%u].\n",
 			pos[0],state[0],
 			pos[1],state[1],
 			pos[2],state[2],
 			pos[3],state[3]);
-	
+#endif
+
+#if 0
+		printf("PWM AT %u.\n",
+					pwm_value/2000);
+#endif
 		*(int*)pLEDS = led_counter++;
 
-
-		pwm_value += 2000;
+#if 0
+		pwm_value += pwm_add;
 
 		if(pwm_value >= 100000)
-			pwm_value=50000;
+			pwm_add*=-1;
+
+		if((pwm_value)<50000)
+			pwm_add*=-1;
 
 
 		*p_pwm = pwm_value;
 		*(p_pwm+1) = pwm_value;
-
+		*(p_pwm+2) = pwm_value;
+		*(p_pwm+3) = pwm_value;
+#endif
 		vTaskDelay(xDelay);
 	
 	}

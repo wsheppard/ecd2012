@@ -4,7 +4,7 @@
 /* For the KEYPAD module */
 #define M_KP_EVENT 1 /* A keypad change of state has occurred */
 
-/* Keys for the KEYPAD module */
+/* Keys for the KEYPAD module - each is represented by a bit in a 2byte variable */
 #define M_KP_KEY_A1 (1 << 0)
 #define M_KP_KEY_A2 (1 << 1)
 #define M_KP_KEY_A3	(1 << 2)
@@ -32,12 +32,15 @@
 #define M_MOVE_RMLAST 8 /* Remove last saved position */
 
 /* For the MOVE CONT message, the DATA is as follows:
-	* the lsBYTE is the servo number
-	* the 8th but is the direction
+	* BIT0-7 is the servo number
+	* BIT8 is the direction
 	*/
 #define M_MOVE_SERVO1 0
 #define M_MOVE_SERVO2 1
 #define M_MOVE_SERVO3 2
 #define M_MOVE_SERVO4 3
-#define M_MOVE_SERVOMASK 255
-#define M_MOVE_DIRMASK 256
+
+/* Masks for the servo messages */
+#define M_MOVE_SERVOMASK 255 /* The servo number (4bits) */
+#define M_MOVE_DIRMASK 256   /* THe direction bit (1bit) */
+
