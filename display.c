@@ -16,6 +16,16 @@
 #include <stdio.h>
 #include <system.h>
 
+typedef struct{
+
+	float input;
+	float output;
+	unsigned int state;
+	unsigned int test;
+
+}euler_s;
+
+
 static void display_main(void*params);
 
 
@@ -48,16 +58,30 @@ void display_main(void*params){
 	unsigned int pwm_add = 2000;
 
 	unsigned int *p_keypad_data;
+	unsigned int *p_euler_data;
+
+	euler_s* p_euler;
 
 	int xDelay = 1000 / portTICK_RATE_MS;
 
 //	p_pwm = (unsigned int*)PWM_COMPONENT_0_BASE;
 
 	p_keypad_data = (unsigned int *)KEYPAD_COMPONENT_0_BASE;
+	p_euler = (euler_s*)EULERBLOCK_0_BASE;
+
+	p_euler->input = -0.25;
 
 	for(;;){
 
-		printf("KEYPAD: %X\n",*(p_keypad_data+2));
+
+		printf("EULER: In[%4.4f] State[%d] Out[%4.4f]\n",
+					p_euler->input,
+					p_euler->state,
+					p_euler->output);
+
+		p_euler->input = -2.25;
+
+		printf("KEYPAD: %X\n",*p_keypad_data);
 
 
 #if 0

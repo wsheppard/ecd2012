@@ -7,6 +7,7 @@
  */
 
 #include "movement.h"
+#include "math.h"
 
 /* This is the INCOMING queue */
 static xQueueHandle qMove;
@@ -21,7 +22,7 @@ typedef struct {
 	int state;
 }move_servoData_s;
 
-static float move_sigmoid(float time); /* Find sigmoid position */
+//static float move_sigmoid(float time); /* Find sigmoid position */
 static void move_servo_task(void *params); /* Individual servo tasks, one spawned for each servo */
 static void move_main_task(void* params); /* Main task manager for this module */
 static void move_servo_cont(move_servoData_s *sData, int direction); /* Move loop */
