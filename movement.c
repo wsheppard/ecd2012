@@ -8,6 +8,12 @@
 
 #include "movement.h"
 #include "math.h"
+#include <system.h>
+
+#define SIGMOID_ERR	6.2126
+
+/* ms between steps  - too small isn't going to get scheduled */
+#define MOVE_SIGMOID_LATENCY
 
 /* This is the INCOMING queue */
 static xQueueHandle qMove;
@@ -22,7 +28,15 @@ typedef struct {
 	int state;
 }move_servoData_s;
 
-//static float move_sigmoid(float time); /* Find sigmoid position */
+typedef struct{
+	float input;
+	float output;
+	unsigned int state;
+	unsigned int test;
+}euler_s;
+
+static int sigmoid(float M, float time, float*result); /* Find sigmoid position */
+static void move_servo_sigmoid(move_servoData_s *sData, int place, float time); /* Move to a specified place, in a specified time */
 static void move_servo_task(void *params); /* Individual servo tasks, one spawned for each servo */
 static void move_main_task(void* params); /* Main task manager for this module */
 static void move_servo_cont(move_servoData_s *sData, int direction); /* Move loop */
@@ -132,6 +146,8 @@ static void move_servo_task(void *params){
 				move_servo_cont(&servoData,(msgMessage.messageDATA & M_MOVE_DIRMASK));
 				ServoData[servoData.iServoID].state = MOVE_STATE_STOP;
 				break;
+
+				/* Move to a specfic place using Sigmoid function */
 			case M_MOVE_SPEC:
 				break;
 			case M_MOVE_STOP:
@@ -193,3 +209,116 @@ int move_get_state(int servo, int*state){
 		
 	return ECD_OK;
 }
+
+
+
+static int sigmoid(float M, float time, float*result){
+
+	euler_s* p_euler;
+	float fInput;
+
+	/* The M value is the half time point where the gradient is maximum */
+
+	/* Do the sigmoid calcs */
+	p_euler = (euler_s*)EULERBLOCK_0_BASE;
+
+	fInput = (-1 * (SIGMOID_ERR) * (time - M)) / M;
+
+
+	if( xSemaphore != NULL )
+	    {
+	        // See if we can obtain the semaphore.  If the semaphore is not available
+	        // wait 10 ticks to see if it becomes free.
+	        if( xSemaphoreTake( xSemaphore, ( portTickType ) 10 ) == pdTRUE )
+	        {
+	        	/* Wait for the euler block to become ready */
+	        		while(!p_euler->state)
+	        			vTaskDelay(1);
+
+	        		p_euler->input = fInput;
+
+	        		/* Wait for the euler block to become ready */
+	        		while(!p_euler->state)
+	        			vTaskDelay(1);
+
+	            xSemaphoreGive( xSemaphore );
+	        }
+	        else
+	        {
+				printf("Servo couldn't get semaphore! Why ever not?\n");
+	            // We could not obtain the semaphore and can therefore not access
+	            // the shared resource safely.
+	        }
+	    }
+
+
+	*result = p_euler->output;
+
+	return ECD_OK;
+}
+
+static void move_servo_sigmoid(move_servoData_s *sData, int place, float time){
+
+	msg_message_s msgMessage;
+	int current = 0, distance = 0;
+	int steps = 0;
+	float currenttime = 0;
+	float m;
+
+	m = 2 * time;
+
+
+	/* First work out how far we have to travel */
+	pwm_get_pos(sData->iServoID, &current);
+
+	distance = place - current;
+
+	/* We've got no-where to go */
+	if (distance == 0)
+		return;
+
+	/* NOTE: Is this bit relevant? */
+#if 1
+	if (distance > 0)
+		ServoData[sData->iServoID].state = MOVE_STATE_INC;
+	else
+		ServoData[sData->iServoID].state = MOVE_STATE_DEC;
+#endif
+
+	//int xDelay = 1000 / portTICK_RATE_MS;
+
+	/* Calculate the time steps */
+	//steps = (time * 1000) / (MOVE_SIGMOID_LATENCY / portTICK_RATE_MS);
+
+	for(;;){
+
+		/* Quick message check */
+		if(msg_recv_noblock(sData->qServo, &msgMessage)!=ECD_NOMSG){
+			if(msgMessage.messageID!=M_MOVE_STOP){
+				printf("Expecting STOP message but received something else!\n");
+				return;
+			}
+			else{
+				//printf("Servo task %d STOPPING %s.\n", sData->iServoID,direction ? "INC": "DEC");
+				return;
+			}
+		}
+
+		/* So no message received, move one step */
+		//printf("Servo task %d moving %s STEP.\n", sData->iServoID,direction ? "INC": "DEC");
+
+
+
+		if (direction & M_MOVE_DIRMASK)
+			pwm_jump(sData->iServoID, MOVE_JUMPVAL);
+		else
+			pwm_jump(sData->iServoID, -MOVE_JUMPVAL);
+
+		vTaskDelay(MOVE_LATENCY);
+
+
+	}
+
+
+}
+
