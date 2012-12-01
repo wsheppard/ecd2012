@@ -263,9 +263,13 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, float time){
 	int current = 0, distance = 0;
 	int steps = 0;
 	float currenttime = 0;
-	float m;
+	float m, totaltime;
+        float res =0;
 
-	m = 2 * time;
+        /* We're given the total time for the transition */
+        m = time / 2;
+
+	//m = 2 * time;
 
 
 	/* First work out how far we have to travel */
@@ -307,6 +311,14 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, float time){
 		/* So no message received, move one step */
 		//printf("Servo task %d moving %s STEP.\n", sData->iServoID,direction ? "INC": "DEC");
 
+
+                /* Get value */
+                sigmoid(m,currenttime,%res);
+
+                res *= distance;
+                res += current;
+
+                
 
 
 		if (direction & M_MOVE_DIRMASK)
