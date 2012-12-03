@@ -9,6 +9,8 @@
 #include "ECD.h"
 
 /* Config */
+
+/* Latencies are in ticks of the system timer */
 #define MOVE_LATENCY 100
 #define SERVO_COUNT PWM_COUNT
 #define MOVE_JUMPVAL 1000

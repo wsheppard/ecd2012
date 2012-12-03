@@ -19,6 +19,8 @@
 /* Task priority */
 #define KP_PRIORITY tskIDLE_PRIORITY
 
+#define KP_BASE_ADDRESS KEYPAD_COMPONENT_0_BASE
+
 /* Called to start off the task; Give the message queue handle to 
 	which it should put keypad events onto. if successful it will return ok. */
 int kp_startTask(xQueueHandle);

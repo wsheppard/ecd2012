@@ -299,7 +299,7 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, float time){
 
 		/* So no STOP message received, move one step */
 
-		/* Get value */
+		/* Get normalized value */
 		sigmoid(m,currenttime,&res);
 
 		/* Now scale it */

@@ -52,7 +52,7 @@ void display_main(void*params){
 	unsigned int *p_keypad_data;
 	unsigned int *p_euler_data;
 
-	euler_s* p_euler;
+//	euler_s* p_euler;
 
 	int xDelay = 1000 / portTICK_RATE_MS;
 
