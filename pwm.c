@@ -13,10 +13,10 @@
 /* Fill private data about servos, the position data is kept track of privately
    in this module - so might need some functions to get it out? */
 pwm_servo_data_s servo_data[PWM_COUNT]={
-	{ADD_SERVO1,0,50},
-	{ADD_SERVO2,0,50},
-	{ADD_SERVO3,0,50},
-	{ADD_SERVO4,0,50},
+	{(void*)ADD_SERVO1,0,55000},
+	{(void*)ADD_SERVO2,0,55000},
+	{(void*)ADD_SERVO3,0,55000},
+	{(void*)ADD_SERVO4,0,55000},
 };
 
 static xSemaphoreHandle xSemaphore = NULL;
@@ -56,9 +56,18 @@ int pwm_jump(int servo, int jump){
 
 int pwm_set_pos(int servo, unsigned int position){
 
+	void* pwm_addr = NULL;
+
+	if ((position>100000) || (position<50000))
+			return ECD_ERROR;
+
 	/* Set this incoming number in hardware for the indicated servo */
 	
 	//IOWR_32DIRECT(BASE,OFFSET,VALUE);
+
+	pwm_addr = servo_data[servo].address;
+
+	*((unsigned int*)pwm_addr) = position;
 
 	 if( xSemaphore != NULL )
     {

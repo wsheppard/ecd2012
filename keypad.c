@@ -8,8 +8,8 @@
   */
 
 /* Local includes */
-#include <keypad.h>
-#include <pwm.h>
+#include "keypad.h"
+#include "pwm.h"
 
 
 /* Private functions */
@@ -91,7 +91,7 @@ static void kp_getCurrent(unsigned short *KP_data){
 	/* Get the state of all the KeyPad buttons and put into a nice 16bits */
 
 	int x,y;
-	static unsigned short output = 3;
+	static unsigned short output = 1;
 
 	//printf("Checking keypad....\n");
 //for 0 to 10
@@ -108,10 +108,10 @@ static void kp_getCurrent(unsigned short *KP_data){
 	
 	}
 
-
-
+	if (output>(1<<8))
+		output=1;
 
 	*KP_data = output;
-	//output <<= 1;
+	output <<= 1;
 }
 
