@@ -10,7 +10,8 @@
 /* Local includes */
 #include "keypad.h"
 #include "pwm.h"
-
+#include <system.h>
+#include <FreeRTOS.h>
 
 /* Private functions */
 static void kp_main(void*pvParams);
@@ -68,8 +69,6 @@ static void kp_main(void*pvParams){
 
 		//printf("Data: Previous[%x], Current:[%x].\n", kp_previousData, kp_currentData);
 		
-	
-
 		/* If there is a change */
 		if (kp_previousData ^ kp_currentData){
 			mMessage.messageID = M_KP_EVENT;
@@ -91,27 +90,19 @@ static void kp_getCurrent(unsigned short *KP_data){
 	/* Get the state of all the KeyPad buttons and put into a nice 16bits */
 
 	int x,y;
-	static unsigned short output = 1;
+	//static unsigned short output = 1;
 
 	//printf("Checking keypad....\n");
-//for 0 to 10
-	/* Now loop through all the combinations to find the button states */
-	for (x=0;x<4;x++){
+
+	unsigned int *p_keypad_data;
+	p_keypad_data = (unsigned int *)KEYPAD_COMPONENT_0_BASE;
+
+	*KP_data = (unsigned short)*p_keypad_data;
 	
-		/* Set the relevant register to LOW */
+	//if (output>(1<<8))
+	//	output=1;
 
-		for (y=0;y<4;y++){
-		
-			/* Check if the particular key is pressed */
-		
-		}
-	
-	}
-
-	if (output>(1<<8))
-		output=1;
-
-	*KP_data = output;
-	output <<= 1;
+	//*KP_data = output;
+	//output <<= 1;
 }
 

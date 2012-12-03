@@ -16,6 +16,8 @@
 #include <stdio.h>
 #include <system.h>
 
+
+
 static void display_main(void*params);
 
 
@@ -47,13 +49,36 @@ void display_main(void*params){
 	void* pLEDS = (void*)LEDS_BASE;
 	unsigned int pwm_add = 2000;
 
+	unsigned int *p_keypad_data;
+	unsigned int *p_euler_data;
+
+	euler_s* p_euler;
+
 	int xDelay = 1000 / portTICK_RATE_MS;
 
 //	p_pwm = (unsigned int*)PWM_COMPONENT_0_BASE;
 
+
+
+
+	p_keypad_data = (unsigned int *)KEYPAD_COMPONENT_0_BASE;
+
 	for(;;){
-	
-#if 1
+
+#if 0
+		printf("EULER: In[%4.4f] State[%d] Out[%4.4f]\n",
+					p_euler->input,
+					p_euler->state,
+					p_euler->output);
+
+
+		p_euler->input = -2.25;
+#endif
+
+		printf("KEYPAD: %X\n",*(p_keypad_data+2));
+
+
+#if 0
 		for(x=0;x<PWM_COUNT;x++){ 
 			pwm_get_pos(x,&pos[x]);
 			pos[x]/=1000;
@@ -61,7 +86,7 @@ void display_main(void*params){
 		}
 #endif
 
-#if 1
+#if 0
 		printf("[%u:%u],[%u:%u],\n[%u:%u],[%u:%u].\n",
 			pos[0],state[0],
 			pos[1],state[1],
