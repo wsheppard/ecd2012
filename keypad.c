@@ -60,6 +60,7 @@ static void kp_main(void*pvParams){
 
 	printf("Keypad starting...\n");
 
+	/* Wait for one second.. why? */
 	vTaskDelay(1000);
 
 	/* Start checking for keypad changes and then send as message */
@@ -95,14 +96,18 @@ static void kp_getCurrent(unsigned short *KP_data){
 	//printf("Checking keypad....\n");
 
 	unsigned int *p_keypad_data;
-	p_keypad_data = (unsigned int *)KEYPAD_COMPONENT_0_BASE;
+	p_keypad_data = (unsigned int *)KP_BASE_ADDRESS;
 
 	*KP_data = (unsigned short)*p_keypad_data;
 	
-	//if (output>(1<<8))
-	//	output=1;
+#if 0
+	/* This cycles through the different keys */
+	if (output>(1<<8))
+		output=1;
 
-	//*KP_data = output;
-	//output <<= 1;
+	*KP_data = output;
+	output <<= 1;
+#endif
 }
+
 

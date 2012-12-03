@@ -10,10 +10,7 @@
 #include "math.h"
 #include <system.h>
 
-#define SIGMOID_ERR	6.2126
 
-/* ms between steps  - too small isn't going to get scheduled */
-#define MOVE_SIGMOID_LATENCY
 
 /* This is the INCOMING queue */
 static xQueueHandle qMove;
@@ -264,13 +261,10 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, float time){
 	int steps = 0;
 	float currenttime = 0;
 	float m, totaltime;
-        float res =0;
+    float res =0;
 
-        /* We're given the total time for the transition */
-        m = time / 2;
-
-	//m = 2 * time;
-
+	/* We're given the total time for the transition */
+	m = time / 2.0;
 
 	/* First work out how far we have to travel */
 	pwm_get_pos(sData->iServoID, &current);
@@ -289,17 +283,12 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, float time){
 		ServoData[sData->iServoID].state = MOVE_STATE_DEC;
 #endif
 
-	//int xDelay = 1000 / portTICK_RATE_MS;
-
-	/* Calculate the time steps */
-	//steps = (time * 1000) / (MOVE_SIGMOID_LATENCY / portTICK_RATE_MS);
-
 	for(;;){
 
 		/* Quick message check */
 		if(msg_recv_noblock(sData->qServo, &msgMessage)!=ECD_NOMSG){
 			if(msgMessage.messageID!=M_MOVE_STOP){
-				printf("Expecting STOP message but received something else!\n");
+				printf("Expecting STOP message but received something else! Returning!\n");
 				return;
 			}
 			else{
@@ -308,23 +297,18 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, float time){
 			}
 		}
 
-		/* So no message received, move one step */
-		//printf("Servo task %d moving %s STEP.\n", sData->iServoID,direction ? "INC": "DEC");
+		/* So no STOP message received, move one step */
 
+		/* Get normalized value */
+		sigmoid(m,currenttime,&res);
 
-                /* Get value */
-                sigmoid(m,currenttime,%res);
+		/* Now scale it */
+		res *= distance;
+		res += current;
 
-                res *= distance;
-                res += current;
+		/* Now move there */
+		pwm_set_pos(sData->iServoID, (unsigned int)res);
 
-                
-
-
-		if (direction & M_MOVE_DIRMASK)
-			pwm_jump(sData->iServoID, MOVE_JUMPVAL);
-		else
-			pwm_jump(sData->iServoID, -MOVE_JUMPVAL);
 
 		vTaskDelay(MOVE_LATENCY);
 
