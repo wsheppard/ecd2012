@@ -25,6 +25,7 @@ typedef struct {
 	int state;
 }move_servoData_s;
 
+/* Struct for euler stuff */
 typedef struct{
 	float input;
 	float output;
@@ -63,7 +64,7 @@ int move_Start(xQueueHandle qHandle){
 	
 		/* Create task, pass queue handle in */
 		if (xTaskCreate( move_servo_task, 
-				"SERVOTASK", 
+				(fStr)"SERVOTASK",
 				configMINIMAL_STACK_SIZE, 
 				(void*)&ServoData[x], 
 				SERVO_PRIORITY, 
@@ -79,7 +80,7 @@ int move_Start(xQueueHandle qHandle){
 
 	/* Create main task; return -1 on error */
 	if (xTaskCreate( move_main_task, 
-		"Movement Main Thread", 
+		(fStr)"Movement Main Thread",
 		configMINIMAL_STACK_SIZE, 
 		NULL, 
 		MOVE_PRIORITY, 
@@ -106,10 +107,18 @@ static void move_main_task(void* params){
 		switch (msgMessage.messageID){
 			case M_MOVE_CONT:
 			case M_MOVE_STOP:
+
 				/* Mask off 8bit servo number */
 				servoID = M_MOVE_SERVOMASK & msgMessage.messageDATA;
-				if (servoID >=PWM_COUNT) break;
+
+				/* If bad servo id quit */
+				if (servoID >=PWM_COUNT){
+					printf("Bad Servo ID! \n");
+					break;}
+
+				/* SEnd out message */
 				msg_send(ServoData[servoID].qServo,msgMessage);
+
 				//printf("Starting movement on servo %d.\n",msgMessage.messageDATA);
 				break;
 			case M_MOVE_SPEC:
@@ -120,6 +129,7 @@ static void move_main_task(void* params){
 		
 	}
 
+	return ;
 } 
 
 static void move_servo_task(void *params){

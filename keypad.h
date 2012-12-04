@@ -19,6 +19,7 @@
 /* Task priority */
 #define KP_PRIORITY tskIDLE_PRIORITY
 
+/* Memory base address for the keypad module. */
 #define KP_BASE_ADDRESS KEYPAD_COMPONENT_0_BASE
 
 /* Called to start off the task; Give the message queue handle to 

@@ -14,6 +14,7 @@
 #define ADD_SERVO3 PWM_COMPONENT_0_BASE+8
 #define ADD_SERVO4 PWM_COMPONENT_0_BASE+12
 
+/* Servo references as enum */
 enum {
 	PWM_SERVO1,
 	PWM_SERVO2,
@@ -22,9 +23,7 @@ enum {
 	PWM_COUNT,
 };
 
-/* TODO: Need to think about the mix and max values for the posiiton - what 
-	resolution are we going to use? I've assumed simple percentage but this might be 
-	too small */
+/* Struct for servo thread data */
 typedef struct {
 	void* address;
 	int position;
@@ -33,6 +32,7 @@ typedef struct {
 
 /* These functions need to be mutex protected so that multiple writes to one servo are prevented */
 
+/* Start point for the PWM module */
 int pwm_init(void);
 
 /* Set position on particular servo - directly into the PWM hardware module. */

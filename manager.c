@@ -6,7 +6,7 @@
 #include <stdio.h>
 
 /* Kernel includes. */
-#include <FreeRTOS.h>
+#include "FreeRTOS.h"
 #include "task.h"
 #include "queue.h"
 #include "timers.h"
@@ -46,7 +46,7 @@ int man_start(void){
 	display_init();
 
 	/* Now start the manager task */
-	xTaskCreate( man_main, "ManagerTask", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL);
+	xTaskCreate( man_main, (fStr)"ManagerTask", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL);
 
 	return ECD_OK;
 }

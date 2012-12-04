@@ -32,12 +32,11 @@ int kp_startTask(xQueueHandle qHandle){
 
 	/* Create main task; return -1 on error */
 	if (xTaskCreate( kp_main, 
-		"KP Main Thread", 
+		(fStr)"KP Main Thread",
 		configMINIMAL_STACK_SIZE, 
 		NULL, 
 		KP_PRIORITY, 
 		&tKP) != pdPASS){
-	
 			return ECD_ERROR;
 	} 
 
@@ -88,16 +87,19 @@ static void kp_main(void*pvParams){
 
 
 static void kp_getCurrent(unsigned short *KP_data){
+
+	//static unsigned short output = 1;
+	unsigned int *p_keypad_data;
+
 	/* Get the state of all the KeyPad buttons and put into a nice 16bits */
 
-	int x,y;
-	//static unsigned short output = 1;
 
-	//printf("Checking keypad....\n");
-
-	unsigned int *p_keypad_data;
 	p_keypad_data = (unsigned int *)KP_BASE_ADDRESS;
 
+	/* Reading from the base address of the keypad module should return
+	 * a 16bit value where each bit represents the down or up states of the
+	 * keypad
+	 */
 	*KP_data = (unsigned short)*p_keypad_data;
 	
 #if 0
