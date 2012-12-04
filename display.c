@@ -92,6 +92,7 @@ void display_main(void*params){
 			pos[1],state[1],
 			pos[2],state[2],
 			pos[3],state[3]);
+		fflush( stdout );
 #endif
 
 #if 0

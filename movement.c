@@ -173,6 +173,8 @@ static void move_servo_task(void *params){
 void move_servo_cont(move_servoData_s *sData, int direction){
 	
 	msg_message_s msgMessage;
+	int jumpval = MOVE_JUMPVAL;
+	int delta = 0;
 
 	if (direction & M_MOVE_DIRMASK) 
 		ServoData[sData->iServoID].state = MOVE_STATE_INC;
@@ -197,9 +199,19 @@ void move_servo_cont(move_servoData_s *sData, int direction){
 		//printf("Servo task %d moving %s STEP.\n", sData->iServoID,direction ? "INC": "DEC");
 	
 		if (direction & M_MOVE_DIRMASK)
-			pwm_jump(sData->iServoID, MOVE_JUMPVAL);
+			pwm_jump(sData->iServoID, jumpval);
 		else
-			pwm_jump(sData->iServoID, -MOVE_JUMPVAL);
+			pwm_jump(sData->iServoID, -jumpval);
+
+		/* Increase movement speed until MOVE_JUMP_MAX */
+		if (jumpval < (MOVE_JUMP_MAX)){
+			jumpval += delta;
+			delta += MOVE_DELTA;
+		}
+
+		/* If it goes over just set it to max */
+		if (jumpval > MOVE_JUMP_MAX)
+			jumpval = MOVE_JUMP_MAX;
 
 		vTaskDelay(MOVE_LATENCY);
 	

@@ -12,12 +12,20 @@
 
 /* Latencies are in ticks of the system timer */
 #define MOVE_LATENCY 100
-#define SERVO_COUNT PWM_COUNT
-#define MOVE_JUMPVAL 1000
-#define SIGMOID_ERR	6.2126
 
 /* ms between steps  - too small isn't going to get scheduled */
 #define MOVE_SIGMOID_LATENCY MOVE_LATENCY
+
+
+#define SERVO_COUNT PWM_COUNT
+
+/* For continuous movement */
+#define MOVE_JUMPVAL 100
+#define MOVE_DELTA 1
+#define MOVE_JUMP_MAX 1000
+
+#define SIGMOID_ERR	6.2126
+
 
 /* Task priority */
 #define MOVE_PRIORITY tskIDLE_PRIORITY 
