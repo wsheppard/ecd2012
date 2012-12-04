@@ -100,7 +100,10 @@ static void kp_getCurrent(unsigned short *KP_data){
 	 * a 16bit value where each bit represents the down or up states of the
 	 * keypad
 	 */
-	*KP_data = (unsigned short)*p_keypad_data;
+
+	//printf("Reading: %X\n",*p_keypad_data);
+
+	*KP_data = (unsigned short)*(p_keypad_data+2);
 	
 #if 0
 	/* This cycles through the different keys */

@@ -10,7 +10,7 @@
 #define ECD_NOMSG -2
 
 /* This is for casting strings to pass to
- * FreeRTOS becuase it wants signed chars */
+ * FreeRTOS because it wants signed chars */
 typedef const signed char * fStr;
 
 #endif

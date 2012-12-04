@@ -75,19 +75,19 @@ void display_main(void*params){
 		p_euler->input = -2.25;
 #endif
 
-		printf("KEYPAD: %X\n",*(p_keypad_data+2));
+//		printf("KEYPAD: %X\n",*(p_keypad_data+2));
 
 
-#if 0
+#if 1
 		for(x=0;x<PWM_COUNT;x++){ 
 			pwm_get_pos(x,&pos[x]);
 			pos[x]/=1000;
 			move_get_state(x,&state[x]);
 		}
-#endif
 
-#if 0
-		printf("[%u:%u],[%u:%u],\n[%u:%u],[%u:%u].\n",
+
+
+		printf("[%u:%u],[%u:%u],[%u:%u],[%u:%u].\n",
 			pos[0],state[0],
 			pos[1],state[1],
 			pos[2],state[2],

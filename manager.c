@@ -66,7 +66,7 @@ static void man_main(void*params){
 			purposes? */
 		msg_recv_block(qKP,&msgKP);
 
-		//printf("Recieved a message... ID: %d, DATA: 0x%X.\n", msgKP.messageID, msgKP.messageDATA);
+		printf("Recieved a message... ID: %d, DATA: 0x%X.\n", msgKP.messageID, msgKP.messageDATA);
 	
 		changed = 65535U & msgKP.messageDATA;
 		state = msgKP.messageDATA >> 16;
@@ -81,11 +81,11 @@ static void man_main(void*params){
 			if (changed & 1){
 			
 				if(state & 1){
-					//printf("Key at pos %d pressed.\n", shifted);
+					printf("Key at pos %d pressed.\n", shifted);
 					man_key_down(shifted);
 				}
 				else{
-					//printf("Key at pos %d released.\n", shifted);
+					printf("Key at pos %d released.\n", shifted);
 					man_key_up(shifted);
 				}
 			

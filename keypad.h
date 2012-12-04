@@ -14,7 +14,7 @@
 #include "messaging.h"
 
 /* How often to POLL (in ticks between polls).*/
-#define KP_DELAY (2000/portTICK_RATE_MS)
+#define KP_DELAY (200/portTICK_RATE_MS)
 
 /* Task priority */
 #define KP_PRIORITY tskIDLE_PRIORITY
