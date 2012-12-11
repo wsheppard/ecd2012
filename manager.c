@@ -153,7 +153,11 @@ void man_key_down(int key){
 		msg_send(qMOVE,msgMessage);
 		break;
 	
-	
+	/* Save / replay functions */
+		/* NOTE: These don't need up and down - so only really UP is used */
+	case M_KP_KEY_C1:
+		/* Save current position */	
+		break;
 	
 	}
 
@@ -211,5 +215,13 @@ void man_key_up(int key){
 		msgMessage.messageDATA = M_MOVE_SERVO4;
 		msg_send(qMOVE,msgMessage);
 		break;
+
+
+	/* Save position */
+#if 0
+	case M_KP_KEY_c1:
+		msgMessage.messageID = 
+#endif
+
 	}
 }
