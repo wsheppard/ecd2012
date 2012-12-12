@@ -4,7 +4,7 @@
  *  Created on: 12 Dec 2012
  *      Author: ironcrap
  *
- *      This will hold the inverse kinematics stuff. soon probably asd
+ *      This will hold the inverse kinematics stuff. soon probably
  */
 
 
