@@ -13,8 +13,15 @@
 #include "ECD.h"
 #include "messaging.h"
 
+/*How much settling time there is for a button
+KP_DELAY * DEBOUNCE_MS = settling time - this needs to be ms .*/
+#define DEBOUNCE_MS 10 
+
 /* How often to POLL (in ticks between polls).*/
-#define KP_DELAY (200/portTICK_RATE_MS)
+#define KP_DELAY (200/portTICK_RATE_MS) /*might need to be ((200/DEBOUNCE_MS)/portTICK_RATE_MS) because the delay time is now being
+					multiplied with DEBOUNCE_MS*/
+
+
 
 /* Task priority */
 #define KP_PRIORITY tskIDLE_PRIORITY
