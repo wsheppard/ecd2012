@@ -1,5 +1,15 @@
+/* Display Header file 
+ *
+ *
+ * This module serves to handle displaying of data on either the JTAG or LCD displays.
+ *
+ */
+
+
 #ifndef DISPLAY_H
 #define DISPLAY_H
+
+
 
 /* Free RTOS includes */
 #include <FreeRTOS.h>
