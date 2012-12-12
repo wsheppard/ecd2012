@@ -22,6 +22,8 @@
 #define M_KP_KEY_D3	(1 << 14)
 #define M_KP_KEY_D4	(1 << 15)
 
+/* Add extra messages here */
+
 /* Movement module */
 #define M_MOVE_CONT 2 /* Start continous movement */
 #define M_MOVE_SPEC 3 /* Move 'gracefully' to a specific place */
