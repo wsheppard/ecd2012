@@ -32,6 +32,7 @@
 #define M_MOVE_SAVE 6 /* Save current position */
 #define M_MOVE_RESET 7 /* delete all saved positions */
 #define M_MOVE_RMLAST 8 /* Remove last saved position */
+#define M_MOVE_IK 9 /* Move gracefully to the calculated IK position */
 
 /* For the MOVE CONT message, the DATA is as follows:
 	* BIT0-7 is the servo number

@@ -123,6 +123,8 @@ static void move_main_task(void* params){
 				break;
 			case M_MOVE_SPEC:
 				break;
+			case M_MOVE_IK: /*will handle all IK, but will prob do the same as M_MOVE_SPEC*/
+				break;
 			default:
 				break;
 		}
@@ -155,7 +157,7 @@ static void move_servo_task(void *params){
 				break;
 
 				/* Move to a specfic place using Sigmoid function */
-			case M_MOVE_SPEC:
+			case M_MOVE_SPEC: /*will handle specific moves and IK moves*/ 
 				break;
 			case M_MOVE_STOP:
 				/* Shouldn't really be valid here */
