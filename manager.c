@@ -18,11 +18,13 @@
 #include "movement.h"
 #include "pwm.h"
 #include "display.h"
+#include "ik.c"
 
 /* Private Functions */
 static void man_main(void*params);
 static void man_key_down(int key);
 static void man_key_up(int key);
+static void man_calc_IK();
 
 /* Queues */
 static xQueueHandle qKP;
@@ -54,6 +56,8 @@ int man_start(void){
 static void man_main(void*params){
 
 	msg_message_s msgKP;
+	ik_cart_pos_s startIK; //temporary until we have a module feeding the IK with position data
+	ik_cart_pos_s stopIK;
 	unsigned changed;
 	unsigned state;
 	int shifted;
@@ -81,12 +85,24 @@ static void man_main(void*params){
 			if (changed & 1){
 			
 				if(state & 1){
-					printf("Key at pos %d pressed.\n", shifted);
-					man_key_down(shifted);
+
+					if(IK_TEST){	
+
+						ik_calc_IK(startIK);				
+					}
+					else{	
+						printf("Key at pos %d pressed.\n", shifted);			
+						man_key_down(shifted);
+					}
 				}
 				else{
-					printf("Key at pos %d released.\n", shifted);
-					man_key_up(shifted);
+					if(IK_TEST){	
+						ik_calc_IK(stopIK);				
+					}
+					else {
+						printf("Key at pos %d released.\n", shifted);
+						man_key_up(shifted);
+					}
 				}
 			
 			}
