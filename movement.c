@@ -124,6 +124,17 @@ static void move_main_task(void* params){
 			case M_MOVE_SPEC:
 				break;
 			case M_MOVE_IK: /*will handle all IK, but will prob do the same as M_MOVE_SPEC*/
+			/* Mask off 8bit servo number */
+				servoID = M_MOVE_SERVOMASK & msgMessage.messageDATA;
+
+				/* If bad servo id quit */
+				if (servoID >=PWM_COUNT){
+					printf("Bad Servo ID! \n");
+					break;}
+
+				/* SEnd out message */
+				msg_send(ServoData[servoID].qServo,msgMessage);
+			
 				break;
 			default:
 				break;

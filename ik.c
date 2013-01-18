@@ -2,7 +2,7 @@
  * ik.c
  *
  *  Created on: 12 Dec 2012
- *      Author: ironcrap
+ *      Author: Raphael Nagel
  *
  *      This will hold the inverse kinematics stuff. soon probably
  *      This is the latest version
@@ -81,18 +81,36 @@ q22 = -atan2(((l3*sin(q32))/sqrt(xc^2+yc^2+zc^2)),+sqrt(1-((l3*sin(q32))/sqrt(xc
 	pwm_get_pos(M_MOVE_SERVO2, &current_q2);
 	pwm_get_pos(M_MOVE_SERVO3, &current_q3);
 	
-	if(current_q2)//////////****************go on here... 
-//q42 = pi/2 -(q22+q32);
+	if(abs(current_q2-q21)<=abs(current_q2-q22)){ //solution 1
+		msgMessage.messageID = M_MOVE_IK;				
+		msgMessage.messageDATA = M_MOVE_SERVO1 | M_MOVE_DIRMASK;
+		msg_send(qMOVE,msgMessage);	
+		
+		msgMessage.messageID = M_MOVE_IK;								
+		msgMessage.messageDATA = M_MOVE_SERVO2 | M_MOVE_DIRMASK;
+		msg_send(qMOVE,msgMessage);
+		
+		msgMessage.messageID = M_MOVE_IK;
+		msgMessage.messageDATA = M_MOVE_SERVO3 | M_MOVE_DIRMASK;
+		msg_send(qMOVE,msgMessage);
+		
+		
+	}
+	else {				//solution 2
+		msgMessage.messageID = M_MOVE_IK;				
+		msgMessage.messageDATA = M_MOVE_SERVO1 | M_MOVE_DIRMASK;
+		msg_send(qMOVE,msgMessage);	
+		
+		msgMessage.messageID = M_MOVE_IK;								
+		msgMessage.messageDATA = M_MOVE_SERVO2 | M_MOVE_DIRMASK;
+		msg_send(qMOVE,msgMessage);
+		
+		msgMessage.messageID = M_MOVE_IK;
+		msgMessage.messageDATA = M_MOVE_SERVO3 | M_MOVE_DIRMASK;
+		msg_send(qMOVE,msgMessage);		
+		
+		}
 
-
-
-//disp('Solution 1:');
-//disp([q1 q21 q31 q41]*180/pi);
-
-
-//disp('Solution 2:');
-//disp([q1 q22 q32 q42]*180/pi);	
-	
 	
 
 }
