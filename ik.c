@@ -27,16 +27,7 @@
 #include "pwm.h"
 #include "display.h"
 
-
-
-
-
-/* cartesian position of end effector*/
-typedef struct {
-	int x_pos;
-	int y_pos;
-	int z_pos;;
-}ik_cart_pos_s;
+static void move_degree_to_servo(int *servoVal,unsigned int degree,int servoMax,int servoMin, int qMax, int qMin); /*convert degrees to a servo understood format*/
 
 
 /* calculates joint angles from cartesian position
@@ -49,17 +40,23 @@ unsigned int l3 = 12 ;
 unsigned int d5 = 4.5;
 int xc, yc,zc,q1,q2,q3,current_q2,current_q3;
 
-																//p0e = [x_in y_in z_in]';
+ik_message_s ikMessage;
+
+if(sqrt((position.x_pos^2)+(position.y_pos^2)+position.z_pos^2)>(l2+l3+d5)){/*check for valud input*/
+    	//printf("Desired position outside of workspace.");
+    return ECD_ERROR;
+    }
+                                                                //p0e = [x_in y_in z_in]';
 
 //theta 1(rotation around base)
-q1  = atan2(position.y_pos,position.x_pos);			//atan2(p0e(2),p0e(1));
+q1  = atan2(position.y_pos,position.x_pos);                     //atan2(p0e(2),p0e(1));
 
 //p0c = p0e - d5.*[cos(q1) sin(q1) 0]';
 
 //treating the remaining part of the arm as planar...
-xc = position.x_pos - d5*cos(q1); 					//xc = p0c(1,1);
-yc = position.y_pos - d5*sin(q1);						//yc = p0c(2,1);
-zc = position.z_pos;										//zc = p0c(3,1);
+xc = position.x_pos - d5*cos(q1);                               //xc = p0c(1,1);
+yc = position.y_pos - d5*sin(q1);                               //yc = p0c(2,1);
+zc = position.z_pos;                                            //zc = p0c(3,1);
 
 
 // Geometric solution of q2 and q3
@@ -82,39 +79,54 @@ q22 = -atan2(((l3*sin(q32))/sqrt(xc^2+yc^2+zc^2)),+sqrt(1-((l3*sin(q32))/sqrt(xc
 	pwm_get_pos(M_MOVE_SERVO3, &current_q3);
 	
 	if(abs(current_q2-q21)<=abs(current_q2-q22)){ //solution 1
-		msgMessage.messageID = M_MOVE_IK;				
-		msgMessage.messageDATA = M_MOVE_SERVO1 | M_MOVE_DIRMASK;
-		msg_send(qMOVE,msgMessage);	
+		ikMessage.messageID = M_MOVE_IK;				
+		ikMessage.messageDATA = M_MOVE_SERVO1;
+                ik_degree_to_servo(&ikMessage.ikPlace,q1,S_MAX_0,int S_MIN_0, int Q_MAX_0, int Q_MIN_0);
+		msg_send(qMOVE,ikMessage);	
 		
-		msgMessage.messageID = M_MOVE_IK;								
-		msgMessage.messageDATA = M_MOVE_SERVO2 | M_MOVE_DIRMASK;
-		msg_send(qMOVE,msgMessage);
+		ikMessage.messageID = M_MOVE_IK;								
+                ikMessage.messageDATA = M_MOVE_SERVO2;
+                ik_degree_to_servo(&ikMessage.ikPlace,q21,S_MAX_1,int S_MIN_1, int Q_MAX_1, int Q_MIN_1);
+		msg_send(qMOVE,ikMessage);
 		
-		msgMessage.messageID = M_MOVE_IK;
-		msgMessage.messageDATA = M_MOVE_SERVO3 | M_MOVE_DIRMASK;
-		msg_send(qMOVE,msgMessage);
+		ikMessage.messageID = M_MOVE_IK;
+		ikMessage.messageDATA = M_MOVE_SERVO3;
+                ik_degree_to_servo(&ikMessage.ikPlace,q31,S_MAX_2,int S_MIN_2, int Q_MAX_2, int Q_MIN_2);
+		msg_send(qMOVE,ikMessage);
 		
 		
 	}
 	else {				//solution 2
-		msgMessage.messageID = M_MOVE_IK;				
-		msgMessage.messageDATA = M_MOVE_SERVO1 | M_MOVE_DIRMASK;
-		msg_send(qMOVE,msgMessage);	
+		ikMessage.messageID = M_MOVE_IK;				
+		ikMessage.messageDATA = M_MOVE_SERVO1;
+                ik_degree_to_servo(&ikMessage.ikPlace,q1,S_MAX_0,int S_MIN_0, int Q_MAX_0, int Q_MIN_0); q1;
+		msg_send(qMOVE,ikMessage);	
 		
-		msgMessage.messageID = M_MOVE_IK;								
-		msgMessage.messageDATA = M_MOVE_SERVO2 | M_MOVE_DIRMASK;
-		msg_send(qMOVE,msgMessage);
+		ikMessage.messageID = M_MOVE_IK;								
+		ikMessage.messageDATA = M_MOVE_SERVO2;
+                ik_degree_to_servo(&ikMessage.ikPlace,q22,S_MAX_1,int S_MIN_1, int Q_MAX_1, int Q_MIN_1);
+		msg_send(qMOVE,ikMessage);
 		
-		msgMessage.messageID = M_MOVE_IK;
-		msgMessage.messageDATA = M_MOVE_SERVO3 | M_MOVE_DIRMASK;
-		msg_send(qMOVE,msgMessage);		
+		ikMessage.messageID = M_MOVE_IK;
+		ikMessage.messageDATA = M_MOVE_SERVO3;
+                ik_degree_to_servo(&ikMessage.ikPlace,q32,S_MAX_2,int S_MIN_2, int Q_MAX_2, int Q_MIN_2);
+		msg_send(qMOVE,ikMessage);		
 		
 		}
 
 	
-
+return ECD_OK;
 }
 
 
 
 
+static unsigned int ik_degree_to_servo(int *servoVal,unsigned int degree,int servoMax,int servoMin, int qMax, int qMin){
+    *servoVal = degree*((servoMax - servoMin)/(qMax-qMin)) + servoMax;
+        if((*servoVal <=servoMax) || (*servoVal >= servoMin)){/*is the value within the servo range?*/
+                return ECD_OK;
+        }
+        else{
+                return ECD_ERROR;
+        }
+    }

@@ -24,7 +24,12 @@
 #define MOVE_DELTA 1
 #define MOVE_JUMP_MAX 1500
 
+/* For specific movement */
+#define MOVE_SPEC_M_TIME 2      //the time allowed for all movements
+
 #define SIGMOID_ERR	6.2126
+
+
 
 
 /* Task priority */
@@ -36,6 +41,7 @@ enum {
 	MOVE_STATE_INC,
 	MOVE_STATE_DEC,
 	MOVE_STATE_COUNT
+        MOVE_STATE_IK
 };
 
 

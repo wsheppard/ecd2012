@@ -8,6 +8,7 @@
 
 #include "movement.h"
 #include "math.h"
+#include "ik.h"
 #include <system.h>
 
 
@@ -38,6 +39,7 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, float time); 
 static void move_servo_task(void *params); /* Individual servo tasks, one spawned for each servo */
 static void move_main_task(void* params); /* Main task manager for this module */
 static void move_servo_cont(move_servoData_s *sData, int direction); /* Move loop */
+
 
 /* These are the queues going off to the servo tasks */
 static move_servoData_s ServoData[SERVO_COUNT];
@@ -95,7 +97,9 @@ int move_Start(xQueueHandle qHandle){
 static void move_main_task(void* params){
 
 	msg_message_s msgMessage;
+        ik_message_s ikMessage;
 	int servoID;
+
 
 	printf("Movement main task created...\n");
 
@@ -116,24 +120,23 @@ static void move_main_task(void* params){
 					printf("Bad Servo ID! \n");
 					break;}
 
-				/* SEnd out message */
+				/* Send out message */
 				msg_send(ServoData[servoID].qServo,msgMessage);
 
 				//printf("Starting movement on servo %d.\n",msgMessage.messageDATA);
 				break;
 			case M_MOVE_SPEC:
 				break;
-			case M_MOVE_IK: /*will handle all IK, but will prob do the same as M_MOVE_SPEC*/
-			/* Mask off 8bit servo number */
-				servoID = M_MOVE_SERVOMASK & msgMessage.messageDATA;
-
-				/* If bad servo id quit */
-				if (servoID >=PWM_COUNT){
+			case M_MOVE_IK: 
+                            /*  IK messages have a different format */
+                                ikMessage = msgMessage;
+                        
+                                /* If bad servo id quit */
+				if (ikMessage.messageDATA >=PWM_COUNT){
 					printf("Bad Servo ID! \n");
 					break;}
-
-				/* SEnd out message */
-				msg_send(ServoData[servoID].qServo,msgMessage);
+				/* Send out message */
+				msg_send(ServoData[servoID].qServo,ikMessage);
 			
 				break;
 			default:
@@ -164,12 +167,25 @@ static void move_servo_task(void *params){
 		switch (msgMessage.messageID){
 			case M_MOVE_CONT:
 				move_servo_cont(&servoData,(msgMessage.messageDATA & M_MOVE_DIRMASK));
-				ServoData[servoData.iServoID].state = MOVE_STATE_STOP;
+				ServoData[servoData.iServoID].state = MOVE_STATE_STOP;//??? why is this??-Rapha
+                                /*servoData.state = MOVE_STATE_STOP; //would this be the same??*/
 				break;
 
 				/* Move to a specfic place using Sigmoid function */
-			case M_MOVE_SPEC: /*will handle specific moves and IK moves*/ 
-				break;
+			case M_MOVE_IK: 
+                                ikMessage = msgMessage; /*IK message have a different format*/
+                                ServoData[servoData.iServoID].state = MOVE_STATE_IK;
+                                
+                            
+                                if(ikMessage.ikTIME == 0){
+                                        move_servo_sigmoid(&servoData,ikMessage.ikPLACE, MOVE_SPEC_M_TIME);
+                                }
+                                else{
+                                        move_servo_sigmoid(&servoData,ikMessage.ikPLACE, ikMessage.ikTIME);
+                                }
+                                ServoData[servoData.iServoID].state = MOVE_STATE_STOP;
+                            	break;
+                                
 			case M_MOVE_STOP:
 				/* Shouldn't really be valid here */
 				printf("Servo task %d stopped moving.\n", servoData.iServoID);
@@ -352,4 +368,5 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, float time){
 
 
 }
+
 

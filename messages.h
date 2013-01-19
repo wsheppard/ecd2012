@@ -43,6 +43,16 @@
 #define M_MOVE_SERVO3 2
 #define M_MOVE_SERVO4 3
 
+
+/* For the MOVE IK message the DATA is:
+        *BIT0-n is the servo number
+        
+    there is also a PLACE and TIME:
+        *PLACE is a u int of the desired servo position in servo parameters
+        *TIME can hold the time allowed for a sigmoid move to the target position
+        */
+        
+        
 /* Masks for the servo messages */
 #define M_MOVE_SERVOMASK 255 /* The servo number (4bits) */
 #define M_MOVE_DIRMASK 256   /* THe direction bit (1bit) */
