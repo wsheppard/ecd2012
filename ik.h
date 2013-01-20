@@ -33,9 +33,9 @@ typedef struct {
         unsigned int messageID;
         unsigned int messageDATA;
         unsigned int ikPLACE;
-        unsigned int ikTIME = 0;
+        unsigned int ikTIME;
 }ik_message_s;
 
-void ik_calc_IK(ik_cart_pos_s);
+int ik_calc_IK(xQueueHandle qMOVE,ik_cart_pos_s);
 
 #endif

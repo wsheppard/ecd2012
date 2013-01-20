@@ -97,7 +97,7 @@ int move_Start(xQueueHandle qHandle){
 static void move_main_task(void* params){
 
 	msg_message_s msgMessage;
-        ik_message_s ikMessage;
+    ik_message_s ikMessage;
 	int servoID;
 
 
@@ -129,14 +129,14 @@ static void move_main_task(void* params){
 				break;
 			case M_MOVE_IK: 
                             /*  IK messages have a different format */
-                                ikMessage = msgMessage;
+                                ikMessage = (ik_message_s)msgMessage;
                         
                                 /* If bad servo id quit */
 				if (ikMessage.messageDATA >=PWM_COUNT){
 					printf("Bad Servo ID! \n");
 					break;}
 				/* Send out message */
-				msg_send(ServoData[servoID].qServo,ikMessage);
+				msg_ik_send(ServoData[servoID].qServo,ikMessage);
 			
 				break;
 			default:
@@ -152,6 +152,7 @@ static void move_servo_task(void *params){
 
 	move_servoData_s servoData;
 	msg_message_s msgMessage;
+	ik_message_s ikMessage;
 
 	/* Grab local copy of the queue handle */
 	servoData = *(move_servoData_s*)params;
@@ -173,7 +174,7 @@ static void move_servo_task(void *params){
 
 				/* Move to a specfic place using Sigmoid function */
 			case M_MOVE_IK: 
-                                ikMessage = msgMessage; /*IK message have a different format*/
+                                ikMessage = (ik_message_s)msgMessage; /*IK message have a different format*/
                                 ServoData[servoData.iServoID].state = MOVE_STATE_IK;
                                 
                             
@@ -308,7 +309,8 @@ static int sigmoid(float M, float time, float*result){
 static void move_servo_sigmoid(move_servoData_s *sData, int place, float time){
 
 	msg_message_s msgMessage;
-	int current = 0, distance = 0;
+	unsigned int current = 0;
+	int	distance = 0;
 	int steps = 0;
 	float currenttime = 0;
 	float m, totaltime;
