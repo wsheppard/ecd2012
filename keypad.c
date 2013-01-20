@@ -16,7 +16,7 @@
 /* Private functions */
 static void kp_main(void*pvParams);
 static void kp_getCurrent(unsigned short *KP_data);
-static void kp_getDebounced(unsigned short *KP_data);
+static void kp_getDebounced(unsigned short *KP_data)
 
 /* Private Variables */
 xQueueHandle qKP;
@@ -143,7 +143,5 @@ static void kp_getDebounced(unsigned short *KP_data){
 
 	
 }
-
-
 
 

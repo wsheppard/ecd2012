@@ -18,13 +18,13 @@
 #include "movement.h"
 #include "pwm.h"
 #include "display.h"
-#include "ik.h"
-#include "manager.h"
+#include "ik.c"
 
 /* Private Functions */
 static void man_main(void*params);
 static void man_key_down(int key);
 static void man_key_up(int key);
+static void man_calc_IK();
 
 /* Queues */
 static xQueueHandle qKP;
@@ -88,7 +88,7 @@ static void man_main(void*params){
 
 					if(IK_TEST){	
 
-						ik_calc_IK(qMOVE,startIK);
+						ik_calc_IK(startIK);				
 					}
 					else{	
 						printf("Key at pos %d pressed.\n", shifted);			
@@ -97,7 +97,7 @@ static void man_main(void*params){
 				}
 				else{
 					if(IK_TEST){	
-						ik_calc_IK(qMOVE,stopIK);
+						ik_calc_IK(stopIK);				
 					}
 					else{
 						printf("Key at pos %d released.\n", shifted);
