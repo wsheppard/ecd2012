@@ -28,13 +28,7 @@ typedef struct {
 	int z_pos;
 }ik_cart_pos_s;
 
-/* specific move message*/
-typedef struct {
-        unsigned int messageID;
-        unsigned int messageDATA;
-        unsigned int ikPLACE;
-        unsigned int ikTIME;
-}ik_message_s;
+
 
 int ik_calc_IK(xQueueHandle qMOVE,ik_cart_pos_s);
 

@@ -97,7 +97,6 @@ int move_Start(xQueueHandle qHandle){
 static void move_main_task(void* params){
 
 	msg_message_s msgMessage;
-    ik_message_s ikMessage;
 	int servoID;
 
 
@@ -129,14 +128,14 @@ static void move_main_task(void* params){
 				break;
 			case M_MOVE_IK: 
                             /*  IK messages have a different format */
-                                ikMessage = (ik_message_s)msgMessage;
+
                         
                                 /* If bad servo id quit */
-				if (ikMessage.messageDATA >=PWM_COUNT){
+				if (msgMessage.messageDATA >=PWM_COUNT){
 					printf("Bad Servo ID! \n");
 					break;}
 				/* Send out message */
-				msg_ik_send(ServoData[servoID].qServo,ikMessage);
+				msg_send(ServoData[servoID].qServo,msgMessage);
 			
 				break;
 			default:
@@ -152,7 +151,6 @@ static void move_servo_task(void *params){
 
 	move_servoData_s servoData;
 	msg_message_s msgMessage;
-	ik_message_s ikMessage;
 
 	/* Grab local copy of the queue handle */
 	servoData = *(move_servoData_s*)params;
@@ -174,15 +172,14 @@ static void move_servo_task(void *params){
 
 				/* Move to a specfic place using Sigmoid function */
 			case M_MOVE_IK: 
-                                ikMessage = (ik_message_s)msgMessage; /*IK message have a different format*/
                                 ServoData[servoData.iServoID].state = MOVE_STATE_IK;
                                 
                             
-                                if(ikMessage.ikTIME == 0){
-                                        move_servo_sigmoid(&servoData,ikMessage.ikPLACE, MOVE_SPEC_M_TIME);
+                                if(msgMessage.sTIME == 0){
+                                        move_servo_sigmoid(&servoData,msgMessage.sPLACE, MOVE_SPEC_M_TIME);
                                 }
                                 else{
-                                        move_servo_sigmoid(&servoData,ikMessage.ikPLACE, ikMessage.ikTIME);
+                                        move_servo_sigmoid(&servoData,msgMessage.sPLACE, msgMessage.sTIME);
                                 }
                                 ServoData[servoData.iServoID].state = MOVE_STATE_STOP;
                             	break;

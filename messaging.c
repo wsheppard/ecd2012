@@ -51,11 +51,11 @@ int msg_send(xQueueHandle qHandle, msg_message_s msgMessage){
 
 }
 
-int msg_ik_send(xQueueHandle qHandle, ik_message_s ikMessage){
+int msg_ik_send(xQueueHandle qHandle, msg_message_s msgMessage){
 
 	/* Send it to the back of the queue, don't wait for the queue
 		if it's full */
-	if (xQueueSendToBack(qHandle, (void*)&ikMessage, 0) != pdTRUE){
+	if (xQueueSendToBack(qHandle, (void*)&msgMessage, 0) != pdTRUE){
 		printf("Sent message failed...\n");
 		return -1;
 	}

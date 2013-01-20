@@ -41,8 +41,8 @@ unsigned int l3 = 12 ;
 unsigned int d5 = 4.5;
 unsigned int current_q2,current_q3;
 int xc, yc,zc,q1,q21,q22,q31,q32;
+msg_message_s msgMessage;
 
-ik_message_s ikMessage;
 
 if(sqrt((position.x_pos^(2))+(position.y_pos^(2))+(position.z_pos^(2)))>(l2+l3+d5)){/*check for valud input*/
     	//printf("Desired position outside of workspace.");
@@ -80,38 +80,38 @@ q22 = -atan2(((l3*sin(q32))/sqrt(pow(xc,2)+pow(yc,2)+pow(zc,2))),+sqrt(1-pow((l3
 	pwm_get_pos(M_MOVE_SERVO3, &current_q3);
 	
 	if (fabs(current_q2-q21)<=fabs(current_q2-q22)){ //solution 1
-		ikMessage.messageID = M_MOVE_IK;				
-		ikMessage.messageDATA = M_MOVE_SERVO1;
-        ik_degree_to_servo(&ikMessage.ikPLACE,q1,S_MAX_0,S_MIN_0, Q_MAX_0, Q_MIN_0);
-		msg_ik_send(qMOVE,ikMessage);
+		msgMessage.messageID = M_MOVE_IK;
+		msgMessage.messageDATA = M_MOVE_SERVO1;
+        ik_degree_to_servo(&msgMessage.sPLACE,q1,S_MAX_0,S_MIN_0, Q_MAX_0, Q_MIN_0);
+		msg_send(qMOVE,msgMessage);
 		
-		ikMessage.messageID = M_MOVE_IK;								
-                ikMessage.messageDATA = M_MOVE_SERVO2;
-                ik_degree_to_servo(&ikMessage.ikPLACE,q21,S_MAX_1, S_MIN_1, Q_MAX_1, Q_MIN_1);
-		msg_ik_send(qMOVE,ikMessage);
+		msgMessage.messageID = M_MOVE_IK;
+                msgMessage.messageDATA = M_MOVE_SERVO2;
+                ik_degree_to_servo(&msgMessage.sPLACE,q21,S_MAX_1, S_MIN_1, Q_MAX_1, Q_MIN_1);
+		msg_send(qMOVE,msgMessage);
 		
-		ikMessage.messageID = M_MOVE_IK;
-		ikMessage.messageDATA = M_MOVE_SERVO3;
-                ik_degree_to_servo(&ikMessage.ikPLACE,q31,S_MAX_2, S_MIN_2, Q_MAX_2, Q_MIN_2);
-		msg_ik_send(qMOVE,ikMessage);
+		msgMessage.messageID = M_MOVE_IK;
+		msgMessage.messageDATA = M_MOVE_SERVO3;
+                ik_degree_to_servo(&msgMessage.sPLACE,q31,S_MAX_2, S_MIN_2, Q_MAX_2, Q_MIN_2);
+		msg_send(qMOVE,msgMessage);
 		
 		
 	}
 	else {				//solution 2
-		ikMessage.messageID = M_MOVE_IK;				
-		ikMessage.messageDATA = M_MOVE_SERVO1;
-                ik_degree_to_servo(&ikMessage.ikPLACE,q1,S_MAX_0, S_MIN_0, Q_MAX_0, Q_MIN_0);
-		msg_ik_send(qMOVE,ikMessage);
+		msgMessage.messageID = M_MOVE_IK;
+		msgMessage.messageDATA = M_MOVE_SERVO1;
+        ik_degree_to_servo(&msgMessage.sPLACE,q1,S_MAX_0, S_MIN_0, Q_MAX_0, Q_MIN_0);
+		msg_send(qMOVE,msgMessage);
 		
-		ikMessage.messageID = M_MOVE_IK;								
-		ikMessage.messageDATA = M_MOVE_SERVO2;
-                ik_degree_to_servo(&ikMessage.ikPLACE,q22,S_MAX_1, S_MIN_1, Q_MAX_1, Q_MIN_1);
-		msg_ik_send(qMOVE,ikMessage);
+		msgMessage.messageID = M_MOVE_IK;
+		msgMessage.messageDATA = M_MOVE_SERVO2;
+        ik_degree_to_servo(&msgMessage.sPLACE,q22,S_MAX_1, S_MIN_1, Q_MAX_1, Q_MIN_1);
+		msg_send(qMOVE,msgMessage);
 		
-		ikMessage.messageID = M_MOVE_IK;
-		ikMessage.messageDATA = M_MOVE_SERVO3;
-                ik_degree_to_servo(&ikMessage.ikPLACE,q32,S_MAX_2, S_MIN_2, Q_MAX_2, Q_MIN_2);
-		msg_ik_send(qMOVE,ikMessage);
+		msgMessage.messageID = M_MOVE_IK;
+		msgMessage.messageDATA = M_MOVE_SERVO3;
+                ik_degree_to_servo(&msgMessage.sPLACE,q32,S_MAX_2, S_MIN_2, Q_MAX_2, Q_MIN_2);
+		msg_send(qMOVE,msgMessage);
 		
 		}
 
