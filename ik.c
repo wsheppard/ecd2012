@@ -44,7 +44,7 @@ int xc, yc,zc,q1,q21,q22,q31,q32;
 msg_message_s msgMessage;
 
 
-if(sqrt((position.x_pos^(2))+(position.y_pos^(2))+(position.z_pos^(2)))>(l2+l3+d5)){/*check for valud input*/
+if(sqrt((position.x_pos^(2))+(position.y_pos^(2))+(position.z_pos^(2)))>(l2+l3+d5)){/*check for valid input*/
     	//printf("Desired position outside of workspace.");
     return ECD_ERROR;
     }

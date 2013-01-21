@@ -19,7 +19,7 @@
 #include "pwm.h"
 #include "display.h"
 #include "ik.h"
-#include "manager.h"
+
 
 /* Private Functions */
 static void man_main(void*params);
@@ -61,8 +61,17 @@ static void man_main(void*params){
 	unsigned changed;
 	unsigned state;
 	int shifted;
+	int do_ik_once = 1;
 
 	printf("Starting manager...\n");
+
+	startIK.x_pos = 10;
+	startIK.y_pos = 10;
+	startIK.z_pos = 0;
+
+	stopIK.x_pos = 12;
+	stopIK.y_pos = 12;
+	stopIK.z_pos = 0;
 
 	for (;;) {
 	
@@ -86,23 +95,30 @@ static void man_main(void*params){
 			
 				if(state & 1){
 
-					if(IK_TEST){	
-
-						ik_calc_IK(qMOVE,startIK);
-					}
-					else{	
 						printf("Key at pos %d pressed.\n", shifted);			
 						man_key_down(shifted);
-					}
+						if(shifted == 8){
+							if(do_ik_once){
+						    	printf("Calculate inverse kinematics for the start position.\n");
+
+								//ik_calc_IK(qMOVE,startIK);
+								do_ik_once = 0;
+							}
+						}
+						if(shifted == 12){
+								if(do_ik_once == 0){
+							    	printf("Calculate inverse kinematics for the stop position.\n");
+
+									//ik_calc_IK(qMOVE,stopIK);
+									do_ik_once = 1;
+								}
+							}
+
 				}
 				else{
-					if(IK_TEST){	
-						ik_calc_IK(qMOVE,stopIK);
-					}
-					else{
 						printf("Key at pos %d released.\n", shifted);
 						man_key_up(shifted);
-					}
+
 				}
 			
 			}

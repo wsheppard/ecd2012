@@ -23,7 +23,7 @@ Must have INCLUDE_vTaskSuspend enabled to go for Blocking waits.
 /* Local Includes */
 #include "messages.h"
 #include "ECD.h"
-#include "ik.h"
+
 
 #ifndef INCLUDE_vTaskSuspend
 #error Must include ability to suspend tasks.
@@ -51,13 +51,12 @@ int msg_rmQueue(xQueueHandle);
 	full, we'll get a failed back. */
 int msg_send(xQueueHandle, msg_message_s);
 
-int msg_ik_send(xQueueHandle, msg_message_s);
 
 
 /* Check for message, NO wait */
 int msg_recv_noblock(xQueueHandle qHandle, msg_message_s*pMessage);
 
-/* Wait for message indefinately */
+/* Wait for message indefinitely */
 int msg_recv_block(xQueueHandle qHandle, msg_message_s*pMessage);
 
 #endif
