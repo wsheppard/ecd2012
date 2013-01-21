@@ -38,6 +38,7 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, float time); 
 static void move_servo_task(void *params); /* Individual servo tasks, one spawned for each servo */
 static void move_main_task(void* params); /* Main task manager for this module */
 static void move_servo_cont(move_servoData_s *sData, int direction); /* Move loop */
+static void move_servo_specific(move_servoData_s *sData, int goal);/*crude way to move servos into a given position*/
 
 
 /* These are the queues going off to the servo tasks */
@@ -125,11 +126,8 @@ static void move_main_task(void* params){
 				break;
 			case M_MOVE_SPEC:
 				break;
-			case M_MOVE_IK: 
-                            /*  IK messages have a different format */
-
-                        
-                                /* If bad servo id quit */
+			case M_MOVE_IK:
+                /* If bad servo id quit */
 				if (msgMessage.messageDATA >=PWM_COUNT){
 					printf("Bad Servo ID! \n");
 					break;}
@@ -165,22 +163,22 @@ static void move_servo_task(void *params){
 		switch (msgMessage.messageID){
 			case M_MOVE_CONT:
 				move_servo_cont(&servoData,(msgMessage.messageDATA & M_MOVE_DIRMASK));
-				ServoData[servoData.iServoID].state = MOVE_STATE_STOP;//??? why is this??-Rapha
+				ServoData[servoData.iServoID].state = MOVE_STATE_STOP;
                                 /*servoData.state = MOVE_STATE_STOP; //would this be the same??*/
 				break;
 
-				/* Move to a specfic place using Sigmoid function */
+				/* Move to a specific place using Sigmoid function */
 			case M_MOVE_IK: 
                                 ServoData[servoData.iServoID].state = MOVE_STATE_IK;
                                 
                             
                                 if(msgMessage.sTIME == 0){
-                                        move_servo_sigmoid(&servoData,(int)msgMessage.sPLACE, MOVE_SPEC_M_TIME);
+                                        //move_servo_sigmoid(&servoData,(int)msgMessage.sPLACE, MOVE_SPEC_M_TIME);
                                 }
                                 else{
-                                        move_servo_sigmoid(&servoData,(int)msgMessage.sPLACE, msgMessage.sTIME);
+                                        //move_servo_sigmoid(&servoData,(int)msgMessage.sPLACE, msgMessage.sTIME);
                                 }
-                				printf("Sigmoid Servo task %d stopped moving.\n", servoData.iServoID);
+                                move_servo_specific(&servoData, msgMessage.sPLACE);
                                 ServoData[servoData.iServoID].state = MOVE_STATE_STOP;
                             	break;
                                 
@@ -377,4 +375,77 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, float time){
 
 }
 
+static void move_servo_specific(move_servoData_s *sData, int goal){
 
+	msg_message_s msgMessage;
+	int jumpval = MOVE_JUMPVAL;
+	int delta = 0;
+	unsigned int current;
+	int distance;
+
+	/* First work out how far we have to travel */
+		pwm_get_pos(sData->iServoID, &current);
+
+		distance = goal - current;
+
+		/* We've got no-where to go */
+		if (distance == 0)
+			return;
+
+	#if 1
+	if (distance>0)
+		ServoData[sData->iServoID].state = MOVE_STATE_INC;
+	else
+		ServoData[sData->iServoID].state = MOVE_STATE_DEC;
+#endif
+	for(;;){
+
+		/* Quick message check */
+		if(msg_recv_noblock(sData->qServo, &msgMessage)!=ECD_NOMSG){
+			if(msgMessage.messageID!=M_MOVE_STOP){
+				printf("Expecting STOP message but received something else!\n");
+				return;
+			}
+			else{
+				//printf("Servo task %d STOPPING %s.\n", sData->iServoID,direction ? "INC": "DEC");
+				return;
+			}
+		}
+
+		/* So no message received, move one step */
+		//printf("Servo task %d moving %s STEP.\n", sData->iServoID,direction ? "INC": "DEC");
+
+		if (distance>0)
+			pwm_jump(sData->iServoID, jumpval);
+		else
+			pwm_jump(sData->iServoID, -jumpval);
+
+		/* Increase movement speed until MOVE_JUMP_MAX */
+		if (jumpval < (MOVE_JUMP_MAX)){
+			jumpval += delta;
+			delta += MOVE_DELTA;
+		}
+
+		/* If it goes over just set it to max */
+		if (jumpval > MOVE_JUMP_MAX)
+			jumpval = MOVE_JUMP_MAX;
+
+		vTaskDelay(MOVE_LATENCY);
+
+		/* First work out how far we have to travel */
+			pwm_get_pos(sData->iServoID, &current);
+
+			distance = goal - current;
+
+			/* We've got no-where to go */
+
+
+		if(distance >=-1500 && distance <=1500){
+			msgMessage.messageID = M_MOVE_STOP;
+			msg_send(sData->qServo,msgMessage);
+
+		}
+
+	}
+
+}
