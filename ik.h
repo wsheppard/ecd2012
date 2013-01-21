@@ -23,9 +23,9 @@ Inverse kinematics
 
 /* cartesian position of end effector*/
 typedef struct {
-	int x_pos;
-	int y_pos;
-	int z_pos;
+	double x_pos;
+	double y_pos;
+	double z_pos;
 }ik_cart_pos_s;
 
 

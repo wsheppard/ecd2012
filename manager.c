@@ -101,7 +101,7 @@ static void man_main(void*params){
 							if(do_ik_once){
 						    	printf("Calculate inverse kinematics for the start position.\n");
 
-								//ik_calc_IK(qMOVE,startIK);
+								ik_calc_IK(qMOVE,startIK);
 								do_ik_once = 0;
 							}
 						}
@@ -109,7 +109,7 @@ static void man_main(void*params){
 								if(do_ik_once == 0){
 							    	printf("Calculate inverse kinematics for the stop position.\n");
 
-									//ik_calc_IK(qMOVE,stopIK);
+									ik_calc_IK(qMOVE,stopIK);
 									do_ik_once = 1;
 								}
 							}
