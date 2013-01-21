@@ -34,7 +34,7 @@ typedef struct {
 	unsigned int messageID;
 	unsigned int messageDATA;
     unsigned int sPLACE;
-    unsigned int sTIME;
+    float sTIME;
 }msg_message_s;
 
 typedef xQueueHandle msg_handle;

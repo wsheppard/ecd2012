@@ -175,11 +175,12 @@ static void move_servo_task(void *params){
                                 
                             
                                 if(msgMessage.sTIME == 0){
-                                        move_servo_sigmoid(&servoData,msgMessage.sPLACE, MOVE_SPEC_M_TIME);
+                                        move_servo_sigmoid(&servoData,(int)msgMessage.sPLACE, MOVE_SPEC_M_TIME);
                                 }
                                 else{
-                                        move_servo_sigmoid(&servoData,msgMessage.sPLACE, msgMessage.sTIME);
+                                        move_servo_sigmoid(&servoData,(int)msgMessage.sPLACE, msgMessage.sTIME);
                                 }
+                				printf("Sigmoid Servo task %d stopped moving.\n", servoData.iServoID);
                                 ServoData[servoData.iServoID].state = MOVE_STATE_STOP;
                             	break;
                                 
@@ -357,6 +358,15 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, float time){
 
 		/* Now move there */
 		pwm_set_pos(sData->iServoID, (unsigned int)res);
+
+		/* check if we arrived at the desired position */
+		pwm_get_pos(sData->iServoID, &current);
+
+		distance = place - current;
+
+		/* We've got no-where to go */
+		if (distance == 0)
+			return;
 
 
 		vTaskDelay(MOVE_LATENCY);
