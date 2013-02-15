@@ -12,11 +12,12 @@
 
 /* Fill private data about servos, the position data is kept track of privately
    in this module - so might need some functions to get it out? */
+int dummypwmadd[PWM_COUNT];
 pwm_servo_data_s servo_data[PWM_COUNT]={
-	{(void*)ADD_SERVO1,0,75000},
-	{(void*)ADD_SERVO2,0,75000},
-	{(void*)ADD_SERVO3,0,75000},
-	{(void*)ADD_SERVO4,0,75000},
+	{(void*)&dummypwmadd[0],0,75000},
+	{(void*)&dummypwmadd[1],0,75000},
+	{(void*)&dummypwmadd[2],0,75000},
+	{(void*)&dummypwmadd[3],0,75000},
 };
 
 static xSemaphoreHandle xSemaphore = NULL;

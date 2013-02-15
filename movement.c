@@ -33,8 +33,8 @@ typedef struct{
 	unsigned int test;
 }euler_s;
 
-static int sigmoid(float M, float time, float*result); /* Find sigmoid position */
-static void move_servo_sigmoid(move_servoData_s *sData, int place, float time); /* Move to a specified place, in a specified time */
+//static int sigmoid(float M, float time, float*result); /* Find sigmoid position */
+//static void move_servo_sigmoid(move_servoData_s *sData, int place, float time); /* Move to a specified place, in a specified time */
 static void move_servo_task(void *params); /* Individual servo tasks, one spawned for each servo */
 static void move_main_task(void* params); /* Main task manager for this module */
 static void move_servo_cont(move_servoData_s *sData, int direction); /* Move loop */
@@ -256,124 +256,124 @@ int move_get_state(int servo, int*state){
 
 
 
-static int sigmoid(float M, float time, float*result){
+//static int sigmoid(float M, float time, float*result){
+//
+//	euler_s* p_euler;
+//	float fInput;
+//
+//	/* The M value is the half time point where the gradient is maximum */
+//
+//	/* Do the sigmoid calcs */
+//	p_euler = (euler_s*)EULERBLOCK_0_BASE;
+//
+//	fInput = (-1 * (SIGMOID_ERR) * (time - M)) / M;
+//
+//
+//	if( xSemaphore != NULL )
+//	    {
+//	        // See if we can obtain the semaphore.  If the semaphore is not available
+//	        // wait 10 ticks to see if it becomes free.
+//	        if( xSemaphoreTake( xSemaphore, ( portTickType ) 10 ) == pdTRUE )
+//	        {
+//	        	/* Wait for the euler block to become ready */
+//	        		while(!p_euler->state)
+//	        			vTaskDelay(1);
+//
+//	        		p_euler->input = fInput;
+//
+//	        		/* Wait for the euler block to become ready */
+//	        		while(!p_euler->state)
+//	        			vTaskDelay(1);
+//
+//	            xSemaphoreGive( xSemaphore );
+//	        }
+//	        else
+//	        {
+//				printf("Servo couldn't get semaphore! Why ever not?\n");
+//	            // We could not obtain the semaphore and can therefore not access
+//	            // the shared resource safely.
+//	        }
+//	    }
+//
+//
+//	*result = p_euler->output;
+//
+//	return ECD_OK;
+//}
 
-	euler_s* p_euler;
-	float fInput;
-
-	/* The M value is the half time point where the gradient is maximum */
-
-	/* Do the sigmoid calcs */
-	p_euler = (euler_s*)EULERBLOCK_0_BASE;
-
-	fInput = (-1 * (SIGMOID_ERR) * (time - M)) / M;
-
-
-	if( xSemaphore != NULL )
-	    {
-	        // See if we can obtain the semaphore.  If the semaphore is not available
-	        // wait 10 ticks to see if it becomes free.
-	        if( xSemaphoreTake( xSemaphore, ( portTickType ) 10 ) == pdTRUE )
-	        {
-	        	/* Wait for the euler block to become ready */
-	        		while(!p_euler->state)
-	        			vTaskDelay(1);
-
-	        		p_euler->input = fInput;
-
-	        		/* Wait for the euler block to become ready */
-	        		while(!p_euler->state)
-	        			vTaskDelay(1);
-
-	            xSemaphoreGive( xSemaphore );
-	        }
-	        else
-	        {
-				printf("Servo couldn't get semaphore! Why ever not?\n");
-	            // We could not obtain the semaphore and can therefore not access
-	            // the shared resource safely.
-	        }
-	    }
-
-
-	*result = p_euler->output;
-
-	return ECD_OK;
-}
-
-static void move_servo_sigmoid(move_servoData_s *sData, int place, float time){
-
-	msg_message_s msgMessage;
-	unsigned int current = 0;
-	int	distance = 0;
-	int steps = 0;
-	float currenttime = 0;
-	float m, totaltime;
-    float res =0;
-
-	/* We're given the total time for the transition */
-	m = time / 2.0;
-
-	/* First work out how far we have to travel */
-	pwm_get_pos(sData->iServoID, &current);
-
-	distance = place - current;
-
-	/* We've got no-where to go */
-	if (distance == 0)
-		return;
-
-	/* NOTE: Is this bit relevant? */
-#if 1
-	if (distance > 0)
-		ServoData[sData->iServoID].state = MOVE_STATE_INC;
-	else
-		ServoData[sData->iServoID].state = MOVE_STATE_DEC;
-#endif
-
-	for(;;){
-
-		/* Quick message check */
-		if(msg_recv_noblock(sData->qServo, &msgMessage)!=ECD_NOMSG){
-			if(msgMessage.messageID!=M_MOVE_STOP){
-				printf("Expecting STOP message but received something else! Returning!\n");
-				return;
-			}
-			else{
-				//printf("Servo task %d STOPPING %s.\n", sData->iServoID,direction ? "INC": "DEC");
-				return;
-			}
-		}
-
-		/* So no STOP message received, move one step */
-
-		/* Get normalized value */
-		sigmoid(m,currenttime,&res);
-
-		/* Now scale it */
-		res *= distance;
-		res += current;
-
-		/* Now move there */
-		pwm_set_pos(sData->iServoID, (unsigned int)res);
-
-		/* check if we arrived at the desired position */
-		pwm_get_pos(sData->iServoID, &current);
-
-		distance = place - current;
-
-		/* We've got no-where to go */
-		if (distance == 0)
-			return;
-
-
-		vTaskDelay(MOVE_LATENCY);
-
-
-	}
-
-
-}
+//static void move_servo_sigmoid(move_servoData_s *sData, int place, float time){
+//
+//	msg_message_s msgMessage;
+//	unsigned int current = 0;
+//	int	distance = 0;
+//	int steps = 0;
+//	float currenttime = 0;
+//	float m, totaltime;
+//    float res =0;
+//
+//	/* We're given the total time for the transition */
+//	m = time / 2.0;
+//
+//	/* First work out how far we have to travel */
+//	pwm_get_pos(sData->iServoID, &current);
+//
+//	distance = place - current;
+//
+//	/* We've got no-where to go */
+//	if (distance == 0)
+//		return;
+//
+//	/* NOTE: Is this bit relevant? */
+//#if 1
+//	if (distance > 0)
+//		ServoData[sData->iServoID].state = MOVE_STATE_INC;
+//	else
+//		ServoData[sData->iServoID].state = MOVE_STATE_DEC;
+//#endif
+//
+//	for(;;){
+//
+//		/* Quick message check */
+//		if(msg_recv_noblock(sData->qServo, &msgMessage)!=ECD_NOMSG){
+//			if(msgMessage.messageID!=M_MOVE_STOP){
+//				printf("Expecting STOP message but received something else! Returning!\n");
+//				return;
+//			}
+//			else{
+//				//printf("Servo task %d STOPPING %s.\n", sData->iServoID,direction ? "INC": "DEC");
+//				return;
+//			}
+//		}
+//
+//		/* So no STOP message received, move one step */
+//
+//		/* Get normalized value */
+//		sigmoid(m,currenttime,&res);
+//
+//		/* Now scale it */
+//		res *= distance;
+//		res += current;
+//
+//		/* Now move there */
+//		pwm_set_pos(sData->iServoID, (unsigned int)res);
+//
+//		/* check if we arrived at the desired position */
+//		pwm_get_pos(sData->iServoID, &current);
+//
+//		distance = place - current;
+//
+//		/* We've got no-where to go */
+//		if (distance == 0)
+//			return;
+//
+//
+//		vTaskDelay(MOVE_LATENCY);
+//
+//
+//	}
+//
+//
+//}
 
 static void move_servo_specific(move_servoData_s *sData, int goal){
 

@@ -46,7 +46,8 @@ void display_main(void*params){
 	unsigned int pos[4];
 	int state[4];
 	int x, led_counter = 0 ;
-	void* pLEDS = (void*)LEDS_BASE;
+	int LEDS_BASE;
+	void* pLEDS = (void*)&LEDS_BASE;
 	unsigned int pwm_add = 2000;
 
 	unsigned int *p_keypad_data;
@@ -54,14 +55,12 @@ void display_main(void*params){
 
 //	euler_s* p_euler;
 
-	int xDelay = 1000 / portTICK_RATE_MS;
+//	int xDelay = 1000 / portTICK_RATE_MS;
+	int xDelay = 150 / portTICK_RATE_MS;
 
-//	p_pwm = (unsigned int*)PWM_COMPONENT_0_BASE;
+	p_pwm = (unsigned int*)PWM_COMPONENT_0_BASE;
 
-
-
-
-	p_keypad_data = (unsigned int *)KEYPAD_COMPONENT_0_BASE;
+//	p_keypad_data = (unsigned int *)KEYPAD_COMPONENT_0_BASE;
 
 	for(;;){
 

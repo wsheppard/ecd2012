@@ -15,10 +15,10 @@
 
 /*How much settling time there is for a button
 KP_DELAY * DEBOUNCE_MS = settling time in ms .*/
-#define DEBOUNCE_MS 10 
+#define DEBOUNCE_MS 1 
 
 /* How often to POLL (in ms between polls).*/
-#define KP_DELAY (20/portTICK_RATE_MS) 
+#define KP_DELAY (10/portTICK_RATE_MS) 
 
 
 

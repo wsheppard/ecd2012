@@ -19,3 +19,12 @@
 *~
 *.DS_Store
 
+
+Debug/*
+ipch/*ipch
+ipch/*
+WIN32.opensdf
+WIN32.sdf
+WIN32.suo
+WIN32.vcxproj.filters
+WIN32.vcxproj.user

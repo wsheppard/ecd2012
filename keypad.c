@@ -10,8 +10,9 @@
 /* Local includes */
 #include "keypad.h"
 #include "pwm.h"
-#include <system.h>
+//#include <system.h>
 #include <FreeRTOS.h>
+#include "windows.h"
 
 /* Private functions */
 static void kp_main(void*pvParams);
@@ -21,6 +22,13 @@ static void kp_getDebounced(unsigned short *KP_data);
 /* Private Variables */
 xQueueHandle qKP;
 xTaskHandle tKP;
+
+const unsigned short key_bit[] = {M_KP_KEY_A1, M_KP_KEY_A2, M_KP_KEY_A3,M_KP_KEY_A4,M_KP_KEY_B1,
+                    M_KP_KEY_B2, M_KP_KEY_B3,M_KP_KEY_B4,M_KP_KEY_C1,M_KP_KEY_C2,
+					M_KP_KEY_C3, M_KP_KEY_C4,M_KP_KEY_D1,M_KP_KEY_D2,M_KP_KEY_D3,
+					M_KP_KEY_D4};
+const int keyboard_value[] = {0x31,0x32,0x33,0x34,0x51,0x57,0x45,0x52,0x41,0x53,0x44,0x46,
+	0x5A,0x58,0x43,0x56};
 
 
 int kp_startTask(xQueueHandle qHandle){
@@ -61,7 +69,7 @@ static void kp_main(void*pvParams){
 	printf("Keypad starting...\n");
 
 	/* Wait for one second.. why? */
-	vTaskDelay(1000);
+	vTaskDelay(100);
 
 	/* Start checking for keypad changes and then send as message */
 	for (;;){
@@ -88,32 +96,48 @@ static void kp_main(void*pvParams){
 
 
 static void kp_getCurrent(unsigned short *KP_data){
+//
+//	//static unsigned short output = 1;
+//	unsigned int *p_keypad_data;
+//
+//	/* Get the state of all the KeyPad buttons and put into a nice 16bits */
+//
+//
+//	p_keypad_data = (unsigned int *)KP_BASE_ADDRESS;
+//
+//	/* Reading from the base address of the keypad module should return
+//	 * a 16bit value where each bit represents the down or up states of the
+//	 * keypad
+//	 */
+//
+//	//printf("Reading: %X\n",*p_keypad_data);
+//
+//	*KP_data = (unsigned short)*(p_keypad_data+2);
+//	
+//#if 0
+//	/* This cycles through the different keys */
+//	if (output>(1<<8))
+//		output=1;
+//
+//	*KP_data = output;
+//	output <<= 1;
+//#endif
+		/* Get the state of all the KeyPad buttons and put into a nice 16bits */
 
-	//static unsigned short output = 1;
-	unsigned int *p_keypad_data;
+	int x,y;
+	static unsigned short output = 3;
+	unsigned short key_mask = 32768;
 
-	/* Get the state of all the KeyPad buttons and put into a nice 16bits */
-
-
-	p_keypad_data = (unsigned int *)KP_BASE_ADDRESS;
-
-	/* Reading from the base address of the keypad module should return
-	 * a 16bit value where each bit represents the down or up states of the
-	 * keypad
-	 */
-
-	//printf("Reading: %X\n",*p_keypad_data);
-
-	*KP_data = (unsigned short)*(p_keypad_data+2);
-	
-#if 0
-	/* This cycles through the different keys */
-	if (output>(1<<8))
-		output=1;
-
-	*KP_data = output;
-	output <<= 1;
-#endif
+//printf("Checking keypad....\n");
+*KP_data = output;
+	for (x=0;x<16;x++){
+		if (GetAsyncKeyState(keyboard_value[x]) & key_mask){
+			output = output | key_bit[x];
+		}
+		else{
+			output = output&(~key_bit[x]);
+		}
+	}
 }
 
 
