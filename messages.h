@@ -56,4 +56,5 @@
 /* Masks for the servo messages */
 #define M_MOVE_SERVOMASK 255 /* The servo number (4bits) */
 #define M_MOVE_DIRMASK 256   /* THe direction bit (1bit) */
+#define M_MOVE_PWMMASK 0x01fffe0
 

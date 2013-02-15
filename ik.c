@@ -30,6 +30,7 @@
 
 static int ik_rad_to_servo(unsigned int *servoVal,double rad,int servoMax,int servoMin, double qMax, double qMin); /*convert rads to a servo understood format*/
 
+unsigned int data_temp;
 
 /* calculates joint angles from cartesian position
 */
@@ -73,23 +74,23 @@ q22 = -atan2(((l3*sin(q32))/sqrt(pow(xc,2)+pow(yc,2)+pow(zc,2))),+sqrt(1-pow((l3
 		//solution 2
 		printf("Angles: q1 = %f, q2 = %f, q3 = %f\n",(q1*180/M_PI),(q22*180/M_PI),(q32*180/M_PI));
 		msgMessage.messageID = M_MOVE_IK;
-		msgMessage.messageDATA = M_MOVE_SERVO1;
-        ik_rad_to_servo(&msgMessage.sPLACE,q1,S_MAX_0, S_MIN_0, Q_MAX_0, Q_MIN_0);
-		msgMessage.sTIME = 2;
+        ik_rad_to_servo(&data_temp,q1,S_MAX_0, S_MIN_0, Q_MAX_0, Q_MIN_0);
+		msgMessage.messageDATA = ((M_MOVE_SERVO1<<1)+ (((data_temp - PWM_OFFSET)<<5) & M_MOVE_PWMMASK)); /**/
+		//msgMessage.sTIME = 2;
 		printf("Servo 1 PWM value: %d \n",msgMessage.sPLACE);
 		msg_send(qMOVE,msgMessage);
 		
 		msgMessage.messageID = M_MOVE_IK;
-		msgMessage.messageDATA = M_MOVE_SERVO2;
-        ik_rad_to_servo(&msgMessage.sPLACE,q22,S_MAX_1, S_MIN_1, Q_MAX_1, Q_MIN_1);
-		msgMessage.sTIME = 2;
+        ik_rad_to_servo(&data_temp,q22,S_MAX_1, S_MIN_1, Q_MAX_1, Q_MIN_1);
+		msgMessage.messageDATA = ((M_MOVE_SERVO2<<1)+ (((data_temp - PWM_OFFSET)<<5) & M_MOVE_PWMMASK));
+		//msgMessage.sTIME = 2;
 		printf("Servo 2 PWM value: %d \n",msgMessage.sPLACE);
 		msg_send(qMOVE,msgMessage);
 		
 		msgMessage.messageID = M_MOVE_IK;
-		msgMessage.messageDATA = M_MOVE_SERVO3;
-        ik_rad_to_servo(&msgMessage.sPLACE,q32,S_MAX_2, S_MIN_2, Q_MAX_2, Q_MIN_2);
-		msgMessage.sTIME = 2;
+        ik_rad_to_servo(&data_temp,q32,S_MAX_2, S_MIN_2, Q_MAX_2, Q_MIN_2);
+		msgMessage.messageDATA = ((M_MOVE_SERVO3<<1)+ (((data_temp - PWM_OFFSET)<<5) & M_MOVE_PWMMASK));
+		//msgMessage.sTIME = 2;
 		printf("Servo 3 PWM value: %d \n",msgMessage.sPLACE);
 		msg_send(qMOVE,msgMessage);
 		
@@ -102,12 +103,14 @@ return ECD_OK;
 
 
 static int ik_rad_to_servo(unsigned int *servoVal,double rad,int servoMax,int servoMin, double qMax, double qMin){
-    *servoVal =(unsigned int)( rad*(((double)(servoMax - servoMin))/(qMax-qMin)) + (double)servoMin);
+
+    *servoVal = (unsigned int)( rad*(((double)(servoMax - servoMin))/(qMax-qMin)) + (double)servoMin);
         if((*servoVal <=servoMax) || (*servoVal >= servoMin)){/*is the value within the servo range?*/
                 return ECD_OK;
         }
         else{
                 return ECD_ERROR;
         }
+
     }
 

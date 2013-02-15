@@ -21,6 +21,7 @@ Inverse kinematics
 #define Q_MAX_2 (-120*M_PI/180)
 #define Q_MIN_2 (120*M_PI/180)
 
+
 /* cartesian position of end effector*/
 typedef struct {
 	double x_pos;
