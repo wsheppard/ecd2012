@@ -25,7 +25,7 @@
 #define MOVE_JUMP_MAX 1500
 
 /* For specific movement */
-#define MOVE_SPEC_M_TIME 2      //the time allowed for all movements
+#define MOVE_SPEC_STD_SPEED 0      //the time allowed for all movements
 
 #define SIGMOID_ERR	6.2126
 
