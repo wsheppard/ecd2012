@@ -9,6 +9,8 @@
 #include "pwm.h"
 #include "semphr.h"
 #include <stdio.h>
+#include "system.h"
+#include <io.h>
 
 /* Fill private data about servos, the position data is kept track of privately
    in this module - so might need some functions to get it out? */
@@ -56,19 +58,16 @@ int pwm_jump(int servo, int jump){
 
 int pwm_set_pos(int servo, unsigned int position){
 
-	void* pwm_addr = NULL;
-
+	/* Boundary check */
 	if ((position>100000) || (position<50000))
 			return ECD_ERROR;
 
-	/* Set this incoming number in hardware for the indicated servo */
-	
-	//IOWR_32DIRECT(BASE,OFFSET,VALUE);
+	/* 	Write to hardware using HAL provided functions.
+		these prevent data caching by the NIOS */
+	IOWR(servo_data[servo].address,0,position);
 
-	pwm_addr = servo_data[servo].address;
 
-	*((unsigned int*)pwm_addr) = position;
-
+	/* Now update the global variable which holds the PWM position data */
 	 if( xSemaphore != NULL )
     {
         // See if we can obtain the semaphore.  If the semaphore is not available
@@ -98,8 +97,6 @@ int pwm_set_pos(int servo, unsigned int position){
 }
 
 int pwm_get_pos(int servo, unsigned int* position){
-
-	//IORD_32DIRECT(BASE,OFFSET);
 
 		 if( xSemaphore != NULL )
     {
