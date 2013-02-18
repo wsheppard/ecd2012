@@ -4,7 +4,7 @@
 #ifndef ECD_H
 #define ECD_H
 
-#include <portmacro.h>
+#include <FreeRTOS.h>
 
 /* Return values for this project */
 #define ECD_OK 0
@@ -18,6 +18,7 @@ typedef const signed char * fStr;
 #define TICKS_PER_MS (configTICK_RATE_HZ / 1000)
 #define MS_PER_TICK (portTICK_RATE_MS)
 #define MS2TICKS(A) ((TICKS_PER_MS) * A)
+#define TICKS2MS(A) ((MS_PER_TICK) * A)
 
 #endif
 
