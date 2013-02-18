@@ -9,6 +9,7 @@
 #include "movement.h"
 #include "math.h"
 #include <system.h>
+#include <stdlib.h>
 
 
 
@@ -34,7 +35,7 @@ typedef struct{
 }euler_s;
 
 static int sigmoid(float M, float time, float*result); /* Find sigmoid position */
-static void move_servo_sigmoid(move_servoData_s *sData, int place, float time); /* Move to a specified place, in a specified time */
+static void move_servo_sigmoid(move_servoData_s *sData, int place, int speed); /* Move to a specified place, in a specified time */
 static void move_servo_task(void *params); /* Individual servo tasks, one spawned for each servo */
 static void move_main_task(void* params); /* Main task manager for this module */
 static void move_servo_cont(move_servoData_s *sData, int direction); /* Move loop */
@@ -165,13 +166,20 @@ static void move_servo_task(void *params){
 
 				/* Move to a specfic place using Sigmoid function */
 			case M_MOVE_SPEC:
-				//move_servo_spec();
+				/* Servo, place ,speed */
+				/* Currently the position values for the PWM are between 50,000 and 100,000 -
+				 * to use two halves of the messgae DAta int, we could just use 0 to 50,000 - but that
+				 * might be confusing... */
+				move_servo_sigmoid(
+						&servoData,
+						M_MOVE_SPEC_POSITION(msgMessage.messageDATA),
+						M_MOVE_SPEC_SPEED(msgMessage.messageDATA));
 				break;
 
 
 			case M_MOVE_STOP:
-				/* Shouldn't really be valid here */
-				printf("Servo task %d stopped moving.\n", servoData.iServoID);
+				/* This means the motor is stopped, but we've received a pointless STOP request */
+				printf("Servo task %d received unneccessary stop message.\n", servoData.iServoID);
 				//printf("Stopping movement on servo %d.\n",msgMessage.messageDATA);
 				break;
 			default:
@@ -289,30 +297,38 @@ static int sigmoid(float M, float time, float*result){
 	return ECD_OK;
 }
 
-static void move_servo_sigmoid(move_servoData_s *sData, int place, float time){
+
+
+/* This function completes a full movement from where the PWM currently is
+ * to where it is specified to go. At that point it returns. During this movement,
+ * a STOP message can be sent which will force an early return */
+static void move_servo_sigmoid(move_servoData_s *sData, int place, int speed){
 
 	msg_message_s msgMessage;
-	int current = 0, distance = 0;
-	float currenttime = 0;
+	unsigned int initialposition;
+	signed int distance;
 	float m, totaltime;
+	int n = 0;
     float res =0;
+    float latency_ms = 0;
 
 	/* First work out how far we have to travel */
-	pwm_get_pos(sData->iServoID, &current);
-	distance = place - current;
-
-    /* The speed for the transition is passed in so find the total time */
-    totaltime =
-
-	/* We're given the total time for the transition */
-	m = time / 2.0;
-
-
-
+	pwm_get_pos(sData->iServoID, &initialposition);
+	distance = (signed int)initialposition - (signed int)place;
 
 	/* We've got no-where to go */
-	if (distance == 0)
+	if (abs(distance)<10)
 		return;
+
+	/* This distance value will act as the scale factor for the Sigmoid function
+	 * it's signed becuase we can of course be going in two directions */
+
+    /* The speed for the transition is passed in so find the total time
+     * but it can't be negative. */
+    totaltime = fabs((float)distance) / (float)speed;
+
+	/* M is the half-way point which is passed to the sigmoid function */
+	m = totaltime / 2.0;
 
 	/* NOTE: Is this bit relevant? */
 #if 0
@@ -322,6 +338,8 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, float time){
 		ServoData[sData->iServoID].state = MOVE_STATE_DEC;
 #endif
 
+
+	latency_ms = TICKS2MS(MOVE_LATENCY);
 
 	/* So start main loop */
 	for(;;){
@@ -333,7 +351,7 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, float time){
 				return;
 			}
 			else{
-				//printf("Servo task %d STOPPING %s.\n", sData->iServoID,direction ? "INC": "DEC");
+				printf("Servo MID-MOVE but received non-STOP message!\n");
 				return;
 			}
 		}
@@ -341,17 +359,26 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, float time){
 		/* So no STOP message received, move one step */
 
 		/* Get normalized value */
-		sigmoid(m,currenttime,&res);
+		sigmoid(m*1000,n*latency_ms,&res);
 
 		/* Now scale it */
 		res *= distance;
-		res += current;
 
-		/* Now move there */
-		pwm_set_pos(sData->iServoID, (unsigned int)res);
+		/* And add the initial offset */
+		res += initialposition;
 
 		/* Are we there yet? */
+		if( (abs(place)-abs(res)) >100 ){
 
+			/* Now move there */
+			pwm_set_pos(sData->iServoID, (unsigned int)res);
+
+			n++;
+		}
+
+		else{
+			return;
+		}
 
 		vTaskDelay(MOVE_LATENCY);
 
@@ -359,14 +386,4 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, float time){
 
 
 }
-
-
-static void move_servo_spec(move_servoData_s *sData, int position, int speed){
-
-
-
-
-
-}
-
 

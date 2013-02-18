@@ -25,13 +25,22 @@
 /* Add extra messages here */
 
 /* Movement module */
-#define M_MOVE_CONT 2 /* Start continous movement */
-#define M_MOVE_SPEC 3 /* Move 'gracefully' to a specific place */
-#define M_MOVE_STOP 4 /* STOP moving */
-#define M_MOVE_PLAYBACK 5 /* Start the playback function */
-#define M_MOVE_SAVE 6 /* Save current position */
-#define M_MOVE_RESET 7 /* delete all saved positions */
-#define M_MOVE_RMLAST 8 /* Remove last saved position */
+enum{
+	M_MOVE_CONT, /* Start continous movement */
+	M_MOVE_SPEC,  /* Move 'gracefully' to a specific place */
+	M_MOVE_STOP,  /* STOP moving */
+	M_MOVE_PLAYBACK,  /* Start the playback function */
+	M_MOVE_SAVE,  /* Save current position */
+	M_MOVE_RESET,  /* delete all saved positions */
+	M_MOVE_RMLAST,  /* Remove last saved position */
+	M_COUNT,
+};
+
+/* Some macros to help put the messaging together */
+#define M_MOVE_SPEC_MESSAGE(SPEED, POSITION)	((unsigned)((((SPEED) & 0xFFFFFU)<<(3*8))|((POSITION)&0xFFFU)))
+#define M_MOVE_SPEC_SPEED(MESSAGE)			(((MESSAGE)>>(3*8))&(0xFFFFFU))
+#define M_MOVE_SPEC_POSITION(MESSAGE)		((MESSAGE)&(0xFFFU))
+
 
 /* For the MOVE CONT message, the DATA is as follows:
 	* BIT0-7 is the servo number
@@ -45,4 +54,5 @@
 /* Masks for the servo messages */
 #define M_MOVE_SERVOMASK 255 /* The servo number (4bits) */
 #define M_MOVE_DIRMASK 256   /* THe direction bit (1bit) */
+
 
