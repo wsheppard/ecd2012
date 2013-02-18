@@ -9,6 +9,7 @@
 #include "movement.h"
 #include "math.h"
 #include <system.h>
+#include <stdlib.h>
 
 
 
@@ -289,30 +290,39 @@ static int sigmoid(float M, float time, float*result){
 	return ECD_OK;
 }
 
-static void move_servo_sigmoid(move_servoData_s *sData, int place, float time){
+
+
+/* This function completes a full movement from where the PWM currently is
+ * to where it is specified to go. At that point it returns. During this movement,
+ * a STOP message can be sent which will force an early return */
+static void move_servo_sigmoid(move_servoData_s *sData, int place, int speed){
 
 	msg_message_s msgMessage;
-	int current = 0, distance = 0;
+	unsigned int initialposition;
+	signed int distance;
 	float currenttime = 0;
 	float m, totaltime;
+	int n = 0;
     float res =0;
+    float latency_ms = 0;
 
 	/* First work out how far we have to travel */
-	pwm_get_pos(sData->iServoID, &current);
-	distance = place - current;
-
-    /* The speed for the transition is passed in so find the total time */
-    totaltime =
-
-	/* We're given the total time for the transition */
-	m = time / 2.0;
-
-
-
+	pwm_get_pos(sData->iServoID, &initialposition);
+	distance = (signed int)initialposition - (signed int)place;
 
 	/* We've got no-where to go */
-	if (distance == 0)
+	if (abs(distance)<10)
 		return;
+
+	/* This distance value will act as the scale factor for the Sigmoid function
+	 * it's signed becuase we can of course be going in two directions */
+
+    /* The speed for the transition is passed in so find the total time
+     * but it can't be negative. */
+    totaltime = fabs((float)distance) / (float)speed;
+
+	/* M is the half-way point which is passed to the sigmoid function */
+	m = totaltime / 2.0;
 
 	/* NOTE: Is this bit relevant? */
 #if 0
@@ -333,7 +343,7 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, float time){
 				return;
 			}
 			else{
-				//printf("Servo task %d STOPPING %s.\n", sData->iServoID,direction ? "INC": "DEC");
+				printf("Servo MID-MOVE but received non-STOP message!\n");
 				return;
 			}
 		}
@@ -341,17 +351,18 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, float time){
 		/* So no STOP message received, move one step */
 
 		/* Get normalized value */
-		sigmoid(m,currenttime,&res);
+		sigmoid(m*1000,n*latency_ms,&res);
 
 		/* Now scale it */
 		res *= distance;
-		res += current;
+
+		/* And add the current offset */
+		res += initialposition;
 
 		/* Now move there */
 		pwm_set_pos(sData->iServoID, (unsigned int)res);
 
 		/* Are we there yet? */
-
 
 		vTaskDelay(MOVE_LATENCY);
 
@@ -359,14 +370,4 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, float time){
 
 
 }
-
-
-static void move_servo_spec(move_servoData_s *sData, int position, int speed){
-
-
-
-
-
-}
-
 
