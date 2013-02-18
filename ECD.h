@@ -4,6 +4,8 @@
 #ifndef ECD_H
 #define ECD_H
 
+#include <portmacro.h>
+
 /* Return values for this project */
 #define ECD_OK 0
 #define ECD_ERROR -1
@@ -12,6 +14,10 @@
 /* This is for casting strings to pass to
  * FreeRTOS because it wants signed chars */
 typedef const signed char * fStr;
+
+#define TICKS_PER_MS (configTICK_RATE_HZ / 1000)
+#define MS_PER_TICK (portTICK_RATE_MS)
+#define MS2TICKS(A) ((TICKS_PER_MS) * A)
 
 #endif
 
