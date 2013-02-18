@@ -35,7 +35,7 @@ typedef struct{
 }euler_s;
 
 static int sigmoid(float M, float time, float*result); /* Find sigmoid position */
-static void move_servo_sigmoid(move_servoData_s *sData, int place, float time); /* Move to a specified place, in a specified time */
+static void move_servo_sigmoid(move_servoData_s *sData, int place, int speed); /* Move to a specified place, in a specified time */
 static void move_servo_task(void *params); /* Individual servo tasks, one spawned for each servo */
 static void move_main_task(void* params); /* Main task manager for this module */
 static void move_servo_cont(move_servoData_s *sData, int direction); /* Move loop */
@@ -166,13 +166,20 @@ static void move_servo_task(void *params){
 
 				/* Move to a specfic place using Sigmoid function */
 			case M_MOVE_SPEC:
-				//move_servo_spec();
+				/* Servo, place ,speed */
+				/* Currently the position values for the PWM are between 50,000 and 100,000 -
+				 * to use two halves of the messgae DAta int, we could just use 0 to 50,000 - but that
+				 * might be confusing... */
+				move_servo_sigmoid(
+						&servoData,
+						M_MOVE_SPEC_POSITION(msgMessage.messageDATA),
+						M_MOVE_SPEC_SPEED(msgMessage.messageDATA));
 				break;
 
 
 			case M_MOVE_STOP:
-				/* Shouldn't really be valid here */
-				printf("Servo task %d stopped moving.\n", servoData.iServoID);
+				/* This means the motor is stopped, but we've received a pointless STOP request */
+				printf("Servo task %d received unneccessary stop message.\n", servoData.iServoID);
 				//printf("Stopping movement on servo %d.\n",msgMessage.messageDATA);
 				break;
 			default:
@@ -300,7 +307,6 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, int speed){
 	msg_message_s msgMessage;
 	unsigned int initialposition;
 	signed int distance;
-	float currenttime = 0;
 	float m, totaltime;
 	int n = 0;
     float res =0;
@@ -333,6 +339,8 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, int speed){
 #endif
 
 
+	latency_ms = TICKS2MS(MOVE_LATENCY);
+
 	/* So start main loop */
 	for(;;){
 
@@ -356,13 +364,21 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, int speed){
 		/* Now scale it */
 		res *= distance;
 
-		/* And add the current offset */
+		/* And add the initial offset */
 		res += initialposition;
 
-		/* Now move there */
-		pwm_set_pos(sData->iServoID, (unsigned int)res);
-
 		/* Are we there yet? */
+		if( (abs(place)-abs(res)) >100 ){
+
+			/* Now move there */
+			pwm_set_pos(sData->iServoID, (unsigned int)res);
+
+			n++;
+		}
+
+		else{
+			return;
+		}
 
 		vTaskDelay(MOVE_LATENCY);
 
