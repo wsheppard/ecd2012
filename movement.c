@@ -20,7 +20,7 @@ static xSemaphoreHandle xSemaphore = NULL;
 /* Position info is kept in the servo task */
 typedef struct {
 	xQueueHandle qServo;
-	int iServoID;
+	unsigned int iServoID;
 	unsigned position;
 	int state;
 }move_servoData_s;
@@ -243,7 +243,7 @@ int move_get_state(int servo, int*state){
 }
 
 
-
+/* A normalized sigmoid - result is always 0-1 */
 static int sigmoid(float M, float time, float*result){
 
 	euler_s* p_euler;
@@ -265,13 +265,13 @@ static int sigmoid(float M, float time, float*result){
 	        {
 	        	/* Wait for the euler block to become ready */
 	        		while(!p_euler->state)
-	        			vTaskDelay(1);
+	        			vTaskDelay(0);
 
 	        		p_euler->input = fInput;
 
 	        		/* Wait for the euler block to become ready */
 	        		while(!p_euler->state)
-	        			vTaskDelay(1);
+	        			vTaskDelay(0);
 
 	            xSemaphoreGive( xSemaphore );
 	        }
@@ -293,7 +293,6 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, float time){
 
 	msg_message_s msgMessage;
 	int current = 0, distance = 0;
-	int steps = 0;
 	float currenttime = 0;
 	float m, totaltime;
     float res =0;
