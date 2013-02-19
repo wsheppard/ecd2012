@@ -24,12 +24,13 @@ Must have INCLUDE_vTaskSuspend enabled to go for Blocking waits.
 #include "messages.h"
 #include "ECD.h"
 
+
 #ifndef INCLUDE_vTaskSuspend
 #error Must include ability to suspend tasks.
 #endif
 
-/* Data type for sending message */
-typedef struct msg_message_ss{
+/* Data type for sending message */ /*modified to allow specific moves*/
+typedef struct {
 	unsigned int messageID;
 	unsigned int messageDATA;
 }msg_message_s;
@@ -48,10 +49,12 @@ int msg_rmQueue(xQueueHandle);
 	full, we'll get a failed back. */
 int msg_send(xQueueHandle, msg_message_s);
 
+
+
 /* Check for message, NO wait */
 int msg_recv_noblock(xQueueHandle qHandle, msg_message_s*pMessage);
 
-/* Wait for message indefinately */
+/* Wait for message indefinitely */
 int msg_recv_block(xQueueHandle qHandle, msg_message_s*pMessage);
 
 #endif

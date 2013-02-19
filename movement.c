@@ -41,6 +41,7 @@ static void move_main_task(void* params); /* Main task manager for this module *
 static void move_servo_cont(move_servoData_s *sData, int direction); /* Move loop */
 static void move_servo_spec(move_servoData_s *sData, int position, int speed);
 
+
 /* These are the queues going off to the servo tasks */
 static move_servoData_s ServoData[SERVO_COUNT];
 
@@ -101,6 +102,7 @@ static void move_main_task(void* params){
 	msg_message_s msgMessage;
 	int servoID;
 
+
 	printf("Movement main task created...\n");
 
 	for(;;){
@@ -126,7 +128,17 @@ static void move_main_task(void* params){
 				msg_send(ServoData[servoID].qServo,msgMessage);
 
 				break;
-
+			case M_MOVE_IK:
+				/* Mask off 4bit servo number */
+				servoID = ((msgMessage.messageDATA & M_MOVE_SERVOMASK_IK )>>1);
+                /* If bad servo id quit */
+				if (servoID >=PWM_COUNT){
+					printf("Bad Servo ID! - IK \n");
+					break;}
+				/* Send out message */
+				msg_send(ServoData[servoID].qServo,msgMessage);
+			
+				break;
 			default:
 				break;
 		}
@@ -164,8 +176,36 @@ static void move_servo_task(void *params){
 
 				break;
 
-				/* Move to a specfic place using Sigmoid function */
-			case M_MOVE_SPEC:
+				/* Move to a specific place using Sigmoid function */
+			case M_MOVE_IK: 
+                                ServoData[servoData.iServoID].state = MOVE_STATE_IK;
+                                
+                        		printf("Servo %d PWM value: %d \n",servoData.iServoID,(((msgMessage.messageDATA & M_MOVE_PWMMASK_IK)>>M_MOVE_PWMOFFSET_IK)+50000));
+                            
+                                if((msgMessage.messageDATA & M_MOVE_SPECSPEEDMASK_IK)>>M_MOVE_SPECSPEEDOFFSET_IK){ /*if a movement speed is defined */
+                                	//move_servo_sigmoid(&servoData,(((msgMessage.messageDATA & M_MOVE_PWMMASK_IK)>>M_MOVE_PWMOFFSET_IK)+50000), ((msgMessage.messageDATA & M_MOVE_SPECSPEEDMASK_IK)>>M_MOVE_SPECSPEEDOFFSET_IK));
+                    				/*move_servo_sigmoid(
+                    						&servoData,
+                    						(((msgMessage.messageDATA & M_MOVE_PWMMASK_IK)>>M_MOVE_PWMOFFSET_IK)+50000),
+                    						MOVE_SPEC_STD_SPEED //M_MOVE_SPEC_SPEED(msgMessage.messageDATA)
+                    						);*/
+                                	pwm_set_pos(servoData.iServoID, (((msgMessage.messageDATA & M_MOVE_PWMMASK_IK)>>M_MOVE_PWMOFFSET_IK)+50000));
+
+                                }
+                                else{
+
+                                	//move_servo_sigmoid(&servoData,(((msgMessage.messageDATA & M_MOVE_PWMMASK_IK)>>M_MOVE_PWMOFFSET_IK)+50000), MOVE_SPEC_STD_SPEED);
+                    				/*move_servo_sigmoid(
+                    						&servoData,
+                    						(((msgMessage.messageDATA & M_MOVE_PWMMASK_IK)>>M_MOVE_PWMOFFSET_IK)+50000),
+                    						MOVE_SPEC_STD_SPEED //M_MOVE_SPEC_SPEED(msgMessage.messageDATA)
+                    						);*/
+                                	pwm_set_pos(servoData.iServoID, (((msgMessage.messageDATA & M_MOVE_PWMMASK_IK)>>M_MOVE_PWMOFFSET_IK)+50000));
+
+                                }
+                                ServoData[servoData.iServoID].state = MOVE_STATE_STOP;
+                            	break;
+       			case M_MOVE_SPEC:
 				/* Servo, place ,speed */
 				/* Currently the position values for the PWM are between 50,000 and 100,000 -
 				 * to use two halves of the messgae DAta int, we could just use 0 to 50,000 - but that
@@ -173,9 +213,11 @@ static void move_servo_task(void *params){
 				move_servo_sigmoid(
 						&servoData,
 						M_MOVE_SPEC_POSITION(msgMessage.messageDATA),
-						M_MOVE_SPEC_SPEED(msgMessage.messageDATA));
-				break;
-
+						M_MOVE_SPEC_SPEED(msgMessage.messageDATA)
+						);
+                     	
+                            			break;
+                            
 
 			case M_MOVE_STOP:
 				/* This means the motor is stopped, but we've received a pointless STOP request */
@@ -273,13 +315,13 @@ static int sigmoid(float M, float time, float*result){
 	        {
 	        	/* Wait for the euler block to become ready */
 	        		while(!p_euler->state)
-	        			vTaskDelay(0);
+	        			vTaskDelay(1);/*definitely 0, remove if redundant?*/
 
 	        		p_euler->input = fInput;
 
 	        		/* Wait for the euler block to become ready */
 	        		while(!p_euler->state)
-	        			vTaskDelay(0);
+	        			vTaskDelay(1);
 
 	            xSemaphoreGive( xSemaphore );
 	        }
@@ -328,7 +370,7 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, int speed){
     totaltime = fabs((float)distance) / (float)speed;
 
 	/* M is the half-way point which is passed to the sigmoid function */
-	m = totaltime / 2.0;
+	m = 1000 * totaltime / 2.0;
 
 	/* NOTE: Is this bit relevant? */
 #if 0
@@ -359,7 +401,7 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, int speed){
 		/* So no STOP message received, move one step */
 
 		/* Get normalized value */
-		sigmoid(m*1000,n*latency_ms,&res);
+		sigmoid(m, latency_ms, &res);
 
 		/* Now scale it */
 		res *= distance;
@@ -373,9 +415,9 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, int speed){
 			/* Now move there */
 			pwm_set_pos(sData->iServoID, (unsigned int)res);
 
-			n++;
+			//n++;
+			latency_ms += latency_ms;
 		}
-
 		else{
 			return;
 		}

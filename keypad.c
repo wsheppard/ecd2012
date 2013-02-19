@@ -16,6 +16,7 @@
 /* Private functions */
 static void kp_main(void*pvParams);
 static void kp_getCurrent(unsigned short *KP_data);
+static void kp_getDebounced(unsigned short *KP_data);
 
 /* Private Variables */
 xQueueHandle qKP;
@@ -65,8 +66,8 @@ static void kp_main(void*pvParams){
 	/* Start checking for keypad changes and then send as message */
 	for (;;){
 	
-		kp_getCurrent(&kp_currentData);
-
+		//kp_getCurrent(&kp_currentData);
+		kp_getDebounced(&kp_currentData);
 		//printf("Data: Previous[%x], Current:[%x].\n", kp_previousData, kp_currentData);
 		
 		/* If there is a change */
@@ -114,5 +115,35 @@ static void kp_getCurrent(unsigned short *KP_data){
 	output <<= 1;
 #endif
 }
+
+
+static void kp_getDebounced(unsigned short *KP_data){
+	
+	static unsigned short dbc_previousData = 0;
+	static unsigned short counter = 0;
+	unsigned short kp_currentData = 0;	
+	
+	/*get the status of the keypad buttons*/
+	kp_getCurrent(&kp_currentData);
+	
+	/*Debounces by reading the input values multiple times. If the value does not change for DEBOUNCEMS * msec
+	the button has stopped bouncing and its signal is stable.*/
+	if(kp_currentData == dbc_previousData){
+		counter++;
+	}
+	else{
+		dbc_previousData = kp_currentData;
+		counter = 0;
+	}
+	/*DEBOUNCE_MS defines the time allowed for a button to settle.
+	It should be chosen so that (DEBOUNCE_MS*KP_Delay) ~ 10ms*/
+	if(counter >= DEBOUNCE_MS){			
+		*KP_data = kp_currentData;
+	}
+
+	
+}
+
+
 
 

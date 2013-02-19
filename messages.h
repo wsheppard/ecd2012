@@ -1,6 +1,7 @@
 /* All the different messages and what they mean */
 
-
+#ifndef MESSAGES_H
+#define MESSAGES_H
 /* For the KEYPAD module */
 #define M_KP_EVENT 1 /* A keypad change of state has occurred */
 
@@ -33,7 +34,8 @@ enum{
 	M_MOVE_SAVE,  /* Save current position */
 	M_MOVE_RESET,  /* delete all saved positions */
 	M_MOVE_RMLAST,  /* Remove last saved position */
-	M_COUNT,
+	M_MOVE_IK,	/*move gracefully to the calculated IK position */
+	M_COUNT
 };
 
 /* Some macros to help put the messaging together */
@@ -51,8 +53,24 @@ enum{
 #define M_MOVE_SERVO3 2
 #define M_MOVE_SERVO4 3
 
+
+/* For the MOVE IK message the DATA is:
+        *BIT0-n is the servo number
+        
+    there is also a PLACE and TIME:
+        *PLACE is a u int of the desired servo position in servo parameters
+        *TIME can hold the time allowed for a sigmoid move to the target position
+        */
+        
+        
 /* Masks for the servo messages */
 #define M_MOVE_SERVOMASK 255 /* The servo number (4bits) */
 #define M_MOVE_DIRMASK 256   /* THe direction bit (1bit) */
+#define M_MOVE_PWMMASK_IK 0x01fffe0 /*The (pwm value-50000) shifted to the left by 5 and therfore at b5-b20*/
+#define M_MOVE_SERVOMASK_IK 0x01E /*servo information at bit 1-b4*/
+#define M_MOVE_SPECSPEEDMASK_IK 0x0ffe00000 /*time information for the duration of a movement at b21-b31*/
 
+#define M_MOVE_PWMOFFSET_IK 5
+#define M_MOVE_SPECSPEEDOFFSET_IK 21
 
+#endif

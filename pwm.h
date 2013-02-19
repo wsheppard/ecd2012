@@ -8,11 +8,14 @@
 #include "timers.h"
 #include "semphr.h"
 
-/* Put in the addresses of the servos or the auto-genreated defines */
+/* Put in the addresses of the servos or the auto-generated defines */
 #define ADD_SERVO1 PWM_COMPONENT_0_BASE
 #define ADD_SERVO2 PWM_COMPONENT_0_BASE+4
 #define ADD_SERVO3 PWM_COMPONENT_0_BASE+8
 #define ADD_SERVO4 PWM_COMPONENT_0_BASE+12
+
+/* The pwm basevalue as defined by the hardware */
+#define PWM_OFFSET 50000
 
 /* Servo references as enum */
 enum {
