@@ -75,17 +75,17 @@ q22 = -atan2(((l3*sin(q32))/sqrt(pow(xc,2)+pow(yc,2)+pow(zc,2))),+sqrt(1-pow((l3
 		printf("Angles: q1 = %f, q2 = %f, q3 = %f\n",(q1*180/M_PI),(q22*180/M_PI),(q32*180/M_PI));
 		msgMessage.messageID = M_MOVE_IK;
         ik_rad_to_servo(&data_temp,q1,S_MAX_0, S_MIN_0, Q_MAX_0, Q_MIN_0);
-		msgMessage.messageDATA = (((M_MOVE_SERVO1<<1) & M_MOVE_SERVOMASK_IK) | (((data_temp - PWM_OFFSET)<<M_MOVE_PWMOFFSET_IK) & M_MOVE_PWMMASK_IK)); /**/
+		msgMessage.messageDATA = (((M_MOVE_SERVO4<<1) & M_MOVE_SERVOMASK_IK) | (((data_temp - PWM_OFFSET)<<M_MOVE_PWMOFFSET_IK) & M_MOVE_PWMMASK_IK)); /**/
 		msg_send(qMOVE,msgMessage);
 		
 		msgMessage.messageID = M_MOVE_IK;
         ik_rad_to_servo(&data_temp,q22,S_MAX_1, S_MIN_1, Q_MAX_1, Q_MIN_1);
-		msgMessage.messageDATA = (((M_MOVE_SERVO2<<1) & M_MOVE_SERVOMASK_IK) | (((data_temp - PWM_OFFSET)<<M_MOVE_PWMOFFSET_IK) & M_MOVE_PWMMASK_IK));
+		msgMessage.messageDATA = (((M_MOVE_SERVO3<<1) & M_MOVE_SERVOMASK_IK) | (((data_temp - PWM_OFFSET)<<M_MOVE_PWMOFFSET_IK) & M_MOVE_PWMMASK_IK));
 		msg_send(qMOVE,msgMessage);
 		
 		msgMessage.messageID = M_MOVE_IK;
         ik_rad_to_servo(&data_temp,q32,S_MAX_2, S_MIN_2, Q_MAX_2, Q_MIN_2);
-		msgMessage.messageDATA = (((M_MOVE_SERVO3<<1) & M_MOVE_SERVOMASK_IK) | (((data_temp - PWM_OFFSET)<<M_MOVE_PWMOFFSET_IK) & M_MOVE_PWMMASK_IK));
+		msgMessage.messageDATA = (((M_MOVE_SERVO2<<1) & M_MOVE_SERVOMASK_IK) | (((data_temp - PWM_OFFSET)<<M_MOVE_PWMOFFSET_IK) & M_MOVE_PWMMASK_IK));
 		msg_send(qMOVE,msgMessage);
 		
 

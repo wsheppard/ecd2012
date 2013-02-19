@@ -1,6 +1,7 @@
 /* All the different messages and what they mean */
 
-
+#ifndef MESSAGES_H
+#define MESSAGES_H
 /* For the KEYPAD module */
 #define M_KP_EVENT 1 /* A keypad change of state has occurred */
 
@@ -34,7 +35,7 @@ enum{
 	M_MOVE_RESET,  /* delete all saved positions */
 	M_MOVE_RMLAST,  /* Remove last saved position */
 	M_MOVE_IK,	/*move gracefully to the calculated IK position */
-	M_COUNT,
+	M_COUNT
 };
 
 /* Some macros to help put the messaging together */
@@ -72,3 +73,4 @@ enum{
 #define M_MOVE_PWMOFFSET_IK 5
 #define M_MOVE_SPECSPEEDOFFSET_IK 21
 
+#endif
