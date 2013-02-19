@@ -328,7 +328,7 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, int speed){
     totaltime = fabs((float)distance) / (float)speed;
 
 	/* M is the half-way point which is passed to the sigmoid function */
-	m = totaltime / 2.0;
+	m = 1000 * totaltime / 2.0;
 
 	/* NOTE: Is this bit relevant? */
 #if 0
@@ -359,7 +359,7 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, int speed){
 		/* So no STOP message received, move one step */
 
 		/* Get normalized value */
-		sigmoid(m*1000,n*latency_ms,&res);
+		sigmoid(m, latency_ms, &res);
 
 		/* Now scale it */
 		res *= distance;
@@ -373,7 +373,8 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, int speed){
 			/* Now move there */
 			pwm_set_pos(sData->iServoID, (unsigned int)res);
 
-			n++;
+			//n++;
+			latency_ms += latency_ms;
 		}
 
 		else{
