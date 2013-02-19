@@ -2,6 +2,8 @@
 
 #ifndef MESSAGES_H
 #define MESSAGES_H
+
+
 /* For the KEYPAD module */
 #define M_KP_EVENT 1 /* A keypad change of state has occurred */
 
