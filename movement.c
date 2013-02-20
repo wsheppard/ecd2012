@@ -460,7 +460,7 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, int speed) {
 	totaltime_ms = totaltime * 1000;
 
 	/* M is the half-way point which is passed to the sigmoid function */
-	m = totaltime_ms * 2;
+	m = totaltime_ms;
 
 	latency_ms = TICKS2MS(MOVE_SIGMOID_LATENCY);
 
@@ -503,7 +503,9 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, int speed) {
 		res += initialposition;
 
 		/* Are we there yet? */
-		if (tick < (unsigned int)totaltime_ms) {
+//		if (tick < (unsigned int)totaltime_ms) {
+
+		if (abs(res - initialposition)<200){
 
 			if(sData->iServoID==3){
 				printf("Latency [%d] and TotalTimeMS [%d] PWM [%d].\n",
