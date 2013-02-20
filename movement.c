@@ -14,6 +14,9 @@
 #include <io.h>
 #include <unistd.h>
 
+#include "pwm.h"
+
+
 /* This is the INCOMING queue */
 static xQueueHandle qMove;
 
@@ -98,6 +101,7 @@ static void move_main_task(void* params) {
 	msg_message_s msgMessage;
 	int servoID;
 
+
 	printf("Movement main task created...\n");
 
 	for (;;) {
@@ -147,6 +151,9 @@ static void move_main_task(void* params) {
 
 /* This function is served to each of the servo tasks */
 static void move_servo_task(void *params) {
+	unsigned int pos[4];
+	int x = 0;
+	int state[4];
 
 	move_servoData_s servoData;
 	msg_message_s msgMessage;
@@ -189,6 +196,23 @@ static void move_servo_task(void *params) {
 				 (((msgMessage.messageDATA & M_MOVE_PWMMASK_IK)>>M_MOVE_PWMOFFSET_IK)+50000),
 				 MOVE_SPEC_STD_SPEED
 				 );
+
+#if 1
+		for(x=0;x<PWM_COUNT;x++){
+			pwm_get_pos(x,&pos[x]);
+			pos[x]/=1000;
+			move_get_state(x,&state[x]);
+		}
+
+
+
+		printf("move done [%u:%u],[%u:%u],[%u:%u],[%u:%u].\n",
+			pos[0],state[0],
+			pos[1],state[1],
+			pos[2],state[2],
+			pos[3],state[3]);
+		fflush( stdout );
+#endif
 #else
 				pwm_set_pos(servoData.iServoID,
 						(((msgMessage.messageDATA & M_MOVE_PWMMASK_IK)
@@ -204,6 +228,24 @@ static void move_servo_task(void *params) {
 				 (((msgMessage.messageDATA & M_MOVE_PWMMASK_IK)>>M_MOVE_PWMOFFSET_IK)+50000),
 				 MOVE_SPEC_STD_SPEED //M_MOVE_SPEC_SPEED(msgMessage.messageDATA)
 				 );
+
+#if 1
+		for(x=0;x<PWM_COUNT;x++){
+			pwm_get_pos(x,&pos[x]);
+			pos[x]/=1000;
+			move_get_state(x,&state[x]);
+		}
+
+
+
+		printf("move done [%u:%u],[%u:%u],[%u:%u],[%u:%u].\n",
+			pos[0],state[0],
+			pos[1],state[1],
+			pos[2],state[2],
+			pos[3],state[3]);
+		fflush( stdout );
+#endif
+
 #else
 				pwm_set_pos(servoData.iServoID,
 						(((msgMessage.messageDATA & M_MOVE_PWMMASK_IK)
