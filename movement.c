@@ -177,7 +177,7 @@ static void move_servo_task(void *params) {
 		case M_MOVE_IK:
 			ServoData[servoData.iServoID].state = MOVE_STATE_IK;
 
-		//printf("Servo %d PWM value: %d \n", servoData.iServoID,(((msgMessage.messageDATA & M_MOVE_PWMMASK_IK)>> M_MOVE_PWMOFFSET_IK) + 50000));
+		printf("Servo %d PWM value: %d \n", servoData.iServoID,(((msgMessage.messageDATA & M_MOVE_PWMMASK_IK)>> M_MOVE_PWMOFFSET_IK) + 50000));
 
 			if ((msgMessage.messageDATA & M_MOVE_SPECSPEEDMASK_IK)
 					>> M_MOVE_SPECSPEEDOFFSET_IK) {
