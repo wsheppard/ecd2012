@@ -436,7 +436,7 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, int speed) {
 	float m, totaltime;
 	int n = 0;
 	float res = 0;
-	float latency_ms = 0;
+	unsigned int latency_ms = 0;
 	float totaltime_ms;
 
 	/* First work out how far we have to travel */
@@ -461,7 +461,7 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, int speed) {
 	/* M is the half-way point which is passed to the sigmoid function */
 	m = totaltime_ms / 2.0;
 
-	latency_ms = TICKS2MS(MOVE_LATENCY);
+	latency_ms = TICKS2MS(MOVE_SIGMOID_LATENCY);
 
 
 	printf("Servo[%d] To[%d] Time[%d] Distance[%d] Init[%d] LatencyMS[%d]\n",
@@ -491,7 +491,7 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, int speed) {
 		/* So no STOP message received, move one step */
 
 		/* Get normalized value */
-		sigmoid(m, latency_ms, &res);
+		sigmoid(m, (float)latency_ms, &res);
 
 		/* Now scale it */
 		res *= distance;
@@ -500,7 +500,7 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, int speed) {
 		res += initialposition;
 
 		/* Are we there yet? */
-		if (latency_ms < totaltime_ms) {
+		if (latency_ms < (unsigned int)totaltime_ms) {
 
 			/* Now move there */
 			pwm_set_pos(sData->iServoID, (unsigned int) res);
@@ -515,7 +515,7 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, int speed) {
 			return;
 		}
 
-		vTaskDelay(MOVE_LATENCY);
+		vTaskDelay(MOVE_SIGMOID_LATENCY);
 
 	} /* End of for loop */
 
