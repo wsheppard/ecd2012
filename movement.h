@@ -11,7 +11,7 @@
 /* Config */
 
 /* Latencies are in ticks of the system timer */
-#define MOVE_LATENCY 50
+#define MOVE_LATENCY 20
 
 /* ms between steps  - too small isn't going to get scheduled */
 #define MOVE_SIGMOID_LATENCY MOVE_LATENCY
