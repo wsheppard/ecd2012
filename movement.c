@@ -197,7 +197,7 @@ static void move_servo_task(void *params) {
 				 MOVE_SPEC_STD_SPEED
 				 );
 
-#if 1
+#if 0
 		for(x=0;x<PWM_COUNT;x++){
 			pwm_get_pos(x,&pos[x]);
 			pos[x]/=1000;
@@ -229,7 +229,7 @@ static void move_servo_task(void *params) {
 				 MOVE_SPEC_STD_SPEED //M_MOVE_SPEC_SPEED(msgMessage.messageDATA)
 				 );
 
-#if 1
+#if 0
 		for(x=0;x<PWM_COUNT;x++){
 			pwm_get_pos(x,&pos[x]);
 			pos[x]/=1000;
