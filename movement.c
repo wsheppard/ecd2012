@@ -405,6 +405,7 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, int speed) {
 	if (abs(distance) < 10)
 		return;
 
+
 	/* This distance value will act as the scale factor for the Sigmoid function
 	 * it's signed becuase we can of course be going in two directions */
 
@@ -418,6 +419,10 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, int speed) {
 	m = totaltime_ms / 2.0;
 
 	latency_ms = TICKS2MS(MOVE_LATENCY);
+
+
+	printf("Servo [%d] asked to go to [%d]. Total time (ms) is [%d]\n",sData->iServoID, place, totaltime_ms);
+
 
 	/* So start main loop */
 	for (;;) {
@@ -456,12 +461,14 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, int speed) {
 		}
 		else {
 
+			printf("Servo [%d] Returns from sigmoid.\n",sData->iServoID);
+
 			return;
 		}
 
 		vTaskDelay(MOVE_LATENCY);
 
-	}
+	} /* End of for loop */
 
-}
+} /* End of move sigmoid function */
 
