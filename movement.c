@@ -507,12 +507,14 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, int speed) {
 
 		if ( abs( abs( (int)res ) - abs( (int)place) ) >200 ){
 
+#if 0
 			if(sData->iServoID==3){
 				printf("Latency [%d] and TotalTimeMS [%d] PWM [%d].\n",
 						(int)tick,
 						(int)totaltime_ms,
 						(int)res);
 			}
+#endif
 			/* Now move there */
 			pwm_set_pos(sData->iServoID, (unsigned int) res);
 
@@ -521,7 +523,7 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, int speed) {
 		}
 		else {
 
-			printf("Servo [%d] Returns from sigmoid.\n",sData->iServoID);
+			//printf("Servo [%d] Returns from sigmoid.\n",sData->iServoID);
 
 			return;
 		}
