@@ -491,7 +491,7 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, int speed) {
 		/* So no STOP message received, move one step */
 
 		/* Get normalized value */
-		sigmoid(5000, (float)latency_ms, &res);
+		sigmoid(m, (float)latency_ms, &res);
 
 		printf("Sigmoid result: [%4.2f]\n",res);
 
@@ -504,8 +504,12 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, int speed) {
 		/* Are we there yet? */
 		if (latency_ms < (unsigned int)totaltime_ms) {
 
-			printf("Latency [%d] and TotalTimeMS [%d].\n",(int)latency_ms, (int)totaltime_ms);
-
+			if(sData->iServoID==3){
+				printf("Latency [%d] and TotalTimeMS [%d] PWM [%d].\n",
+						(int)latency_ms,
+						(int)totaltime_ms,
+						(int)res);
+			}
 			/* Now move there */
 			pwm_set_pos(sData->iServoID, (unsigned int) res);
 
