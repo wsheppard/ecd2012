@@ -505,7 +505,7 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, int speed) {
 		/* Are we there yet? */
 //		if (tick < (unsigned int)totaltime_ms) {
 
-		if (abs(res - initialposition)<200){
+		if (abs(res - place)<200){
 
 			if(sData->iServoID==3){
 				printf("Latency [%d] and TotalTimeMS [%d] PWM [%d].\n",
