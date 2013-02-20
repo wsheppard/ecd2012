@@ -38,8 +38,8 @@ int ik_calc_IK(xQueueHandle qMOVE ,ik_cart_pos_s position){
 // Links Length
 //unsigned int l1 = 8.5+9;
 double l2 = 10;
-double l3 = 12 ;
-double d5 = 4.5;
+double l3 = 13 ;
+double d5 = 6.7;
 
 //unsigned int current_s2,current_s3;
 //double current_q2,current_q3;
@@ -61,7 +61,7 @@ q1  = atan2(position.y_pos,position.x_pos);                     //atan2(p0e(2),p
 xc = position.x_pos - d5*cos(q1);                               //xc = p0c(1,1);
 yc = position.y_pos - d5*sin(q1);                               //yc = p0c(2,1);
 zc = position.z_pos;                                            //zc = p0c(3,1);
-printf("Wrist position: (%.3f,%.3f,%.3f)\n",xc,yc,zc);
+//printf("Wrist position: (%.3f,%.3f,%.3f)\n",xc,yc,zc);
 
 /*Only solution 2 is used as solution 1 always produces a negative q2
  * which isn't a possible configuration for this arm*/
@@ -77,16 +77,19 @@ q22 = -atan2(((l3*sin(q32))/sqrt(pow(xc,2)+pow(yc,2)+pow(zc,2))),+sqrt(1-pow((l3
         ik_rad_to_servo(&data_temp,q1,S_MAX_0, S_MIN_0, Q_MAX_0, Q_MIN_0);
 		msgMessage.messageDATA = (((M_MOVE_SERVO4<<1) & M_MOVE_SERVOMASK_IK) | (((data_temp - PWM_OFFSET)<<M_MOVE_PWMOFFSET_IK) & M_MOVE_PWMMASK_IK)); /**/
 		msg_send(qMOVE,msgMessage);
+
 		
 		msgMessage.messageID = M_MOVE_IK;
         ik_rad_to_servo(&data_temp,q22,S_MAX_1, S_MIN_1, Q_MAX_1, Q_MIN_1);
 		msgMessage.messageDATA = (((M_MOVE_SERVO3<<1) & M_MOVE_SERVOMASK_IK) | (((data_temp - PWM_OFFSET)<<M_MOVE_PWMOFFSET_IK) & M_MOVE_PWMMASK_IK));
 		msg_send(qMOVE,msgMessage);
+
 		
 		msgMessage.messageID = M_MOVE_IK;
         ik_rad_to_servo(&data_temp,q32,S_MAX_2, S_MIN_2, Q_MAX_2, Q_MIN_2);
 		msgMessage.messageDATA = (((M_MOVE_SERVO2<<1) & M_MOVE_SERVOMASK_IK) | (((data_temp - PWM_OFFSET)<<M_MOVE_PWMOFFSET_IK) & M_MOVE_PWMMASK_IK));
 		msg_send(qMOVE,msgMessage);
+
 		
 
 	
@@ -98,8 +101,18 @@ return ECD_OK;
 
 static int ik_rad_to_servo(unsigned int *servoVal,double rad,int servoMax,int servoMin, double qMax, double qMin){
 
-    *servoVal = (unsigned int)( rad*(((double)(servoMax - servoMin))/(qMax-qMin)) + (double)servoMin);
-        if((*servoVal <=servoMax) || (*servoVal >= servoMin)){/*is the value within the servo range?*/
+    *servoVal = (unsigned int)( (rad-qMin)*((double)(servoMax - servoMin)) / (qMax-qMin) + (double)servoMin);
+
+
+    if(*servoVal >servoMax){
+        *servoVal = servoMax;
+    }
+
+    if(*servoVal <servoMin){
+        *servoVal = servoMin;
+    }
+
+    if((*servoVal <=servoMax) || (*servoVal >= servoMin)){/*is the value within the servo range?*/
                 return ECD_OK;
         }
         else{
