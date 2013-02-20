@@ -30,13 +30,6 @@ int main( void )
 	printf("Starting the RTOS demo.....\n");
 
 
-	test_sigmoid();
-
-	printf("Finished.\n");
-	while(1);
-
-
-
 	/* Starting off the manager thread */
 	if (man_start()!=ECD_OK){
 	
