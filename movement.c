@@ -491,7 +491,7 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, int speed) {
 		/* So no STOP message received, move one step */
 
 		/* Get normalized value */
-		sigmoid(m, (float)latency_ms, &res);
+		sigmoid(5000, (float)latency_ms, &res);
 
 		/* Now scale it */
 		res *= distance;
