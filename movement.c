@@ -302,6 +302,8 @@ static int sigmoid(float M, float time, float*result) {
 	euler_s* p_euler;
 	float fInput;
 
+
+
 	/* The M value is the half time point where the gradient is maximum */
 
 	/* Boundary checks ? */
@@ -316,7 +318,10 @@ static int sigmoid(float M, float time, float*result) {
 		// See if we can obtain the semaphore.  If the semaphore is not available
 		// wait 10 ticks to see if it becomes free.
 		if (xSemaphoreTake( xSemaphore, ( portTickType ) 10 ) == pdTRUE) {
-			/* Wait for the euler block to become ready */
+
+			printf("Entered sigmoid...");
+
+			/* Wait for the euler block to become ready - this might hang!!!*/
 			while (!p_euler->state)
 				vTaskDelay(1);/*definitely 0, remove if redundant?*/
 
@@ -325,6 +330,8 @@ static int sigmoid(float M, float time, float*result) {
 			/* Wait for the euler block to become ready */
 			while (!p_euler->state)
 				vTaskDelay(1);
+
+			printf("Finished with sigmoid...\n");
 
 			xSemaphoreGive( xSemaphore);
 		} else {
