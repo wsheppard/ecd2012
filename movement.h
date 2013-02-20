@@ -14,7 +14,7 @@
 #define MOVE_LATENCY 50
 
 /* ms between steps  - too small isn't going to get scheduled */
-#define MOVE_SIGMOID_LATENCY MOVE_LATENCY*2
+#define MOVE_SIGMOID_LATENCY MOVE_LATENCY
 
 
 #define SERVO_COUNT PWM_COUNT
