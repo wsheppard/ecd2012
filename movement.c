@@ -421,7 +421,10 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, int speed) {
 	latency_ms = TICKS2MS(MOVE_LATENCY);
 
 
-	printf("Servo [%d] asked to go to [%d]. Total time (ms) is [%d]\n",sData->iServoID, place, totaltime_ms);
+	printf("Servo [%d] asked to go to [%d]. Total time (ms) is [%d]\n",
+			sData->iServoID,
+			place,
+			(unsigned int)totaltime_ms);
 
 
 	/* So start main loop */
