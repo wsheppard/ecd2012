@@ -10,6 +10,7 @@
  
  /* Standard includes. */
 #include <stdio.h>
+#include <stdlib.h>
 #include "math.h"
 
 /* Kernel includes. */
@@ -36,15 +37,22 @@ unsigned int data_temp;
 */
 int ik_calc_IK(xQueueHandle qMOVE ,ik_cart_pos_s position){
 // Links Length
-//unsigned int l1 = 8.5+9;
+
 double l2 = 10;
 double l3 = 13 ;
 double d5 = 6.7;
 
-//unsigned int current_s2,current_s3;
-//double current_q2,current_q3;
+
 double xc, yc,zc,q1,q22,q32;
 msg_message_s msgMessage;
+
+/*The current pwm value of each servo*/
+unsigned int pos[3];
+unsigned int x;
+unsigned int goal[3];
+signed int longest_distance=0;
+float longest_time;
+unsigned int speed[3];
 
 
 if(sqrt(pow(position.x_pos,2)+pow(position.y_pos,2)+pow(position.z_pos,2))>(l2+l3+d5)){/*check for valid input*/
@@ -71,6 +79,7 @@ zc = position.z_pos;                                            //zc = p0c(3,1);
 q32 = atan2(-sqrt(1-pow((pow(xc,2)+pow(yc,2)+pow(zc,2)-pow(l2,2)-pow(l3,2))/(2*l2*l3),2)),((pow(xc,2)+pow(yc,2)+pow(zc,2)-pow(l2,2)-pow(l3,2))/(2*l2*l3)));
 q22 = -atan2(((l3*sin(q32))/sqrt(pow(xc,2)+pow(yc,2)+pow(zc,2))),+sqrt(1-pow((l3*sin(q32))/sqrt(pow(xc,2)+pow(yc,2)+pow(zc,2)),2)))+atan2(zc,sqrt(pow(xc,2)+pow(yc,2)));
 
+#if 0
 		//solution 2
 		printf("Angles: q1 = %f, q2 = %f, q3 = %f\n",(q1*180/M_PI),(q22*180/M_PI),(q32*180/M_PI));
 		msgMessage.messageID = M_MOVE_IK;
@@ -90,7 +99,39 @@ q22 = -atan2(((l3*sin(q32))/sqrt(pow(xc,2)+pow(yc,2)+pow(zc,2))),+sqrt(1-pow((l3
 		msgMessage.messageDATA = (((M_MOVE_SERVO2<<1) & M_MOVE_SERVOMASK_IK) | (((data_temp - PWM_OFFSET)<<M_MOVE_PWMOFFSET_IK) & M_MOVE_PWMMASK_IK));
 		msg_send(qMOVE,msgMessage);
 
-		
+#else
+		printf("Angles: q1 = %f, q2 = %f, q3 = %f\n",(q1*180/M_PI),(q22*180/M_PI),(q32*180/M_PI));
+        ik_rad_to_servo(&goal[0],q1,S_MAX_0, S_MIN_0, Q_MAX_0, Q_MIN_0);
+        ik_rad_to_servo(&goal[1],q22,S_MAX_1, S_MIN_1, Q_MAX_1, Q_MIN_1);
+        ik_rad_to_servo(&goal[2],q32,S_MAX_2, S_MIN_2, Q_MAX_2, Q_MIN_2);
+
+		for(x=1;x<PWM_COUNT;x++){ /*find the longest distance and calculate the longest time*/
+			pwm_get_pos(x,&pos[x-1]);
+			if(abs((goal[PWM_COUNT-x-1]-pos[x-1]))> longest_distance){
+				longest_distance = abs(goal[PWM_COUNT-x-1]-pos[x-1]);
+			}
+			longest_time = (float)longest_distance/MOVE_SPEC_STD_SPEED;
+
+		}
+
+		for(x=1;x<PWM_COUNT;x++){/*update the speeds, so that the time is the same on all of them*/
+		speed[x-1] = (unsigned int)((abs(goal[PWM_COUNT-x-1]-pos[x-1]) / longest_time) / 6.11); /*M_MOVE_SPECSPEEDMASK_IK / 6.11 is < 2^11. Ergo it fits within the msgData*/
+		}
+				msgMessage.messageID = M_MOVE_IK;
+				msgMessage.messageDATA = (((M_MOVE_SERVO4<<1) & M_MOVE_SERVOMASK_IK) | (((goal[0] - PWM_OFFSET)<<M_MOVE_PWMOFFSET_IK) & M_MOVE_PWMMASK_IK) | ((speed[3]<<M_MOVE_SPECSPEEDOFFSET_IK) & M_MOVE_SPECSPEEDMASK_IK)); /**/
+				msg_send(qMOVE,msgMessage);
+
+
+				msgMessage.messageID = M_MOVE_IK;
+				msgMessage.messageDATA = (((M_MOVE_SERVO3<<1) & M_MOVE_SERVOMASK_IK) | (((goal[1] - PWM_OFFSET)<<M_MOVE_PWMOFFSET_IK) & M_MOVE_PWMMASK_IK) | ((speed[2]<<M_MOVE_SPECSPEEDOFFSET_IK) & M_MOVE_SPECSPEEDMASK_IK));
+				msg_send(qMOVE,msgMessage);
+
+
+				msgMessage.messageID = M_MOVE_IK;
+				msgMessage.messageDATA = (((M_MOVE_SERVO2<<1) & M_MOVE_SERVOMASK_IK) | (((goal[2] - PWM_OFFSET)<<M_MOVE_PWMOFFSET_IK) & M_MOVE_PWMMASK_IK) | ((speed[1]<<M_MOVE_SPECSPEEDOFFSET_IK) & M_MOVE_SPECSPEEDMASK_IK));
+				msg_send(qMOVE,msgMessage);
+
+#endif
 
 	
 return ECD_OK;

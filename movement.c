@@ -184,73 +184,72 @@ static void move_servo_task(void *params) {
 		case M_MOVE_IK:
 			ServoData[servoData.iServoID].state = MOVE_STATE_IK;
 
-		printf("Servo %d PWM value: %d \n", servoData.iServoID,(((msgMessage.messageDATA & M_MOVE_PWMMASK_IK)>> M_MOVE_PWMOFFSET_IK) + 50000));
+			printf("Servo %d PWM value: %d \n", servoData.iServoID,(((msgMessage.messageDATA & M_MOVE_PWMMASK_IK)>> M_MOVE_PWMOFFSET_IK) + 50000));
 
-			if ((msgMessage.messageDATA & M_MOVE_SPECSPEEDMASK_IK)
-					>> M_MOVE_SPECSPEEDOFFSET_IK) {
+			if ((msgMessage.messageDATA & M_MOVE_SPECSPEEDMASK_IK)>> M_MOVE_SPECSPEEDOFFSET_IK) {/*if a movement speed is defined */
 
-				/*if a movement speed is defined */
+
 #ifndef IK_ONLY
 				move_servo_sigmoid(
-				 &servoData,
-				 (((msgMessage.messageDATA & M_MOVE_PWMMASK_IK)>>M_MOVE_PWMOFFSET_IK)+50000),
-				 MOVE_SPEC_STD_SPEED
-				 );
+						&servoData,
+						(((msgMessage.messageDATA & M_MOVE_PWMMASK_IK)>>M_MOVE_PWMOFFSET_IK)+50000),
+						((unsigned int)(((msgMessage.messageDATA & M_MOVE_SPECSPEEDMASK_IK)>>M_MOVE_SPECSPEEDOFFSET_IK)*6.11))
+				);
 
 #if 0
-		for(x=0;x<PWM_COUNT;x++){
-			pwm_get_pos(x,&pos[x]);
-			pos[x]/=1000;
-			move_get_state(x,&state[x]);
-		}
+			for(x=0;x<PWM_COUNT;x++){
+				pwm_get_pos(x,&pos[x]);
+				pos[x]/=1000;
+				move_get_state(x,&state[x]);
+			}
 
 
 
-		printf("move done [%u:%u],[%u:%u],[%u:%u],[%u:%u].\n",
+			printf("move done [%u:%u],[%u:%u],[%u:%u],[%u:%u].\n",
 			pos[0],state[0],
 			pos[1],state[1],
 			pos[2],state[2],
 			pos[3],state[3]);
-		fflush( stdout );
-#endif
-#else
-				pwm_set_pos(servoData.iServoID,
-						(((msgMessage.messageDATA & M_MOVE_PWMMASK_IK)
-								>> M_MOVE_PWMOFFSET_IK) + 50000));
+			fflush( stdout );
 #endif
 
-			} else {
+
+#else
+			pwm_set_pos(servoData.iServoID,
+					(((msgMessage.messageDATA & M_MOVE_PWMMASK_IK)>> M_MOVE_PWMOFFSET_IK) + 50000));
+#endif
+
+			} else{
 
 #ifndef IK_ONLY
 
 				move_servo_sigmoid(
-				 &servoData,
-				 (((msgMessage.messageDATA & M_MOVE_PWMMASK_IK)>>M_MOVE_PWMOFFSET_IK)+50000),
-				 MOVE_SPEC_STD_SPEED //M_MOVE_SPEC_SPEED(msgMessage.messageDATA)
-				 );
+						&servoData,
+						(((msgMessage.messageDATA & M_MOVE_PWMMASK_IK)>>M_MOVE_PWMOFFSET_IK)+50000),
+						MOVE_SPEC_STD_SPEED //M_MOVE_SPEC_SPEED(msgMessage.messageDATA)
+				);
 
 #if 0
-		for(x=0;x<PWM_COUNT;x++){
-			pwm_get_pos(x,&pos[x]);
-			pos[x]/=1000;
-			move_get_state(x,&state[x]);
-		}
+				for(x=0;x<PWM_COUNT;x++){
+					pwm_get_pos(x,&pos[x]);
+					pos[x]/=1000;
+					move_get_state(x,&state[x]);
+				}
 
 
 
-		printf("move done [%u:%u],[%u:%u],[%u:%u],[%u:%u].\n",
-			pos[0],state[0],
-			pos[1],state[1],
-			pos[2],state[2],
-			pos[3],state[3]);
-		fflush( stdout );
+				printf("move done [%u:%u],[%u:%u],[%u:%u],[%u:%u].\n",
+						pos[0],state[0],
+						pos[1],state[1],
+						pos[2],state[2],
+						pos[3],state[3]);
+				fflush( stdout );
 #endif
+
 
 #else
 				pwm_set_pos(servoData.iServoID,
-						(((msgMessage.messageDATA & M_MOVE_PWMMASK_IK)
-								>> M_MOVE_PWMOFFSET_IK) + 50000));
-				//move_servo_sigmoid(&servoData,(((msgMessage.messageDATA & M_MOVE_PWMMASK_IK)>>M_MOVE_PWMOFFSET_IK)+50000), ((msgMessage.messageDATA & M_MOVE_SPECSPEEDMASK_IK)>>M_MOVE_SPECSPEEDOFFSET_IK));
+						(((msgMessage.messageDATA & M_MOVE_PWMMASK_IK)>> M_MOVE_PWMOFFSET_IK) + 50000));
 #endif
 			}
 			ServoData[servoData.iServoID].state = MOVE_STATE_STOP;

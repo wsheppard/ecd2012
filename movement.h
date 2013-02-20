@@ -25,7 +25,7 @@
 #define MOVE_JUMP_MAX 1500
 
 /* For specific movement */
-#define MOVE_SPEC_STD_SPEED 12500      //the time allowed for all movements - random atm
+#define MOVE_SPEC_STD_SPEED 12500      //the time allowed for all movements - random at 50000pwmvalues/4s
 
 #define SIGMOID_ERR	6.2126
 
