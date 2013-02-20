@@ -11,6 +11,8 @@
 #include "math.h"
 #include <system.h>
 #include <stdlib.h>
+#include <io.h>
+#include <unistd.h>
 
 /* This is the INCOMING queue */
 static xQueueHandle qMove;
@@ -295,11 +297,53 @@ int move_get_state(int servo, int*state) {
 	return ECD_OK;
 }
 
+
+int test_sigmoid(void){
+
+
+	float M,time,result;
+	volatile euler_s* p_euler;
+
+
+	p_euler = (euler_s*) EULERBLOCK_0_BASE;
+
+	/* Semaphore is normally created by the movement init function.. */
+	xSemaphore = xSemaphoreCreateMutex();
+
+	M = 2.24;
+	time = 2.24;
+	result = 0;
+
+	/* Do initial write to the first place. */
+	p_euler->input = M;
+
+	/* Check it's corrent */
+
+
+	printf("Starting sigmoid test....\n");
+	printf("Sigmoid block test register returns [%X].\n", p_euler->test);
+	printf("Floats have byte count of [%d].\n",sizeof(float));
+	printf("Sigmoid returns for [%4.2f] ---> [%4.2f].\n",M,p_euler->input);
+
+	printf("Inputs are M=[%4.2f], time=[%4.2f].\n",M,time);
+
+	usleep(3000);
+
+	sigmoid(M, time, &result);
+
+	printf("Sigmoid returned [%4.2f].\n", result);
+
+	return 0;
+}
+
+
+
+
 /* A normalized sigmoid - result is always 0-1
  * M is a time value which must be the same unit as the "time" parameter */
 static int sigmoid(float M, float time, float*result) {
 
-	euler_s* p_euler;
+	volatile euler_s* p_euler;
 	float fInput;
 
 
@@ -319,17 +363,27 @@ static int sigmoid(float M, float time, float*result) {
 		// wait 10 ticks to see if it becomes free.
 		if (xSemaphoreTake( xSemaphore, ( portTickType ) 10 ) == pdTRUE) {
 
-			printf("Entered sigmoid...");
+			printf("Entered sigmoid...\n");
 
-			/* Wait for the euler block to become ready - this might hang!!!*/
-			while (!p_euler->state)
-				vTaskDelay(1);/*definitely 0, remove if redundant?*/
 
 			p_euler->input = fInput;
 
-			/* Wait for the euler block to become ready */
-			while (!p_euler->state)
-				vTaskDelay(1);
+			printf("Sigmoid called with [%4.2f]\n", fInput);
+
+			//IOWR(EULERBLOCK_0_BASE,0,fInput);
+
+
+
+			printf("Check value back [%4.2f] and ready state [%d]\n",
+					p_euler->input,
+					p_euler->state);
+
+			/* Wait for the euler block to become ready - this might hang!!!*/
+					while (!p_euler->state){
+						//vTaskDelay(1);/*definitely 0, remove if redundant?*/
+						__asm("nop");
+					}
+
 
 			printf("Finished with sigmoid...\n");
 
@@ -341,7 +395,13 @@ static int sigmoid(float M, float time, float*result) {
 		}
 	}
 
-	*result = p_euler->output;
+	printf("Sigmoid block returned with [%4.2f]\nReady state[%d].\n",
+			p_euler->output,
+			p_euler->state);
+
+	//*result = p_euler->output;
+	*result = 1.0/(1+p_euler->output);
+
 
 	return ECD_OK;
 }

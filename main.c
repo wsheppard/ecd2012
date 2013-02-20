@@ -17,6 +17,8 @@
 #include "manager.h"
 #include "ECD.h"
 
+#include "test.h"
+
 #define mainTIMER_TEST_PERIOD			( 50 )
 
 /*-----------------------------------------------------------*/
@@ -27,6 +29,11 @@ int main( void )
 
 	printf("Starting the RTOS demo.....\n");
 
+
+	test_sigmoid();
+
+	printf("Finished.\n");
+	while(1);
 
 
 
