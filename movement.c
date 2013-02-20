@@ -460,7 +460,7 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, int speed) {
 	totaltime_ms = totaltime * 1000;
 
 	/* M is the half-way point which is passed to the sigmoid function */
-	m = totaltime_ms;
+	m = totaltime_ms / 2;
 
 	latency_ms = TICKS2MS(MOVE_SIGMOID_LATENCY);
 
@@ -494,7 +494,7 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, int speed) {
 		/* Get normalized value */
 		sigmoid(m, (float)tick, &res);
 
-		printf("Sigmoid result: [%4.2f]\n",res);
+		//printf("Sigmoid result: [%4.2f]\n",res);
 
 		/* Now scale it */
 		res *= distance;
