@@ -184,16 +184,16 @@ static void move_servo_task(void *params) {
 
 				/*if a movement speed is defined */
 
-				//move_servo_sigmoid(&servoData,(((msgMessage.messageDATA & M_MOVE_PWMMASK_IK)>>M_MOVE_PWMOFFSET_IK)+50000), ((msgMessage.messageDATA & M_MOVE_SPECSPEEDMASK_IK)>>M_MOVE_SPECSPEEDOFFSET_IK));
+				move_servo_sigmoid(&servoData,(((msgMessage.messageDATA & M_MOVE_PWMMASK_IK)>>M_MOVE_PWMOFFSET_IK)+50000), ((msgMessage.messageDATA & M_MOVE_SPECSPEEDMASK_IK)>>M_MOVE_SPECSPEEDOFFSET_IK));
 				/*move_servo_sigmoid(
 				 &servoData,
 				 (((msgMessage.messageDATA & M_MOVE_PWMMASK_IK)>>M_MOVE_PWMOFFSET_IK)+50000),
 				 MOVE_SPEC_STD_SPEED //M_MOVE_SPEC_SPEED(msgMessage.messageDATA)
 				 );*/
 
-				pwm_set_pos(servoData.iServoID,
-						(((msgMessage.messageDATA & M_MOVE_PWMMASK_IK)
-								>> M_MOVE_PWMOFFSET_IK) + 50000));
+				//pwm_set_pos(servoData.iServoID,
+				//		(((msgMessage.messageDATA & M_MOVE_PWMMASK_IK)
+				//				>> M_MOVE_PWMOFFSET_IK) + 50000));
 
 			} else {
 
@@ -203,9 +203,10 @@ static void move_servo_task(void *params) {
 				 (((msgMessage.messageDATA & M_MOVE_PWMMASK_IK)>>M_MOVE_PWMOFFSET_IK)+50000),
 				 MOVE_SPEC_STD_SPEED //M_MOVE_SPEC_SPEED(msgMessage.messageDATA)
 				 );*/
-				pwm_set_pos(servoData.iServoID,
-						(((msgMessage.messageDATA & M_MOVE_PWMMASK_IK)
-								>> M_MOVE_PWMOFFSET_IK) + 50000));
+				//pwm_set_pos(servoData.iServoID,
+					//	(((msgMessage.messageDATA & M_MOVE_PWMMASK_IK)
+						//		>> M_MOVE_PWMOFFSET_IK) + 50000));
+				move_servo_sigmoid(&servoData,(((msgMessage.messageDATA & M_MOVE_PWMMASK_IK)>>M_MOVE_PWMOFFSET_IK)+50000), ((msgMessage.messageDATA & M_MOVE_SPECSPEEDMASK_IK)>>M_MOVE_SPECSPEEDOFFSET_IK));
 
 			}
 			ServoData[servoData.iServoID].state = MOVE_STATE_STOP;
