@@ -65,13 +65,13 @@ static void man_main(void*params){
 
 	printf("Starting manager...\n");
 
-	startIK.x_pos = 27.78;
-	startIK.y_pos = -7.4;
-	startIK.z_pos = 4.23;
+	startIK.x_pos = 20.62;
+	startIK.y_pos = 20.62;
+	startIK.z_pos = -4.846;
 
-	stopIK.x_pos = 26.9;
-	stopIK.y_pos = 7.23;
-	stopIK.z_pos = -5.63;
+	stopIK.x_pos = 20.62;
+	stopIK.y_pos = -20.62;
+	stopIK.z_pos = -4.846;
 
 	for (;;) {
 	
