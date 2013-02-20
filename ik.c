@@ -47,12 +47,12 @@ double xc, yc,zc,q1,q22,q32;
 msg_message_s msgMessage;
 
 /*The current pwm value of each servo*/
-unsigned int pos[3];
+unsigned int pos[4];
 unsigned int x;
-unsigned int goal[3];
+unsigned int goal[4];
 signed int longest_distance=0;
 float longest_time;
-unsigned int speed[3];
+unsigned int speed[4];
 
 
 if(sqrt(pow(position.x_pos,2)+pow(position.y_pos,2)+pow(position.z_pos,2))>(l2+l3+d5)){/*check for valid input*/
@@ -101,34 +101,34 @@ q22 = -atan2(((l3*sin(q32))/sqrt(pow(xc,2)+pow(yc,2)+pow(zc,2))),+sqrt(1-pow((l3
 
 #else
 		printf("Angles: q1 = %f, q2 = %f, q3 = %f\n",(q1*180/M_PI),(q22*180/M_PI),(q32*180/M_PI));
-        ik_rad_to_servo(&goal[0],q1,S_MAX_0, S_MIN_0, Q_MAX_0, Q_MIN_0);
-        ik_rad_to_servo(&goal[1],q22,S_MAX_1, S_MIN_1, Q_MAX_1, Q_MIN_1);
-        ik_rad_to_servo(&goal[2],q32,S_MAX_2, S_MIN_2, Q_MAX_2, Q_MIN_2);
+        ik_rad_to_servo(&goal[M_MOVE_SERVO4],q1,S_MAX_0, S_MIN_0, Q_MAX_0, Q_MIN_0);
+        ik_rad_to_servo(&goal[M_MOVE_SERVO3],q22,S_MAX_1, S_MIN_1, Q_MAX_1, Q_MIN_1);
+        ik_rad_to_servo(&goal[M_MOVE_SERVO2],q32,S_MAX_2, S_MIN_2, Q_MAX_2, Q_MIN_2);
 
 		for(x=1;x<PWM_COUNT;x++){ /*find the longest distance and calculate the longest time*/
-			pwm_get_pos(x,&pos[x-1]);
-			if(abs((goal[PWM_COUNT-x-1]-pos[x-1]))> longest_distance){
-				longest_distance = abs(goal[PWM_COUNT-x-1]-pos[x-1]);
+			pwm_get_pos(x,&pos[x]); /*get the pwm position for all but the gripper*/
+			if(abs((goal[x]-pos[x]))> longest_distance){
+				longest_distance = abs(goal[x]-pos[x]);
 			}
 			longest_time = (float)longest_distance/MOVE_SPEC_STD_SPEED;
 
 		}
 
 		for(x=1;x<PWM_COUNT;x++){/*update the speeds, so that the time is the same on all of them*/
-		speed[x-1] = (unsigned int)((abs(goal[PWM_COUNT-x-1]-pos[x-1]) / longest_time) / 6.11); /*M_MOVE_SPECSPEEDMASK_IK / 6.11 is < 2^11. Ergo it fits within the msgData*/
+		speed[x] = (unsigned int)((abs(goal[x]-pos[x]) / longest_time) / 6.11); /*M_MOVE_SPECSPEEDMASK_IK / 6.11 is < 2^11. Ergo it fits within the msgData*/
 		}
 				msgMessage.messageID = M_MOVE_IK;
-				msgMessage.messageDATA = (((M_MOVE_SERVO4<<1) & M_MOVE_SERVOMASK_IK) | (((goal[0] - PWM_OFFSET)<<M_MOVE_PWMOFFSET_IK) & M_MOVE_PWMMASK_IK) | ((speed[3]<<M_MOVE_SPECSPEEDOFFSET_IK) & M_MOVE_SPECSPEEDMASK_IK)); /**/
+				msgMessage.messageDATA = (((M_MOVE_SERVO4<<1) & M_MOVE_SERVOMASK_IK) | (((goal[M_MOVE_SERVO4] - PWM_OFFSET)<<M_MOVE_PWMOFFSET_IK) & M_MOVE_PWMMASK_IK) | ((speed[M_MOVE_SERVO4]<<M_MOVE_SPECSPEEDOFFSET_IK) & M_MOVE_SPECSPEEDMASK_IK)); /**/
 				msg_send(qMOVE,msgMessage);
 
 
 				msgMessage.messageID = M_MOVE_IK;
-				msgMessage.messageDATA = (((M_MOVE_SERVO3<<1) & M_MOVE_SERVOMASK_IK) | (((goal[1] - PWM_OFFSET)<<M_MOVE_PWMOFFSET_IK) & M_MOVE_PWMMASK_IK) | ((speed[2]<<M_MOVE_SPECSPEEDOFFSET_IK) & M_MOVE_SPECSPEEDMASK_IK));
+				msgMessage.messageDATA = (((M_MOVE_SERVO3<<1) & M_MOVE_SERVOMASK_IK) | (((goal[M_MOVE_SERVO3] - PWM_OFFSET)<<M_MOVE_PWMOFFSET_IK) & M_MOVE_PWMMASK_IK) | ((speed[M_MOVE_SERVO3]<<M_MOVE_SPECSPEEDOFFSET_IK) & M_MOVE_SPECSPEEDMASK_IK));
 				msg_send(qMOVE,msgMessage);
 
 
 				msgMessage.messageID = M_MOVE_IK;
-				msgMessage.messageDATA = (((M_MOVE_SERVO2<<1) & M_MOVE_SERVOMASK_IK) | (((goal[2] - PWM_OFFSET)<<M_MOVE_PWMOFFSET_IK) & M_MOVE_PWMMASK_IK) | ((speed[1]<<M_MOVE_SPECSPEEDOFFSET_IK) & M_MOVE_SPECSPEEDMASK_IK));
+				msgMessage.messageDATA = (((M_MOVE_SERVO2<<1) & M_MOVE_SERVOMASK_IK) | (((goal[M_MOVE_SERVO2] - PWM_OFFSET)<<M_MOVE_PWMOFFSET_IK) & M_MOVE_PWMMASK_IK) | ((speed[M_MOVE_SERVO2]<<M_MOVE_SPECSPEEDOFFSET_IK) & M_MOVE_SPECSPEEDMASK_IK));
 				msg_send(qMOVE,msgMessage);
 
 #endif

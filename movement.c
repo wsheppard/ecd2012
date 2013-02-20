@@ -193,8 +193,9 @@ static void move_servo_task(void *params) {
 				move_servo_sigmoid(
 						&servoData,
 						(((msgMessage.messageDATA & M_MOVE_PWMMASK_IK)>>M_MOVE_PWMOFFSET_IK)+50000),
-						((unsigned int)(((msgMessage.messageDATA & M_MOVE_SPECSPEEDMASK_IK)>>M_MOVE_SPECSPEEDOFFSET_IK)*6.11))
+						(((msgMessage.messageDATA & M_MOVE_SPECSPEEDMASK_IK)>>M_MOVE_SPECSPEEDOFFSET_IK)*6.11)
 				);
+
 
 #if 0
 			for(x=0;x<PWM_COUNT;x++){
@@ -464,11 +465,12 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, int speed) {
 	latency_ms = TICKS2MS(MOVE_SIGMOID_LATENCY);
 
 
-	printf("Servo[%d] To[%d] Time[%d] Distance[%d] Init[%d] LatencyMS[%d]\n",
+	printf("Servo[%d] To[%d] Time[%d] Distance[%d] Speed [%d] Init[%d] LatencyMS[%d]\n",
 			sData->iServoID,
 			place,
 			(unsigned int)totaltime_ms,
 			distance,
+			speed,
 			initialposition,
 			latency_ms);
 
