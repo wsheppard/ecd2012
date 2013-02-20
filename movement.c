@@ -393,6 +393,7 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, int speed) {
 	int n = 0;
 	float res = 0;
 	float latency_ms = 0;
+	float totaltime_ms;
 
 	/* First work out how far we have to travel */
 	pwm_get_pos(sData->iServoID, &initialposition);
@@ -409,8 +410,10 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, int speed) {
 	 * but it can't be negative. */
 	totaltime = fabs((float) distance) / (float) speed;
 
+	totaltime_ms = totaltime * 1000;
+
 	/* M is the half-way point which is passed to the sigmoid function */
-	m = 1000 * totaltime / 2.0;
+	m = totaltime_ms / 2.0;
 
 	latency_ms = TICKS2MS(MOVE_LATENCY);
 
@@ -419,13 +422,13 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, int speed) {
 
 		/* Quick message check */
 		if (msg_recv_noblock(sData->qServo, &msgMessage) != ECD_NOMSG) {
-			if (msgMessage.messageID != M_MOVE_STOP) {
+			if (msgMessage.messageID == M_MOVE_STOP) {
 				printf(
-						"Expecting STOP message but received something else! Returning!\n");
+						"STOP message received before SIGMOID move finshed. Stopping. \n");
 				return;
 			} else {
-				printf("Servo MID-MOVE but received non-STOP message!\n");
-				return;
+				printf("Servo MID-SIGMOID-MOVE and received non-STOP message! Ignoring.\n");
+
 			}
 		}
 
@@ -441,7 +444,7 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, int speed) {
 		res += initialposition;
 
 		/* Are we there yet? */
-		if ((abs(place) - abs(res)) > 100) {
+		if (latency_ms >= totaltime_ms) {
 
 			/* Now move there */
 			pwm_set_pos(sData->iServoID, (unsigned int) res);
