@@ -504,6 +504,8 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, int speed) {
 		/* Are we there yet? */
 		if (latency_ms < (unsigned int)totaltime_ms) {
 
+			printf("Latency [%d] and TotalTimeMS [%d].\n",(int)latency_ms, (int)totaltime_ms);
+
 			/* Now move there */
 			pwm_set_pos(sData->iServoID, (unsigned int) res);
 
