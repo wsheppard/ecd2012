@@ -250,6 +250,8 @@ static int sigmoid(float M, float time, float*result){
 	        // wait 10 ticks to see if it becomes free.
 	        if( xSemaphoreTake( xSemaphore, ( portTickType ) 10 ) == pdTRUE )
 	        {
+	        	printf("Entered euler block...\n");
+
 	        	/* Wait for the euler block to become ready */
 	        		while(!p_euler->state)
 	        			vTaskDelay(1);
@@ -264,7 +266,7 @@ static int sigmoid(float M, float time, float*result){
 	        }
 	        else
 	        {
-				printf("Servo couldn't get semaphore! Why ever not?\n");
+				printf("Servo couldn't get SIGMOID semaphore! Why ever not?\n");
 	            // We could not obtain the semaphore and can therefore not access
 	            // the shared resource safely.
 	        }
