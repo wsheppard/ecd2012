@@ -459,7 +459,7 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, int speed) {
 	totaltime_ms = totaltime * 1000;
 
 	/* M is the half-way point which is passed to the sigmoid function */
-	m = totaltime_ms / 2.0;
+	m = totaltime_ms * 2;
 
 	latency_ms = TICKS2MS(MOVE_SIGMOID_LATENCY);
 
