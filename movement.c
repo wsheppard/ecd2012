@@ -350,7 +350,6 @@ static int sigmoid(float M, float time, float*result) {
 	/* Boundary checks ? */
 
 	/* Do the sigmoid calcs */
-	/* TODO: Replace this with IORD/IOWR macros */
 	p_euler = (euler_s*) EULERBLOCK_0_BASE;
 
 	fInput = (-1 * (SIGMOID_ERR) * (time - M)) / M;
