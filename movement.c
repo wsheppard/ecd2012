@@ -372,7 +372,7 @@ static int sigmoid(float M, float time, float*result) {
 
 			xSemaphoreGive( xSemaphore);
 		} else {
-			printf("Servo couldn't get semaphore! Why ever not?\n");
+			printf("Servo couldn't get EULERBLOCK semaphore! \n");
 			// We could not obtain the semaphore and can therefore not access
 			// the shared resource safely.
 		}
@@ -399,7 +399,8 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, int speed) {
 
 	/* First work out how far we have to travel */
 	pwm_get_pos(sData->iServoID, &initialposition);
-	distance = (signed int) initialposition - (signed int) place;
+
+	distance = (signed int) place - (signed int) initialposition;
 
 	/* We've got no-where to go */
 	if (abs(distance) < 10)

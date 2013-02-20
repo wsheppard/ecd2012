@@ -14,7 +14,7 @@
 
 /* Fill private data about servos, the position data is kept track of privately
    in this module - so might need some functions to get it out? */
-pwm_servo_data_s servo_data[PWM_COUNT]={
+static pwm_servo_data_s servo_data[PWM_COUNT]={
 	{(void*)ADD_SERVO1,0,75000},
 	{(void*)ADD_SERVO2,0,75000},
 	{(void*)ADD_SERVO3,0,75000},
@@ -59,9 +59,10 @@ int pwm_jump(int servo, int jump){
 int pwm_set_pos(int servo, unsigned int position){
 
 	/* Boundary check */
-	if ((position>100000) || (position<50000))
+	if ((position>100000) || (position<50000)){
+		printf("Servo [%d] bounary error! Value: %d.\n",servo, position);
 			return ECD_ERROR;
-
+	}
 	/* 	Write to hardware using HAL provided functions.
 		these prevent data caching by the NIOS */
 	IOWR(servo_data[servo].address,0,position);
@@ -87,7 +88,7 @@ int pwm_set_pos(int servo, unsigned int position){
         }
         else
         {
-			printf("Couldn't get semaphore...\n");
+			printf("PWM_SET Couldn't get semaphore...\n");
             // We could not obtain the semaphore and can therefore not access
             // the shared resource safely.
         }
