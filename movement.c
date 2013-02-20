@@ -493,6 +493,8 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, int speed) {
 		/* Get normalized value */
 		sigmoid(5000, (float)latency_ms, &res);
 
+		printf("Sigmoid result: [%4.2f]\n",res);
+
 		/* Now scale it */
 		res *= distance;
 
