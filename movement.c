@@ -340,13 +340,12 @@ int test_sigmoid(void){
 
 
 /* A normalized sigmoid - result is always 0-1
- * M is a time value which must be the same unit as the "time" parameter */
+ * M is a time value which must be the same unit as the "time" parameter and represents
+ * the half-time point*/
 static int sigmoid(float M, float time, float*result) {
 
 	volatile euler_s* p_euler;
 	float fInput;
-
-
 
 	/* The M value is the half time point where the gradient is maximum */
 
@@ -363,29 +362,14 @@ static int sigmoid(float M, float time, float*result) {
 		// wait 10 ticks to see if it becomes free.
 		if (xSemaphoreTake( xSemaphore, ( portTickType ) 10 ) == pdTRUE) {
 
-			printf("Entered sigmoid...\n");
-
-
 			p_euler->input = fInput;
-
-			printf("Sigmoid called with [%4.2f]\n", fInput);
-
-			//IOWR(EULERBLOCK_0_BASE,0,fInput);
-
-
-
-			printf("Check value back [%4.2f] and ready state [%d]\n",
-					p_euler->input,
-					p_euler->state);
 
 			/* Wait for the euler block to become ready - this might hang!!!*/
 					while (!p_euler->state){
-						//vTaskDelay(1);/*definitely 0, remove if redundant?*/
-						__asm("nop");
+						vTaskDelay(1);/*definitely 0, remove if redundant?*/
+						//__asm("nop");
 					}
 
-
-			printf("Finished with sigmoid...\n");
 
 			xSemaphoreGive( xSemaphore);
 		} else {
@@ -395,13 +379,7 @@ static int sigmoid(float M, float time, float*result) {
 		}
 	}
 
-	printf("Sigmoid block returned with [%4.2f]\nReady state[%d].\n",
-			p_euler->output,
-			p_euler->state);
-
-	//*result = p_euler->output;
 	*result = 1.0/(1+p_euler->output);
-
 
 	return ECD_OK;
 }
