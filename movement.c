@@ -11,16 +11,15 @@
 #include "math.h"
 #include <system.h>
 #include <stdlib.h>
-#include <io.h>
 #include <unistd.h>
-
+#include "sigmoid.h"
 #include "pwm.h"
 
 
 /* This is the INCOMING queue */
 static xQueueHandle qMove;
 
-static xSemaphoreHandle xSemaphore = NULL;
+
 
 /* Position info is kept in the servo task */
 typedef struct {
@@ -30,19 +29,10 @@ typedef struct {
 	int state;
 } move_servoData_s;
 
-/* Struct for euler stuff */
-typedef struct {
-	float input;
-	float output;
-	unsigned int state;
-	unsigned int test;
-} euler_s;
-
-static int sigmoid(float M, float time, float*result); /* Find sigmoid position */
-static void move_servo_sigmoid(move_servoData_s *sData, int place, int speed); /* Move to a specified place, in a specified time */
 static void move_servo_task(void *params); /* Individual servo tasks, one spawned for each servo */
 static void move_main_task(void* params); /* Main task manager for this module */
 static void move_servo_cont(move_servoData_s *sData, int direction); /* Move loop */
+static void move_servo_sigmoid(move_servoData_s *sData, int place, int speed);
 
 /* These are the queues going off to the servo tasks */
 static move_servoData_s ServoData[SERVO_COUNT];
@@ -80,7 +70,7 @@ int move_Start(xQueueHandle qHandle) {
 
 	}
 
-	xSemaphore = xSemaphoreCreateMutex();
+
 
 	/* Create main task; return -1 on error */
 	if (xTaskCreate( move_main_task,

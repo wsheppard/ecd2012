@@ -17,7 +17,7 @@
 #include "manager.h"
 #include "ECD.h"
 
-//#include "test.h"
+#include "test.h"
 
 #define mainTIMER_TEST_PERIOD			( 50 )
 
@@ -29,6 +29,9 @@ int main( void )
 
 	printf("Starting the RTOS demo.....\n");
 
+
+	//test_sigmoid();
+	//while(1);
 
 	/* Starting off the manager thread */
 	if (man_start()!=ECD_OK){
