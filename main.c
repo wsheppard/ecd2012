@@ -13,6 +13,7 @@
 #include "timers.h"
 #include "semphr.h"
 #include "system.h"
+#include "timer.h"
 
 #include "manager.h"
 #include "ECD.h"
@@ -29,6 +30,8 @@ int main( void )
 
 	printf("Starting the RTOS demo.....\n");
 
+	timer_init();
+	while(1);
 
 	//test_sigmoid();
 	//while(1);

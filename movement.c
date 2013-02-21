@@ -331,8 +331,6 @@ int move_get_state(int servo, int*state) {
 
 
 
-
-
 /* This function completes a full movement from where the PWM currently is
  * to where it is specified to go. At that point it returns. During this movement,
  * a STOP message can be sent which will force an early return */
