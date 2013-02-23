@@ -11,6 +11,7 @@
 #include "display.h"
 #include "pwm.h"
 #include "movement.h"
+#include "led.h"
 
 /* System Includes */
 #include <stdio.h>
@@ -46,7 +47,7 @@ void display_main(void*params){
 	unsigned int pos[4];
 	int state[4];
 	int x, led_counter = 0 ;
-	void* pLEDS = (void*)LEDS_BASE;
+
 	unsigned int pwm_add = 2000;
 
 	unsigned int *p_keypad_data;
@@ -57,9 +58,6 @@ void display_main(void*params){
 	int xDelay = 1000 / portTICK_RATE_MS;
 
 //	p_pwm = (unsigned int*)PWM_COMPONENT_0_BASE;
-
-
-
 
 	p_keypad_data = (unsigned int *)KEYPAD_COMPONENT_0_BASE;
 
@@ -99,7 +97,9 @@ void display_main(void*params){
 		printf("PWM AT %u.\n",
 					pwm_value/2000);
 #endif
-		*(int*)pLEDS = led_counter++;
+
+		setLED(led_counter++);
+		//*(int*)pLEDS = led_counter++;
 
 #if 0
 		pwm_value += pwm_add;
