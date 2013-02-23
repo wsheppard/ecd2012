@@ -10,8 +10,8 @@
 /* Local includes */
 #include "keypad.h"
 #include "pwm.h"
-#include <system.h>
-#include <FreeRTOS.h>
+#include "system.h"
+#include "FreeRTOS.h"
 #include "io.h"
 
 /* Private functions */
