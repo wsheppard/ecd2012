@@ -12,6 +12,7 @@
 #include "pwm.h"
 #include <system.h>
 #include <FreeRTOS.h>
+#include "io.h"
 
 /* Private functions */
 static void kp_main(void*pvParams);
@@ -90,12 +91,12 @@ static void kp_main(void*pvParams){
 static void kp_getCurrent(unsigned short *KP_data){
 
 	//static unsigned short output = 1;
-	unsigned int *p_keypad_data;
+	//unsigned int *p_keypad_data;
 
 	/* Get the state of all the KeyPad buttons and put into a nice 16bits */
 
 
-	p_keypad_data = (unsigned int *)KP_BASE_ADDRESS;
+	//p_keypad_data = (unsigned int *)KP_BASE_ADDRESS;
 
 	/* Reading from the base address of the keypad module should return
 	 * a 16bit value where each bit represents the down or up states of the
@@ -104,7 +105,9 @@ static void kp_getCurrent(unsigned short *KP_data){
 
 	//printf("Reading: %X\n",*p_keypad_data);
 
-	*KP_data = (unsigned short)*(p_keypad_data+2);
+	*KP_data = (unsigned short)IORD(KP_BASE_ADDRESS, 2);
+
+	///*KP_data = (unsigned short)*(p_keypad_data+2);
 	
 #if 0
 	/* This cycles through the different keys */
