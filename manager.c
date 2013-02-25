@@ -87,6 +87,9 @@ static void man_replay(void*params){
 										(replay_array_position != (NUM_REPLAY_STEPS+1)) && (msgREPLAY.messageID!=REPLAY_STOP)){
 				/*Non blocking wait on Stop messages on replay queue*/
 				msg_recv_noblock(qREPLAY,&msgREPLAY);
+				/* A single delay the full length of the period between keypad state changes could result in a larg(ish) period of time between pressing stop
+				and the replay actually stopping. To overcome this I've split the delay into suitable sized chunks and check intermittently for stop messages. 
+				It's either this or implementing some other way of directly stopping the pwms. E.G an interrupt */
 				num_delays=replay_storage_array[msgREPLAY.messageDATA][replay_array_position].delayTime / STOP_POLL_DELAY;
 				leftover_time=replay_storage_array[msgREPLAY.messageDATA][replay_array_position].delayTime % STOP_POLL_DELAY;
 				while(num_delays){
@@ -99,9 +102,6 @@ static void man_replay(void*params){
 				if (msgREPLAY.messageID==REPLAY_STOP)
 					break;
 				vTaskDelay(leftover_time);
-				//TODO:This method could result in a larg(ish) period of time between pressing stop and actually stopping with a maximum of the time taken to 
-				//fully move a pwm from a max to min position to overcome this we could split the delay into suitable sized chunks and check intermittently
-				//for stop messages. Either that or we could implement some other way of directly stopping the pwms.
 				if (replay_storage_array[msgREPLAY.messageDATA][replay_array_position].state == REPLAY_BUTTON_UP){
 					man_key_up(replay_storage_array[msgREPLAY.messageDATA][replay_array_position].keyPressed);
 				}
