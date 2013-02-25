@@ -20,5 +20,8 @@ typedef const signed char * fStr;
 #define MS2TICKS(A) ((TICKS_PER_MS) * A)
 #define TICKS2MS(A) ((MS_PER_TICK) * A)
 
+//#define lcd_printf(...) fprintf(lcd, __VA_ARGS__)
+//#define jtag_printf(...) fprintf(jtag, __VA_ARGS__)
+
 #endif
 
