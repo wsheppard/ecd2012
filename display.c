@@ -11,6 +11,7 @@
 #include "display.h"
 #include "pwm.h"
 #include "movement.h"
+#include "led.h"
 
 /* System Includes */
 #include <stdio.h>
@@ -59,7 +60,6 @@ void display_main(void*params){
 
 //	p_pwm = (unsigned int*)PWM_COMPONENT_0_BASE;
 
-//	p_keypad_data = (unsigned int *)KEYPAD_COMPONENT_0_BASE;
 
 	for(;;){
 
@@ -97,7 +97,9 @@ void display_main(void*params){
 		printf("PWM AT %u.\n",
 					pwm_value/2000);
 #endif
-		*(int*)pLEDS = led_counter++;
+
+		setLED(led_counter++);
+		//*(int*)pLEDS = led_counter++;
 
 #if 0
 		pwm_value += pwm_add;

@@ -136,13 +136,13 @@ static void man_main(void*params){
 
 	printf("Starting manager...\n");
 
-	startIK.x_pos = 10;
-	startIK.y_pos = 10;
-	startIK.z_pos = 0;
+	startIK.x_pos = 15.13;
+	startIK.y_pos = 15.13;
+	startIK.z_pos = 16.99;
 
-	stopIK.x_pos = 12;
-	stopIK.y_pos = 12;
-	stopIK.z_pos = 0;
+	stopIK.x_pos = 19.53;
+	stopIK.y_pos = -19.53;
+	stopIK.z_pos = -9.08;
 
 	for (;;) {
 	
@@ -150,7 +150,7 @@ static void man_main(void*params){
 			purposes? */
 		msg_recv_block(qKP,&msgKP);
 
-		printf("Received a message... ID: %d, DATA: 0x%X.\n", msgKP.messageID, msgKP.messageDATA);
+		//printf("Received a message... ID: %d, DATA: 0x%X.\n", msgKP.messageID, msgKP.messageDATA);
 	
 		changed = 65535U & msgKP.messageDATA;
 		state = msgKP.messageDATA >> 16;
@@ -467,6 +467,11 @@ void man_key_down(int key){
 		msgMessage.messageDATA = M_MOVE_SERVO4;
 		msg_send(qMOVE,msgMessage);
 		break;
+	/* Save / replay functions */
+		/* NOTE: These don't need up and down - so only really UP is used */
+	case M_KP_KEY_C1:
+		/* Save current position */	
+		break;
 	}
 
 }
@@ -521,5 +526,13 @@ void man_key_up(int key){
 		msgMessage.messageDATA = M_MOVE_SERVO4;
 		msg_send(qMOVE,msgMessage);
 		break;
+
+
+	/* Save position */
+#if 0
+	case M_KP_KEY_c1:
+		msgMessage.messageID = 
+#endif
+
 	}
 }

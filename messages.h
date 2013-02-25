@@ -1,5 +1,8 @@
 /* All the different messages and what they mean */
 
+#ifndef MESSAGES_H
+#define MESSAGES_H
+
 
 /* For the KEYPAD module */
 #define M_KP_EVENT 1 /* A keypad change of state has occurred */
@@ -25,14 +28,23 @@
 /* Add extra messages here */
 
 /* Movement module */
-#define M_MOVE_CONT 2 /* Start continous movement */
-#define M_MOVE_SPEC 3 /* Move 'gracefully' to a specific place */
-#define M_MOVE_STOP 4 /* STOP moving */
-#define M_MOVE_PLAYBACK 5 /* Start the playback function */
-#define M_MOVE_SAVE 6 /* Save current position */
-#define M_MOVE_RESET 7 /* delete all saved positions */
-#define M_MOVE_RMLAST 8 /* Remove last saved position */
-#define M_MOVE_IK 9 /* Move gracefully to the calculated IK position */
+enum{
+	M_MOVE_CONT, /* Start continous movement */
+	M_MOVE_SPEC,  /* Move 'gracefully' to a specific place */
+	M_MOVE_STOP,  /* STOP moving */
+	M_MOVE_PLAYBACK,  /* Start the playback function */
+	M_MOVE_SAVE,  /* Save current position */
+	M_MOVE_RESET,  /* delete all saved positions */
+	M_MOVE_RMLAST,  /* Remove last saved position */
+	M_MOVE_IK,	/*move gracefully to the calculated IK position */
+	M_COUNT
+};
+
+/* Some macros to help put the messaging together */
+#define M_MOVE_SPEC_MESSAGE(SPEED, POSITION)	((unsigned)((((SPEED) & 0xFFFFFU)<<(3*8))|((POSITION)&0xFFFU)))
+#define M_MOVE_SPEC_SPEED(MESSAGE)			(((MESSAGE)>>(3*8))&(0xFFFFFU))
+#define M_MOVE_SPEC_POSITION(MESSAGE)		((MESSAGE)&(0xFFFU))
+
 
 /* For the MOVE CONT message, the DATA is as follows:
 	* BIT0-7 is the servo number
@@ -56,4 +68,11 @@
 /* Masks for the servo messages */
 #define M_MOVE_SERVOMASK 255 /* The servo number (4bits) */
 #define M_MOVE_DIRMASK 256   /* THe direction bit (1bit) */
+#define M_MOVE_PWMMASK_IK 0x01fffe0 /*The (pwm value-50000) shifted to the left by 5 and therefore at b5-b20*/
+#define M_MOVE_SERVOMASK_IK 0x01E /*servo information at bit 1-b4*/
+#define M_MOVE_SPECSPEEDMASK_IK 0x0ffe00000 /*time information for the duration of a movement at b21-b31*/
 
+#define M_MOVE_PWMOFFSET_IK 5
+#define M_MOVE_SPECSPEEDOFFSET_IK 21
+
+#endif

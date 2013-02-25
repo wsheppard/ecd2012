@@ -33,8 +33,6 @@ Must have INCLUDE_vTaskSuspend enabled to go for Blocking waits.
 typedef struct {
 	unsigned int messageID;
 	unsigned int messageDATA;
-    unsigned int sPLACE;
-    float sTIME;
 }msg_message_s;
 
 typedef xQueueHandle msg_handle;

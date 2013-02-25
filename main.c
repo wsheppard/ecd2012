@@ -17,6 +17,8 @@
 #include "manager.h"
 #include "ECD.h"
 
+//#include "test.h"
+
 #define mainTIMER_TEST_PERIOD			( 50 )
 
 /*-----------------------------------------------------------*/
@@ -28,18 +30,12 @@ int main( void )
 	printf("Starting the RTOS demo.....\n");
 
 
-
-
 	/* Starting off the manager thread */
 	if (man_start()!=ECD_OK){
 	
 		printf("Cannot start, halting system!\n");
 
-		for(;;){
-		
-			vTaskDelay(1000);
-		}
-	
+                while(1);	
 	}
 		
 	/* Start the scheduler itself. */

@@ -7,14 +7,13 @@
 #include "pwm.h"
 #include "messaging.h"
 #include "ECD.h"
+#include "sigmoid.h"
 
 /* Config */
 
 /* Latencies are in ticks of the system timer */
 #define MOVE_LATENCY 10
 
-/* ms between steps  - too small isn't going to get scheduled */
-#define MOVE_SIGMOID_LATENCY MOVE_LATENCY
 
 
 #define SERVO_COUNT PWM_COUNT
@@ -25,9 +24,9 @@
 #define MOVE_JUMP_MAX 1500
 
 /* For specific movement */
-#define MOVE_SPEC_M_TIME 2      //the time allowed for all movements
+#define MOVE_SPEC_STD_SPEED 12500      //the time allowed for all movements - random at 50000pwmvalues/4s
 
-#define SIGMOID_ERR	6.2126
+
 
 
 

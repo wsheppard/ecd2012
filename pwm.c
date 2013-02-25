@@ -9,15 +9,16 @@
 #include "pwm.h"
 #include "semphr.h"
 #include <stdio.h>
+#include "system.h"
+#include <io.h>
 
 /* Fill private data about servos, the position data is kept track of privately
    in this module - so might need some functions to get it out? */
-int dummypwmadd[PWM_COUNT];
-pwm_servo_data_s servo_data[PWM_COUNT]={
-	{(void*)&dummypwmadd[0],0,75000},
-	{(void*)&dummypwmadd[1],0,75000},
-	{(void*)&dummypwmadd[2],0,75000},
-	{(void*)&dummypwmadd[3],0,75000},
+static pwm_servo_data_s servo_data[PWM_COUNT]={
+	{(void*)ADD_SERVO1,0,75000},
+	{(void*)ADD_SERVO2,0,75000},
+	{(void*)ADD_SERVO3,0,75000},
+	{(void*)ADD_SERVO4,0,75000},
 };
 
 static xSemaphoreHandle xSemaphore = NULL;
@@ -57,19 +58,17 @@ int pwm_jump(int servo, int jump){
 
 int pwm_set_pos(int servo, unsigned int position){
 
-	void* pwm_addr = NULL;
-
-	if ((position>100000) || (position<50000))
+	/* Boundary check */
+	if ((position>100000) || (position<50000)){
+		printf("Servo [%d] bounary error! Value: %d.\n",servo, position);
 			return ECD_ERROR;
+	}
+	/* 	Write to hardware using HAL provided functions.
+		these prevent data caching by the NIOS */
+	IOWR(servo_data[servo].address,0,position);
 
-	/* Set this incoming number in hardware for the indicated servo */
-	
-	//IOWR_32DIRECT(BASE,OFFSET,VALUE);
 
-	pwm_addr = servo_data[servo].address;
-
-	*((unsigned int*)pwm_addr) = position;
-
+	/* Now update the global variable which holds the PWM position data */
 	 if( xSemaphore != NULL )
     {
         // See if we can obtain the semaphore.  If the semaphore is not available
@@ -89,7 +88,7 @@ int pwm_set_pos(int servo, unsigned int position){
         }
         else
         {
-			printf("Couldn't get semaphore...\n");
+			printf("PWM_SET Couldn't get semaphore...\n");
             // We could not obtain the semaphore and can therefore not access
             // the shared resource safely.
         }
@@ -99,8 +98,6 @@ int pwm_set_pos(int servo, unsigned int position){
 }
 
 int pwm_get_pos(int servo, unsigned int* position){
-
-	//IORD_32DIRECT(BASE,OFFSET);
 
 		 if( xSemaphore != NULL )
     {
