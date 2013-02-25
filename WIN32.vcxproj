@@ -132,9 +132,7 @@
     <ClCompile Include="..\FreeRTOS\Source\queue.c" />
     <ClCompile Include="..\FreeRTOS\Source\tasks.c" />
     <ClCompile Include="..\FreeRTOS\Source\timers.c" />
-    <ClCompile Include="display.c">
-      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">CompileAsC</CompileAs>
-    </ClCompile>
+    <ClCompile Include="display.c" />
     <ClCompile Include="ik.c" />
     <ClCompile Include="keypad.c" />
     <ClCompile Include="main.c">

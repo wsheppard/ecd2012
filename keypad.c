@@ -124,7 +124,7 @@ static void kp_getCurrent(unsigned short *KP_data){
 //#endif
 		/* Get the state of all the KeyPad buttons and put into a nice 16bits */
 
-	int x,y;
+	int x;
 	static unsigned short output = 3;
 	unsigned short key_mask = 32768;
 

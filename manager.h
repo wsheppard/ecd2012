@@ -10,7 +10,6 @@
 #define NUM_REPLAY_SLOTS 9
 #define NUM_REPLAY_STEPS 1000
 
-
 typedef struct replay_storage_ss{
 	unsigned int keyPressed;
 	portTickType delayTime;
@@ -25,6 +24,7 @@ enum {
 
 #define REPLAY_STOP 0
 #define REPLAY_START 1
+#define STOP_POLL_DELAY 50
 
 /* Create all required threads and start kick off */
 int man_start(void);

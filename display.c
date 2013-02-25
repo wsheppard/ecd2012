@@ -14,7 +14,6 @@
 
 /* System Includes */
 #include <stdio.h>
-#include <system.h>
 
 
 
@@ -58,7 +57,7 @@ void display_main(void*params){
 //	int xDelay = 1000 / portTICK_RATE_MS;
 	int xDelay = 150 / portTICK_RATE_MS;
 
-	p_pwm = (unsigned int*)PWM_COMPONENT_0_BASE;
+//	p_pwm = (unsigned int*)PWM_COMPONENT_0_BASE;
 
 //	p_keypad_data = (unsigned int *)KEYPAD_COMPONENT_0_BASE;
 
