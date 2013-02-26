@@ -129,6 +129,8 @@ static void man_main(void*params){
 	msg_message_s msgKP;
 	ik_cart_pos_s startIK; //temporary until we have a module feeding the IK with position data
 	ik_cart_pos_s stopIK;
+
+
 	unsigned changed;
 	unsigned state;
 	int shifted;
@@ -143,6 +145,16 @@ static void man_main(void*params){
 	stopIK.x_pos = 19.53;
 	stopIK.y_pos = -19.53;
 	stopIK.z_pos = -9.08;
+
+	ik_cart_pos_s centerIK;
+
+
+	centerIK.x_pos = 29.16;
+	centerIK.y_pos = 0;
+	centerIK.z_pos = 0.3308;
+
+	ik_calc_IK(qMOVE,centerIK);
+
 
 	for (;;) {
 	
@@ -222,6 +234,12 @@ static int man_check_menu(unsigned state, int shifted){
 	static portTickType xLastStateChange, xNewStateChange;
 	static int slot_key_binary=0;
 	int x,key;
+	ik_cart_pos_s centerIK;
+
+
+	centerIK.x_pos = 29.16;
+	centerIK.y_pos = 0;
+	centerIK.z_pos = 0.3308;
 
 	/*Convert to a binary representation of key pressed as 
 	defined in messages.h*/
@@ -238,6 +256,8 @@ static int man_check_menu(unsigned state, int shifted){
 				put specific 
 				move to centre code here 
 				*/
+				ik_calc_IK(qMOVE,centerIK);
+
 				printf("Stopped\n");
 				mode_changed=0;
 			}
