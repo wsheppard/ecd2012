@@ -74,34 +74,34 @@ int man_start(void){
 /* Replay task that block waits on a queue till told to start. It then begins replaying and performing non blocking queries on the queue monitoring for
 stop messages intermittently whilst performing the replay operations*/
 static void man_replay(void*params){
-	int replay_array_position,num_loops,leftover_time;
+	int replay_array_position,num_delays,leftover_time;
 	msg_message_s msgREPLAY;
 
 	for(;;){
 		msg_recv_block(qREPLAY,&msgREPLAY);
 		if(msgREPLAY.messageID==REPLAY_START){
-			//initiliase to start of replay array when starting a replay action
+			/*initiliase to start of replay array when starting a replay action*/
 			replay_array_position=0;
-			//Keep sending commands whilst there are still replay steps left, not end of array and have not recieved stop message
+			/*Keep sending commands whilst there are still replay steps left, not end of array and have not recieved stop message*/
 			while((replay_storage_array[msgREPLAY.messageDATA][replay_array_position].state !=REPLAY_END) && 
 										(replay_array_position != (NUM_REPLAY_STEPS+1)) && (msgREPLAY.messageID!=REPLAY_STOP)){
-				//Non blocking wait on Stop messages on replay queue
+				/*Non blocking wait on Stop messages on replay queue*/
 				msg_recv_noblock(qREPLAY,&msgREPLAY);
-				num_loops=replay_storage_array[msgREPLAY.messageDATA][replay_array_position].delayTime / STOP_POLL_DELAY;
+				/* A single delay the full length of the period between keypad state changes could result in a larg(ish) period of time between pressing stop
+				and the replay actually stopping. To overcome this I've split the delay into suitable sized chunks and check intermittently for stop messages. 
+				It's either this or implementing some other way of directly stopping the pwms. E.G an interrupt */
+				num_delays=replay_storage_array[msgREPLAY.messageDATA][replay_array_position].delayTime / STOP_POLL_DELAY;
 				leftover_time=replay_storage_array[msgREPLAY.messageDATA][replay_array_position].delayTime % STOP_POLL_DELAY;
-				while(num_loops){
+				while(num_delays){
 					vTaskDelay(STOP_POLL_DELAY);
 					msg_recv_noblock(qREPLAY,&msgREPLAY);
 					if (msgREPLAY.messageID==REPLAY_STOP)
 						break;
-					num_loops--;
+					num_delays--;
 				}
 				if (msgREPLAY.messageID==REPLAY_STOP)
 					break;
 				vTaskDelay(leftover_time);
-				//TODO:This method could result in a larg(ish) period of time between pressing stop and actually stopping with a maximum of the time taken to 
-				//fully move a pwm from a max to min position to overcome this we could split the delay into suitable sized chunks and check intermittently
-				//for stop messages. Either that or we could implement some other way of directly stopping the pwms.
 				if (replay_storage_array[msgREPLAY.messageDATA][replay_array_position].state == REPLAY_BUTTON_UP){
 					man_key_up(replay_storage_array[msgREPLAY.messageDATA][replay_array_position].keyPressed);
 				}
@@ -129,6 +129,8 @@ static void man_main(void*params){
 	msg_message_s msgKP;
 	ik_cart_pos_s startIK; //temporary until we have a module feeding the IK with position data
 	ik_cart_pos_s stopIK;
+
+
 	unsigned changed;
 	unsigned state;
 	int shifted;
@@ -143,6 +145,16 @@ static void man_main(void*params){
 	stopIK.x_pos = 19.53;
 	stopIK.y_pos = -19.53;
 	stopIK.z_pos = -9.08;
+
+	ik_cart_pos_s centerIK;
+
+
+	centerIK.x_pos = 29.16;
+	centerIK.y_pos = 0;
+	centerIK.z_pos = 0.3308;
+
+	ik_calc_IK(qMOVE,centerIK);
+
 
 	for (;;) {
 	
@@ -222,6 +234,12 @@ static int man_check_menu(unsigned state, int shifted){
 	static portTickType xLastStateChange, xNewStateChange;
 	static int slot_key_binary=0;
 	int x,key;
+	ik_cart_pos_s centerIK;
+
+
+	centerIK.x_pos = 29.16;
+	centerIK.y_pos = 0;
+	centerIK.z_pos = 0.3308;
 
 	/*Convert to a binary representation of key pressed as 
 	defined in messages.h*/
@@ -238,6 +256,8 @@ static int man_check_menu(unsigned state, int shifted){
 				put specific 
 				move to centre code here 
 				*/
+				ik_calc_IK(qMOVE,centerIK);
+
 				printf("Stopped\n");
 				mode_changed=0;
 			}

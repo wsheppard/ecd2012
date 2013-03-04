@@ -7,7 +7,7 @@
 #define M_MANMODE_RECORD 2
 #define M_MANMODE_REPLAY 3
 
-#define NUM_REPLAY_SLOTS 9
+#define NUM_REPLAY_SLOTS 10
 #define NUM_REPLAY_STEPS 1000
 
 typedef struct replay_storage_ss{
@@ -33,4 +33,3 @@ int man_start(void);
 
 
 #endif
-
