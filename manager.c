@@ -129,7 +129,6 @@ static void man_main(void*params){
 	msg_message_s msgKP;
 	ik_cart_pos_s startIK; //temporary until we have a module feeding the IK with position data
 	ik_cart_pos_s stopIK;
-	ik_cart_pos_s current_pos;
 
 
 	unsigned changed;
@@ -182,21 +181,17 @@ static void man_main(void*params){
 						man_key_down(shifted);
 						if(shifted == 8){
 							if(do_ik_once){
-								ik_calc_FK(&current_pos);
-								printf("current_pos: x = %f, y = %f, z = %f\n",current_pos.x_pos,current_pos.y_pos,current_pos.z_pos);
+						    	printf("Calculate inverse kinematics for the start position.\n");
 
-								printf("Calculate inverse kinematics for the start position: x = %f, y = %f, z = %f\n",startIK.x_pos,startIK.y_pos,startIK.z_pos);
-						    	ik_calc_IK(qMOVE,startIK);
+								ik_calc_IK(qMOVE,startIK);
 								do_ik_once = 0;
 							}
 						}
 						if(shifted == 12){
 								if(do_ik_once == 0){
-									ik_calc_FK(&current_pos);
-									printf("current_pos: x = %f, y = %f, z = %f\n",current_pos.x_pos,current_pos.y_pos,current_pos.z_pos);
+							    	printf("Calculate inverse kinematics for the stop position.\n");
 
-									printf("Calculate inverse kinematics for the stop position: x = %f, y = %f, z = %f\n",stopIK.x_pos,stopIK.y_pos,stopIK.z_pos);
-							    	ik_calc_IK(qMOVE,stopIK);
+									ik_calc_IK(qMOVE,stopIK);
 									do_ik_once = 1;
 								}
 							}
