@@ -154,7 +154,7 @@ static void man_main(void*params){
 	centerIK.y_pos = 0;
 	centerIK.z_pos = 0.3308;
 
-	ik_calc_IK(qMOVE,centerIK);
+	ik_move_goal(qMOVE,centerIK);
 
 
 	for (;;) {
@@ -186,7 +186,7 @@ static void man_main(void*params){
 								printf("current_pos: x = %f, y = %f, z = %f\n",current_pos.x_pos,current_pos.y_pos,current_pos.z_pos);
 
 								printf("Calculate inverse kinematics for the start position: x = %f, y = %f, z = %f\n",startIK.x_pos,startIK.y_pos,startIK.z_pos);
-						    	ik_calc_IK(qMOVE,startIK);
+								ik_move_goal(qMOVE,startIK);
 								do_ik_once = 0;
 							}
 						}
@@ -196,7 +196,7 @@ static void man_main(void*params){
 									printf("current_pos: x = %f, y = %f, z = %f\n",current_pos.x_pos,current_pos.y_pos,current_pos.z_pos);
 
 									printf("Calculate inverse kinematics for the stop position: x = %f, y = %f, z = %f\n",stopIK.x_pos,stopIK.y_pos,stopIK.z_pos);
-							    	ik_calc_IK(qMOVE,stopIK);
+									ik_move_goal(qMOVE,stopIK);
 									do_ik_once = 1;
 								}
 							}
@@ -261,7 +261,7 @@ static int man_check_menu(unsigned state, int shifted){
 				put specific 
 				move to centre code here 
 				*/
-				ik_calc_IK(qMOVE,centerIK);
+				ik_move_goal(qMOVE,centerIK);
 
 				printf("Stopped\n");
 				mode_changed=0;

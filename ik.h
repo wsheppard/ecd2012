@@ -39,7 +39,8 @@ typedef struct {
 
 
 
-int ik_calc_IK(xQueueHandle qMOVE,ik_cart_pos_s);
+int ik_calc_IK(ik_cart_pos_s position, msg_message_s* msgMessage[3]);
 int ik_calc_FK(ik_cart_pos_s*);
+int ik_move_goal(xQueueHandle qMOVE, ik_cart_pos_s goal);
 
 #endif

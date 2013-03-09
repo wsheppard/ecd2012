@@ -39,124 +39,125 @@ const double d5 = 6.7;
 
 /* calculates joint angles from Cartesian position
 */
-int ik_calc_IK(xQueueHandle qMOVE ,ik_cart_pos_s position){
+int ik_calc_IK(ik_cart_pos_s position, msg_message_s* msgMessage[3]){
 
-		double xc, yc,zc,q1,q22,q32;
+	double xc, yc,zc,q1,q22,q32;
+	int servoReturn = ECD_ERROR;
 #if IK_DEBUG
-		double tq1 = 0;
-		double tq22 = 0;
-		double tq32 = 0;
+	double tq1 = 0;
+	double tq22 = 0;
+	double tq32 = 0;
 #endif
-		msg_message_s msgMessage;
 
-		/*The current pwm value of each servo*/
-		unsigned int pos[4];
-		unsigned int x;
-		unsigned int goal[4];
-		signed int longest_distance=0;
-		float longest_time;
-		unsigned int speed[4];
+	/*The current pwm value of each servo*/
+	unsigned int pos[4];
+	unsigned int x;
+	unsigned int goal[4];
+	signed int longest_distance=0;
+	float longest_time;
+	unsigned int speed[4];
 		
 		
-		if(sqrt(pow(position.x_pos,2)+pow(position.y_pos,2)+pow(position.z_pos,2))>(l2+l3+d5)){/*check for valid input*/
-				//printf("Desired position outside of workspace.");
-			return ECD_ERROR;
-			}
+	if(sqrt(pow(position.x_pos,2)+pow(position.y_pos,2)+pow(position.z_pos,2))>(l2+l3+d5)){/*check for valid input*/
+	//printf("Desired position outside of workspace.");
+		return ECD_ERROR;
+	}
 
 
-		//theta 1(rotation around base)
-		q1  = atan2(position.y_pos,position.x_pos);
+	//theta 1(rotation around base)
+	q1  = atan2(position.y_pos,position.x_pos);
 
 
-		//Find the wrist position so that we can use these as our goal x,y,z coordinates
-		xc = position.x_pos - d5*cos(q1);
-		yc = position.y_pos - d5*sin(q1);
-		zc = position.z_pos;
-		//printf("Wrist position: (%.3f,%.3f,%.3f)\n",xc,yc,zc);
+	//Find the wrist position so that we can use these as our goal x,y,z coordinates
+	xc = position.x_pos - d5*cos(q1);
+	yc = position.y_pos - d5*sin(q1);
+	zc = position.z_pos;
+	//printf("Wrist position: (%.3f,%.3f,%.3f)\n",xc,yc,zc);
 
-		/*Only solution 2 is used as solution 1 always produces a negative q2
-		 * which isn't a possible configuration for this arm*/
+	/*Only solution 2 is used as solution 1 always produces a negative q2
+	 * which isn't a possible configuration for this arm*/
 
 
-		//set 2
-		q32 = atan2(-sqrt(1-pow((pow(xc,2)+pow(yc,2)+pow(zc,2)-pow(l2,2)-pow(l3,2))/(2*l2*l3),2)),((pow(xc,2)+pow(yc,2)+pow(zc,2)-pow(l2,2)-pow(l3,2))/(2*l2*l3)));
-		q22 = -atan2(((l3*sin(q32))/sqrt(pow(xc,2)+pow(yc,2)+pow(zc,2))),+sqrt(1-pow((l3*sin(q32))/sqrt(pow(xc,2)+pow(yc,2)+pow(zc,2)),2)))+atan2(zc,sqrt(pow(xc,2)+pow(yc,2)));
-
+	//set 2
+	q32 = atan2(-sqrt(1-pow((pow(xc,2)+pow(yc,2)+pow(zc,2)-pow(l2,2)-pow(l3,2))/(2*l2*l3),2)),((pow(xc,2)+pow(yc,2)+pow(zc,2)-pow(l2,2)-pow(l3,2))/(2*l2*l3)));
+	q22 = -atan2(((l3*sin(q32))/sqrt(pow(xc,2)+pow(yc,2)+pow(zc,2))),+sqrt(1-pow((l3*sin(q32))/sqrt(pow(xc,2)+pow(yc,2)+pow(zc,2)),2)))+atan2(zc,sqrt(pow(xc,2)+pow(yc,2)));
 #if 0 //move all servos at the same speed
-				//solution 2
-				printf("Angles: q1 = %f, q2 = %f, q3 = %f\n",(q1*RAD2DEG),(q22*RAD2DEG),(q32*RAD2DEG));
-				msgMessage.messageID = M_MOVE_IK;
-				ik_rad_to_servo(&data_temp,q1,S_MAX_0, S_MIN_0, Q_MAX_0, Q_MIN_0);
-				msgMessage.messageDATA = (((M_MOVE_SERVO4<<1) & M_MOVE_SERVOMASK_IK) | (((data_temp - PWM_OFFSET)<<M_MOVE_PWMOFFSET_IK) & M_MOVE_PWMMASK_IK)); /**/
-				msg_send(qMOVE,msgMessage);
+	//solution 2
+	printf("Angles: q1 = %f, q2 = %f, q3 = %f\n",(q1*RAD2DEG),(q22*RAD2DEG),(q32*RAD2DEG));
+	msgMessage.messageID = M_MOVE_IK;
+	ik_rad_to_servo(&data_temp,q1,S_MAX_0, S_MIN_0, Q_MAX_0, Q_MIN_0);
+	msgMessage.messageDATA = (((M_MOVE_SERVO4<<1) & M_MOVE_SERVOMASK_IK) | (((data_temp - PWM_OFFSET)<<M_MOVE_PWMOFFSET_IK) & M_MOVE_PWMMASK_IK)); /**/
+	msg_send(qMOVE,msgMessage);
 
 
-				msgMessage.messageID = M_MOVE_IK;
-				ik_rad_to_servo(&data_temp,q22,S_MAX_1, S_MIN_1, Q_MAX_1, Q_MIN_1);
-				msgMessage.messageDATA = (((M_MOVE_SERVO3<<1) & M_MOVE_SERVOMASK_IK) | (((data_temp - PWM_OFFSET)<<M_MOVE_PWMOFFSET_IK) & M_MOVE_PWMMASK_IK));
-				msg_send(qMOVE,msgMessage);
+	msgMessage.messageID = M_MOVE_IK;
+	ik_rad_to_servo(&data_temp,q22,S_MAX_1, S_MIN_1, Q_MAX_1, Q_MIN_1);
+	msgMessage.messageDATA = (((M_MOVE_SERVO3<<1) & M_MOVE_SERVOMASK_IK) | (((data_temp - PWM_OFFSET)<<M_MOVE_PWMOFFSET_IK) & M_MOVE_PWMMASK_IK));
+	msg_send(qMOVE,msgMessage);
 
 
-				msgMessage.messageID = M_MOVE_IK;
-				ik_rad_to_servo(&data_temp,q32,S_MAX_2, S_MIN_2, Q_MAX_2, Q_MIN_2);
-				msgMessage.messageDATA = (((M_MOVE_SERVO2<<1) & M_MOVE_SERVOMASK_IK) | (((data_temp - PWM_OFFSET)<<M_MOVE_PWMOFFSET_IK) & M_MOVE_PWMMASK_IK));
-				msg_send(qMOVE,msgMessage);
+	msgMessage.messageID = M_MOVE_IK;
+	ik_rad_to_servo(&data_temp,q32,S_MAX_2, S_MIN_2, Q_MAX_2, Q_MIN_2);
+	msgMessage.messageDATA = (((M_MOVE_SERVO2<<1) & M_MOVE_SERVOMASK_IK) | (((data_temp - PWM_OFFSET)<<M_MOVE_PWMOFFSET_IK) & M_MOVE_PWMMASK_IK));
+	msg_send(qMOVE,msgMessage);
 
 #else //change each servos movement speed so that the movement time is equal to the largest move - all servos start and finish at the same time
-				printf("Angles: q1 = %f, q2 = %f, q3 = %f\n",(q1*RAD2DEG),(q22*RAD2DEG),(q32*RAD2DEG));
+	printf("Angles: q1 = %f, q2 = %f, q3 = %f\n",(q1*RAD2DEG),(q22*RAD2DEG),(q32*RAD2DEG));
 
-				ik_rad_to_servo(&goal[M_MOVE_SERVO4],q1,S_MAX_0, S_MIN_0, Q_MAX_0, Q_MIN_0);
-	#if IK_DEBUG //revert the servo values back to degrees and print them
-				ik_servo_to_rad(&tq1,goal[M_MOVE_SERVO4],S_MAX_0, S_MIN_0, Q_MAX_0, Q_MIN_0);
-				printf("tq1: %f\n",tq1*RAD2DEG);
-	#endif
-				ik_rad_to_servo(&goal[M_MOVE_SERVO3],q22,S_MAX_1, S_MIN_1, Q_MAX_1, Q_MIN_1);
-	#if IK_DEBUG
-				ik_servo_to_rad(&tq22,goal[M_MOVE_SERVO3],S_MAX_1, S_MIN_1, Q_MAX_1, Q_MIN_1);
-				printf("tq22: %f\n",tq22*RAD2DEG);
-	#endif
-				ik_rad_to_servo(&goal[M_MOVE_SERVO2],q32,S_MAX_2, S_MIN_2, Q_MAX_2, Q_MIN_2);
-	#if IK_DEBUG
-				ik_servo_to_rad(&tq32,goal[M_MOVE_SERVO2],S_MAX_2, S_MIN_2, Q_MAX_2, Q_MIN_2);
-				printf("tq32: %f\n",tq32*RAD2DEG);
+	if(ik_rad_to_servo(&goal[M_MOVE_SERVO4],q1,S_MAX_0, S_MIN_0, Q_MAX_0, Q_MIN_0) == ECD_OK){
+		servoReturn = ECD_OK;
+	}
 
-				printf("servo values: s-q1: %d, s-q2: %d, s-q3: %d\n",goal[Q1],goal[Q2], goal[Q3]);
-				printf("recalc Angles: q1 = %f, q2 = %f, q3 = %f\n",(tq1*RAD2DEG),(tq22*RAD2DEG),(tq32*RAD2DEG));
-	#endif
+#if IK_DEBUG //revert the servo values back to degrees and print them
+	ik_servo_to_rad(&tq1,goal[M_MOVE_SERVO4],S_MAX_0, S_MIN_0, Q_MAX_0, Q_MIN_0);
+	printf("tq1: %f\n",tq1*RAD2DEG);
+#endif
 
-				for(x=1;x<PWM_COUNT;x++){ /*find the longest distance to move from all servos and calculate the time needed for that move*/
-					pwm_get_pos(x,&pos[x]); /*get the currrent pwm position for servos all but the gripper*/
-					if(abs((goal[x]-pos[x]))> longest_distance){
-						longest_distance = abs(goal[x]-pos[x]);
-					}
-					longest_time = (float)longest_distance/MOVE_SPEC_STD_SPEED;
+	if(ik_rad_to_servo(&goal[M_MOVE_SERVO3],q22,S_MAX_1, S_MIN_1, Q_MAX_1, Q_MIN_1) == ECD_OK){
+		servoReturn = ECD_OK;
+	}
+#if IK_DEBUG
+	ik_servo_to_rad(&tq22,goal[M_MOVE_SERVO3],S_MAX_1, S_MIN_1, Q_MAX_1, Q_MIN_1);
+	printf("tq22: %f\n",tq22*RAD2DEG);
+#endif
+	if(ik_rad_to_servo(&goal[M_MOVE_SERVO2],q32,S_MAX_2, S_MIN_2, Q_MAX_2, Q_MIN_2) == ECD_OK){
+		servoReturn = ECD_OK;
+	}
+#if IK_DEBUG
+	ik_servo_to_rad(&tq32,goal[M_MOVE_SERVO2],S_MAX_2, S_MIN_2, Q_MAX_2, Q_MIN_2);
+	printf("tq32: %f\n",tq32*RAD2DEG);
 
-				}
+	printf("servo values: s-q1: %d, s-q2: %d, s-q3: %d\n",goal[Q1],goal[Q2], goal[Q3]);
+	printf("recalc Angles: q1 = %f, q2 = %f, q3 = %f\n",(tq1*RAD2DEG),(tq22*RAD2DEG),(tq32*RAD2DEG));
+#endif
 
-				for(x=1;x<PWM_COUNT;x++){/*update the servo movement speeds, so that the time is the same on all of them*/
-				speed[x] = (unsigned int)((abs(goal[x]-pos[x]) / longest_time) / MOVE_IK_MSG_COMPRESSION); /*M_MOVE_SPECSPEEDMASK_IK / MOVE_IK_MSG_COMPRESSION is < 2^11. Ergo it fits within the msgData*/
-				}
-						msgMessage.messageID = M_MOVE_IK;
-						//msgMessage.messageDATA = (((M_MOVE_SERVO4<<1) & M_MOVE_SERVOMASK_IK) | (((goal[M_MOVE_SERVO4] - PWM_OFFSET)<<M_MOVE_PWMOFFSET_IK) & M_MOVE_PWMMASK_IK) | ((speed[M_MOVE_SERVO4]<<M_MOVE_SPECSPEEDOFFSET_IK) & M_MOVE_SPECSPEEDMASK_IK)); /**/
-						msgMessage.messageDATA = M_IK_SERVO_MESSAGE(M_MOVE_SERVO4, goal[M_MOVE_SERVO4], speed[M_MOVE_SERVO4]);
-						msg_send(qMOVE,msgMessage);
-
-
-						msgMessage.messageID = M_MOVE_IK;
-						//msgMessage.messageDATA = (((M_MOVE_SERVO3<<1) & M_MOVE_SERVOMASK_IK) | (((goal[M_MOVE_SERVO3] - PWM_OFFSET)<<M_MOVE_PWMOFFSET_IK) & M_MOVE_PWMMASK_IK) | ((speed[M_MOVE_SERVO3]<<M_MOVE_SPECSPEEDOFFSET_IK) & M_MOVE_SPECSPEEDMASK_IK));
-						msgMessage.messageDATA = M_IK_SERVO_MESSAGE(M_MOVE_SERVO3, goal[M_MOVE_SERVO3], speed[M_MOVE_SERVO3]);
-						msg_send(qMOVE,msgMessage);
-
-
-						msgMessage.messageID = M_MOVE_IK;
-						//msgMessage.messageDATA = (((M_MOVE_SERVO2<<1) & M_MOVE_SERVOMASK_IK) | (((goal[M_MOVE_SERVO2] - PWM_OFFSET)<<M_MOVE_PWMOFFSET_IK) & M_MOVE_PWMMASK_IK) | ((speed[M_MOVE_SERVO2]<<M_MOVE_SPECSPEEDOFFSET_IK) & M_MOVE_SPECSPEEDMASK_IK));
-						msgMessage.messageDATA = M_IK_SERVO_MESSAGE(M_MOVE_SERVO2, goal[M_MOVE_SERVO2], speed[M_MOVE_SERVO2]);
-						msg_send(qMOVE,msgMessage);
-
-		#endif
+	for(x=1;x<PWM_COUNT;x++){ /*find the longest distance to move from all servos and calculate the time needed for that move*/
+		pwm_get_pos(x,&pos[x]); /*get the currrent pwm position for servos all but the gripper*/
+		if(abs((goal[x]-pos[x]))> longest_distance){
+			longest_distance = abs(goal[x]-pos[x]);
+		}
+		longest_time = (float)longest_distance/MOVE_SPEC_STD_SPEED;
+	}
+	for(x=1;x<PWM_COUNT;x++){/*update the servo movement speeds, so that the time is the same on all of them*/
+		speed[x] = (unsigned int)((abs(goal[x]-pos[x]) / longest_time) / MOVE_IK_MSG_COMPRESSION); /*M_MOVE_SPECSPEEDMASK_IK / MOVE_IK_MSG_COMPRESSION is < 2^11. Ergo it fits within the msgData*/
+	}
+	msgMessage[0]->messageID = M_MOVE_IK;
+	//msgMessage.messageDATA = (((M_MOVE_SERVO4<<1) & M_MOVE_SERVOMASK_IK) | (((goal[M_MOVE_SERVO4] - PWM_OFFSET)<<M_MOVE_PWMOFFSET_IK) & M_MOVE_PWMMASK_IK) | ((speed[M_MOVE_SERVO4]<<M_MOVE_SPECSPEEDOFFSET_IK) & M_MOVE_SPECSPEEDMASK_IK)); /**/
+	msgMessage[0]->messageDATA = M_IK_SERVO_MESSAGE(M_MOVE_SERVO4, goal[M_MOVE_SERVO4], speed[M_MOVE_SERVO4]);
 
 
-		return ECD_OK;
+	msgMessage[1]->messageID = M_MOVE_IK;
+	//msgMessage.messageDATA = (((M_MOVE_SERVO3<<1) & M_MOVE_SERVOMASK_IK) | (((goal[M_MOVE_SERVO3] - PWM_OFFSET)<<M_MOVE_PWMOFFSET_IK) & M_MOVE_PWMMASK_IK) | ((speed[M_MOVE_SERVO3]<<M_MOVE_SPECSPEEDOFFSET_IK) & M_MOVE_SPECSPEEDMASK_IK));
+	msgMessage[1]->messageDATA = M_IK_SERVO_MESSAGE(M_MOVE_SERVO3, goal[M_MOVE_SERVO3], speed[M_MOVE_SERVO3]);
+
+
+	msgMessage[2]->messageID = M_MOVE_IK;
+	//msgMessage.messageDATA = (((M_MOVE_SERVO2<<1) & M_MOVE_SERVOMASK_IK) | (((goal[M_MOVE_SERVO2] - PWM_OFFSET)<<M_MOVE_PWMOFFSET_IK) & M_MOVE_PWMMASK_IK) | ((speed[M_MOVE_SERVO2]<<M_MOVE_SPECSPEEDOFFSET_IK) & M_MOVE_SPECSPEEDMASK_IK));
+	msgMessage[2]->messageDATA = M_IK_SERVO_MESSAGE(M_MOVE_SERVO2, goal[M_MOVE_SERVO2], speed[M_MOVE_SERVO2]);
+
+#endif
+
+	return servoReturn; /**/
 }
 
 
@@ -227,4 +228,39 @@ static int ik_servo_to_rad(double * rad,unsigned int servoVal,int servoMax, int 
         }
 
     }
+
+int ik_move_goal(xQueueHandle qMOVE, ik_cart_pos_s goal){/*tries to move the arm to a goal position regardless of it being within the workspace */
+	msg_message_s msgMessage[3];
+	int rVal = ECD_ERROR;
+	rVal =  ik_calc_IK(goal, &msgMessage); /*Calculate the values*/
+
+	if(msg_send(qMOVE,msgMessage[0]) == ECD_OK){/*send them off to the servos*/
+		rVal = ECD_OK;
+	}
+	if(msg_send(qMOVE,msgMessage[1]) == ECD_OK){
+		rVal = ECD_OK;
+	}
+	if(msg_send(qMOVE,msgMessage[2]) == ECD_OK){
+		rVal = ECD_OK;
+	}
+
+	return rVal;
+}
+
+int ik_move_delta(ik_cart_pos_s delta){/*moves the arm along the x, y and z axis if it is possible.*/
+	ik_cart_pos_s current_position;
+
+
+	ik_calc_FK(&current_position);
+
+
+
+	if(1){
+
+		return ECD_OK;
+	}else{
+
+		return ECD_ERROR;
+	}
+}
 
