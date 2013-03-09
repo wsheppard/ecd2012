@@ -8,6 +8,9 @@
  *      This is the latest version
  */
  
+#ifndef M_PI
+#define M_PI	3.14159265358979323846
+#endif
  /* Standard includes. */
 #include <stdio.h>
 #include <stdlib.h>

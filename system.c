@@ -1,0 +1,1 @@
+/* Dummy methods to make emulator work */

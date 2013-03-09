@@ -135,15 +135,20 @@
     <ClCompile Include="display.c" />
     <ClCompile Include="ik.c" />
     <ClCompile Include="keypad.c" />
+    <ClCompile Include="led.c" />
     <ClCompile Include="main.c">
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="manager.c" />
+    <ClCompile Include="menu.c" />
     <ClCompile Include="messaging.c" />
     <ClCompile Include="movement.c" />
     <ClCompile Include="pwm.c" />
+    <ClCompile Include="replay.c" />
+    <ClCompile Include="sigmoid.c" />
+    <ClCompile Include="system.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\FreeRTOS\Source\portable\MSVC-MingW\portmacro.h" />
@@ -152,11 +157,17 @@
     <ClInclude Include="FreeRTOSConfig.h" />
     <ClInclude Include="ik.h" />
     <ClInclude Include="keypad.h" />
+    <ClInclude Include="led.h" />
     <ClInclude Include="manager.h" />
+    <ClInclude Include="menu.h" />
     <ClInclude Include="messages.h" />
     <ClInclude Include="messaging.h" />
     <ClInclude Include="movement.h" />
     <ClInclude Include="pwm.h" />
+    <ClInclude Include="replay.h" />
+    <ClInclude Include="sigmoid.h" />
+    <ClInclude Include="system.h" />
+    <ClInclude Include="test.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\FreeRTOS\Source\readme.txt" />

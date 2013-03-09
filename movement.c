@@ -11,7 +11,7 @@
 #include "math.h"
 #include <system.h>
 #include <stdlib.h>
-#include <unistd.h>
+//#include <unistd.h>
 #include "sigmoid.h"
 #include "pwm.h"
 
@@ -142,7 +142,6 @@ static void move_main_task(void* params) {
 /* This function is served to each of the servo tasks */
 static void move_servo_task(void *params) {
 	unsigned int pos[4];
-	int x = 0;
 	int state[4];
 
 	move_servoData_s servoData;
@@ -342,7 +341,6 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, int speed) {
 	unsigned int initialposition;
 	signed int distance;
 	float m, totaltime;
-	int n = 0;
 	float res = 0;
 	unsigned int latency_ms = 0, tick = 0;
 

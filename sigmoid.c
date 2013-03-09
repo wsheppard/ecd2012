@@ -39,19 +39,19 @@ int test_sigmoid(void){
 
 	printf("Starting sigmoid test....\n");
 
-	printf("Sigmoid block test register returns [%X].\n", IORD(EULERBLOCK_0_BASE,3));
+//	printf("Sigmoid block test register returns [%X].\n", IORD(EULERBLOCK_0_BASE,3));
 
 	printf("Floats have byte count of [%d].\n",(int)sizeof(float));
 
 	input.fl = M;
 
-	IOWR(EULERBLOCK_0_BASE,0,input.ui);
+//	IOWR(EULERBLOCK_0_BASE,0,input.ui);
 
 	/* Check it's corrent */
-	input.ui = IORD(EULERBLOCK_0_BASE, 0);
+//	input.ui = IORD(EULERBLOCK_0_BASE, 0);
 
 
-	printf("Inputs are M=[%4.2f], time=[%4.2f].\n",M,time);
+//	printf("Inputs are M=[%4.2f], time=[%4.2f].\n",M,time);
 
 	printf("IORD returns [%4.8f].\n", input.fl);
 
@@ -93,11 +93,11 @@ int sigmoid(float M, float time, float*result) {
 			 * other servos are trying to use it right at this moment then maybe we've got problems.
 			 * We could make this a CRITICAL section...*/
 
-			IOWR(EULERBLOCK_0_BASE,0,input.ui);
+			//IOWR(EULERBLOCK_0_BASE,0,input.ui);
 
-			while (IORD(EULERBLOCK_0_BASE,2)==0);
+			//while (IORD(EULERBLOCK_0_BASE,2)==0);
 
-			output.ui = IORD(EULERBLOCK_0_BASE, 1);
+			//output.ui = IORD(EULERBLOCK_0_BASE, 1);
 
 			xSemaphoreGive( xSemaphore);
 
@@ -114,8 +114,8 @@ int sigmoid(float M, float time, float*result) {
 		return ECD_ERROR;
 		}
 
-	*result = 1.0/(1 + output.fl);
-
+	//*result = 1.0/(1 + output.fl);
+	*result=0.5;
 	return ECD_OK;
 }
 

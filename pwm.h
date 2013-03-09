@@ -23,7 +23,7 @@ enum {
 	PWM_SERVO2,
 	PWM_SERVO3,
 	PWM_SERVO4,
-	PWM_COUNT,
+	PWM_COUNT
 };
 
 /* Struct for servo thread data */
