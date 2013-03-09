@@ -39,7 +39,7 @@ const double d5 = 6.7;
 
 /* calculates joint angles from Cartesian position
 */
-int ik_calc_IK(ik_cart_pos_s position, msg_message_s* msgMessage[3]){
+int ik_calc_IK(ik_cart_pos_s position, msg_message_s *msgMessage0, msg_message_s *msgMessage1, msg_message_s *msgMessage2 ){
 
 	double xc, yc,zc,q1,q22,q32;
 	int servoReturn = ECD_ERROR;
@@ -141,19 +141,19 @@ int ik_calc_IK(ik_cart_pos_s position, msg_message_s* msgMessage[3]){
 	for(x=1;x<PWM_COUNT;x++){/*update the servo movement speeds, so that the time is the same on all of them*/
 		speed[x] = (unsigned int)((abs(goal[x]-pos[x]) / longest_time) / MOVE_IK_MSG_COMPRESSION); /*M_MOVE_SPECSPEEDMASK_IK / MOVE_IK_MSG_COMPRESSION is < 2^11. Ergo it fits within the msgData*/
 	}
-	msgMessage[0]->messageID = M_MOVE_IK;
+	msgMessage0->messageID = M_MOVE_IK;
 	//msgMessage.messageDATA = (((M_MOVE_SERVO4<<1) & M_MOVE_SERVOMASK_IK) | (((goal[M_MOVE_SERVO4] - PWM_OFFSET)<<M_MOVE_PWMOFFSET_IK) & M_MOVE_PWMMASK_IK) | ((speed[M_MOVE_SERVO4]<<M_MOVE_SPECSPEEDOFFSET_IK) & M_MOVE_SPECSPEEDMASK_IK)); /**/
-	msgMessage[0]->messageDATA = M_IK_SERVO_MESSAGE(M_MOVE_SERVO4, goal[M_MOVE_SERVO4], speed[M_MOVE_SERVO4]);
+	msgMessage0->messageDATA = M_IK_SERVO_MESSAGE(M_MOVE_SERVO4, goal[M_MOVE_SERVO4], speed[M_MOVE_SERVO4]);
 
 
-	msgMessage[1]->messageID = M_MOVE_IK;
+	msgMessage1->messageID = M_MOVE_IK;
 	//msgMessage.messageDATA = (((M_MOVE_SERVO3<<1) & M_MOVE_SERVOMASK_IK) | (((goal[M_MOVE_SERVO3] - PWM_OFFSET)<<M_MOVE_PWMOFFSET_IK) & M_MOVE_PWMMASK_IK) | ((speed[M_MOVE_SERVO3]<<M_MOVE_SPECSPEEDOFFSET_IK) & M_MOVE_SPECSPEEDMASK_IK));
-	msgMessage[1]->messageDATA = M_IK_SERVO_MESSAGE(M_MOVE_SERVO3, goal[M_MOVE_SERVO3], speed[M_MOVE_SERVO3]);
+	msgMessage1->messageDATA = M_IK_SERVO_MESSAGE(M_MOVE_SERVO3, goal[M_MOVE_SERVO3], speed[M_MOVE_SERVO3]);
 
 
-	msgMessage[2]->messageID = M_MOVE_IK;
+	msgMessage2->messageID = M_MOVE_IK;
 	//msgMessage.messageDATA = (((M_MOVE_SERVO2<<1) & M_MOVE_SERVOMASK_IK) | (((goal[M_MOVE_SERVO2] - PWM_OFFSET)<<M_MOVE_PWMOFFSET_IK) & M_MOVE_PWMMASK_IK) | ((speed[M_MOVE_SERVO2]<<M_MOVE_SPECSPEEDOFFSET_IK) & M_MOVE_SPECSPEEDMASK_IK));
-	msgMessage[2]->messageDATA = M_IK_SERVO_MESSAGE(M_MOVE_SERVO2, goal[M_MOVE_SERVO2], speed[M_MOVE_SERVO2]);
+	msgMessage2->messageDATA = M_IK_SERVO_MESSAGE(M_MOVE_SERVO2, goal[M_MOVE_SERVO2], speed[M_MOVE_SERVO2]);
 
 #endif
 
@@ -232,33 +232,38 @@ static int ik_servo_to_rad(double * rad,unsigned int servoVal,int servoMax, int 
 int ik_move_goal(xQueueHandle qMOVE, ik_cart_pos_s goal){/*tries to move the arm to a goal position regardless of it being within the workspace */
 	msg_message_s msgMessage[3];
 	int rVal = ECD_ERROR;
-	rVal =  ik_calc_IK(goal, &msgMessage); /*Calculate the values*/
+	rVal =  ik_calc_IK(goal, &msgMessage[0], &msgMessage[1], &msgMessage[2]); /*Calculate the values*/
 
-	if(msg_send(qMOVE,msgMessage[0]) == ECD_OK){/*send them off to the servos*/
-		rVal = ECD_OK;
-	}
-	if(msg_send(qMOVE,msgMessage[1]) == ECD_OK){
-		rVal = ECD_OK;
-	}
-	if(msg_send(qMOVE,msgMessage[2]) == ECD_OK){
-		rVal = ECD_OK;
-	}
+	msg_send(qMOVE,msgMessage[0]);/*send them off to the servos*/
+	msg_send(qMOVE,msgMessage[1]);
+	msg_send(qMOVE,msgMessage[2]);
 
 	return rVal;
 }
 
-int ik_move_delta(ik_cart_pos_s delta){/*moves the arm along the x, y and z axis if it is possible.*/
-	ik_cart_pos_s current_position;
+int ik_move_delta(xQueueHandle qMOVE, ik_cart_pos_s delta){/*moves the arm along the x, y and z axis if it is possible.*/
+	ik_cart_pos_s current_position, next_position;
+	msg_message_s msgMessage[3];
+	int rVal = ECD_ERROR;
+
+	ik_calc_FK(&current_position); /*find the current position*/
+
+	next_position.x_pos = current_position.x_pos + delta.x_pos; /*calculate the next position to be moved to.*/
+	next_position.y_pos = current_position.y_pos + delta.y_pos;
+	next_position.z_pos = current_position.z_pos + delta.z_pos;
+
+	/*calculate the pwm values needed to reach the next position and check if we are within the workspace boundaries of our arm*/
+	rVal = ik_calc_IK(next_position, &msgMessage[0], &msgMessage[1], &msgMessage[2]);
 
 
-	ik_calc_FK(&current_position);
-
-
-
-	if(1){
+	if(rVal == ECD_OK){/*if we can move to that position*/
+		msg_send(qMOVE,msgMessage[0]);/*send the commands off to the servos*/
+		msg_send(qMOVE,msgMessage[1]);
+		msg_send(qMOVE,msgMessage[2]);
 
 		return ECD_OK;
-	}else{
+	}else{/*if we cannot move dont send the commands but print an error message*/
+		printf("Cannot move to that position\n");
 
 		return ECD_ERROR;
 	}
