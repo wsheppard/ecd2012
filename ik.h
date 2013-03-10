@@ -21,6 +21,14 @@ Inverse kinematics
 #define Q_MAX_2 (-35*M_PI/180)
 #define Q_MIN_2 (25*M_PI/180)
 
+#define Q1 3
+#define Q2 2
+#define Q3 1
+#define Q4 0
+
+#define RAD2DEG 180/M_PI
+
+
 
 /* cartesian position of end effector*/
 typedef struct {
@@ -31,6 +39,8 @@ typedef struct {
 
 
 
-int ik_calc_IK(xQueueHandle qMOVE,ik_cart_pos_s);
-
+int ik_calc_IK(ik_cart_pos_s position, msg_message_s *msgMessage0, msg_message_s *msgMessage1, msg_message_s *msgMessage2 );
+int ik_calc_FK(ik_cart_pos_s*);
+int ik_move_goal(xQueueHandle qMOVE, ik_cart_pos_s goal);
+int ik_move_delta(xQueueHandle qMOVE, ik_cart_pos_s delta);
 #endif

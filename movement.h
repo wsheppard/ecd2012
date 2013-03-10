@@ -9,11 +9,11 @@
 #include "ECD.h"
 #include "sigmoid.h"
 
+
 /* Config */
 
 /* Latencies are in ticks of the system timer */
 #define MOVE_LATENCY 10
-
 
 
 #define SERVO_COUNT PWM_COUNT
@@ -25,7 +25,8 @@
 
 /* For specific movement */
 #define MOVE_SPEC_STD_SPEED 12500      //the time allowed for all movements - random at 50000pwmvalues/4s
-
+#define MOVE_IK_MSG_COMPRESSION 6.11   // the value that the speed gets divided by in the ik module so that it fits in the 32bit messageData
+										// It gets multiplied by it in the movement module again.
 
 
 

@@ -173,16 +173,16 @@ static void move_servo_task(void *params) {
 		case M_MOVE_IK:
 			ServoData[servoData.iServoID].state = MOVE_STATE_IK;
 
-			printf("Servo %d PWM value: %d \n", servoData.iServoID,(((msgMessage.messageDATA & M_MOVE_PWMMASK_IK)>> M_MOVE_PWMOFFSET_IK) + 50000));
+			printf("Servo %d PWM value: %d \n", servoData.iServoID, M_IK_SERVO_GOAL(msgMessage.messageDATA));
 
-			if ((msgMessage.messageDATA & M_MOVE_SPECSPEEDMASK_IK)>> M_MOVE_SPECSPEEDOFFSET_IK) {/*if a movement speed is defined */
+			if (M_IK_SERVO_SPEED(msgMessage.messageDATA)) {/*if a movement speed is defined */
 
 
 #ifndef IK_ONLY
 				move_servo_sigmoid(
 						&servoData,
-						(((msgMessage.messageDATA & M_MOVE_PWMMASK_IK)>>M_MOVE_PWMOFFSET_IK)+50000),
-						(((msgMessage.messageDATA & M_MOVE_SPECSPEEDMASK_IK)>>M_MOVE_SPECSPEEDOFFSET_IK)*6.11)
+						M_IK_SERVO_GOAL(msgMessage.messageDATA),
+						M_IK_SERVO_SPEED(msgMessage.messageDATA)
 				);
 
 
@@ -206,7 +206,7 @@ static void move_servo_task(void *params) {
 
 #else
 			pwm_set_pos(servoData.iServoID,
-					(((msgMessage.messageDATA & M_MOVE_PWMMASK_IK)>> M_MOVE_PWMOFFSET_IK) + 50000));
+					M_IK_SERVO_GOAL(msgMessage.messageDATA));
 #endif
 
 			} else{
@@ -215,7 +215,7 @@ static void move_servo_task(void *params) {
 
 				move_servo_sigmoid(
 						&servoData,
-						(((msgMessage.messageDATA & M_MOVE_PWMMASK_IK)>>M_MOVE_PWMOFFSET_IK)+50000),
+						M_IK_SERVO_GOAL(msgMessage.messageDATA),
 						MOVE_SPEC_STD_SPEED //M_MOVE_SPEC_SPEED(msgMessage.messageDATA)
 				);
 
@@ -239,7 +239,7 @@ static void move_servo_task(void *params) {
 
 #else
 				pwm_set_pos(servoData.iServoID,
-						(((msgMessage.messageDATA & M_MOVE_PWMMASK_IK)>> M_MOVE_PWMOFFSET_IK) + 50000));
+						M_IK_SERVO_GOAL(msgMessage.messageDATA));
 #endif
 			}
 			ServoData[servoData.iServoID].state = MOVE_STATE_STOP;
