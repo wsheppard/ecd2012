@@ -363,7 +363,7 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, int speed) {
 	 * but it can't be negative. */
 	totaltime = fabs((float) distance) / (float) speed;
 
-	totaltime_ms = totaltime * 1000;
+	totaltime_ms = totaltime * configTICK_RATE_HZ;
 
 	/* M is the half-way point which is passed to the sigmoid function */
 	m = totaltime_ms / 2;

@@ -52,15 +52,16 @@ int man_start(void){
 
 	msg_newQueue(&qMENU);
 	
-	replay_init(qMOVE,qREPLAY,qKP,qMENU);
+	replay_init(qMOVE,qREPLAY,qMENU);
 	menu_init(qMOVE,qREPLAY,qMENU);
+	ik_init(qMOVE);
 		/* Start replay task */
 
 	pwm_init();
 	display_init();
 
 	/* Now start the manager task */
-	xTaskCreate( man_main, (fStr)"ManagerTask", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL);
+	xTaskCreate( man_main, (fStr)"ManagerTask", configMINIMAL_STACK_SIZE, NULL, 2, NULL);
 
 	return ECD_OK;
 }
@@ -91,7 +92,7 @@ static void man_main(void*params){
 	stopIK.z_pos = -9.08;
 
 
-	ik_move_goal(qMOVE,centerIK);
+	ik_move_goal(centerIK);
 
 
 	for (;;) {
@@ -115,7 +116,7 @@ static void man_main(void*params){
 			if (changed & 1){		
 				if(state & 1){
 						printf("Key at pos %d pressed.\n", shifted);
-						if (man_check_menu(state,shifted) == 1){
+						if (men_check_menu(state,shifted) == 1){
 						man_key_down(shifted);
 						if(shifted == 8){
 							if(do_ik_once){
@@ -123,7 +124,7 @@ static void man_main(void*params){
 								printf("current_pos: x = %f, y = %f, z = %f\n",current_pos.x_pos,current_pos.y_pos,current_pos.z_pos);
 
 								printf("Calculate inverse kinematics for the start position: x = %f, y = %f, z = %f\n",startIK.x_pos,startIK.y_pos,startIK.z_pos);
-								ik_move_goal(qMOVE,startIK);
+								ik_move_goal(startIK);
 								do_ik_once = 0;
 							}
 						}
@@ -133,7 +134,7 @@ static void man_main(void*params){
 									printf("current_pos: x = %f, y = %f, z = %f\n",current_pos.x_pos,current_pos.y_pos,current_pos.z_pos);
 
 									printf("Calculate inverse kinematics for the stop position: x = %f, y = %f, z = %f\n",stopIK.x_pos,stopIK.y_pos,stopIK.z_pos);
-									ik_move_goal(qMOVE,stopIK);
+									ik_move_goal(stopIK);
 									do_ik_once = 1;
 								}
 							}
@@ -142,7 +143,7 @@ static void man_main(void*params){
 				}
 				else{
 						printf("Key at pos %d released.\n", shifted);
-						if (man_check_menu(state,shifted) == 1){
+						if (men_check_menu(state,shifted) == 1){
 						man_key_up(shifted);
 						}
 
