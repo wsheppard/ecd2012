@@ -2,12 +2,14 @@
 #include "replay.h"
 #include "pwm.h"
 #include "manager.h"
+#include "ik.h"
+#include "math.h"
 
 static xQueueHandle qMOVE;
 static xQueueHandle qREPLAY;
 static xQueueHandle qKP;
 static xQueueHandle qMENU;
-static replay_storage_s replay_storage_array[NUM_REPLAY_SLOTS][NUM_REPLAY_STEPS];
+static replay_storage_s replay_storage_array[NUM_REPLAY_SLOTS][NUM_REPLAY_STEPS]={0};
 
 static void man_stop_all_pwm();
 static void man_replay(void*params);
@@ -17,51 +19,92 @@ int replay_init(xQueueHandle qMoveHandle,xQueueHandle qRHandle,xQueueHandle qMen
 	qMOVE=qMoveHandle;
 	qREPLAY=qRHandle;
 	qMENU=qMenuHandle;
-	xTaskCreate( man_replay, "ReplayTask", configMINIMAL_STACK_SIZE, NULL, 1, NULL);
+	xTaskCreate( man_replay, "ReplayTask", configMINIMAL_STACK_SIZE, NULL, 2, NULL);
 	return ECD_OK;
 }
 
 /* Replay task that block waits on a queue till told to start. It then begins replaying and performing non blocking queries on the queue monitoring for
 stop messages intermittently whilst performing the replay operations*/
 static void man_replay(void*params){
-	int replay_array_position,num_delays,leftover_time,replay_array_slot;
+	int replay_array_position=0,replay_array_slot=0;
+	int num_delays,leftover_time;
+	replay_storage_s replay_mode;
 	msg_message_s msgREPLAY;
+	msg_message_s msgMessage[3];
 	msg_message_s mMessage;
+	unsigned int servo_id;
+	unsigned int initialposition;
+	int speed;
+	signed int distance;
+	float totaltime;
 	for(;;){
 		msg_recv_block(qREPLAY,&msgREPLAY);
 		switch (msgREPLAY.messageID){
 		case REPLAY_START_PLAY:
 			/*initiliase to start of replay array when starting a replay action*/
-			replay_array_position=0;
+			replay_array_position=1;
 			replay_array_slot=msgREPLAY.messageDATA;
-			/*Keep sending commands whilst there are still replay steps left, not end of array and have not recieved stop message*/
-			while((replay_storage_array[replay_array_slot][replay_array_position].state !=REPLAY_END) && 
-				(replay_array_position != (NUM_REPLAY_STEPS+1)) && (msgREPLAY.messageID!=REPLAY_STOP_PLAY)){
-					/*Non blocking wait on Stop messages on replay queue*/
-					msg_recv_noblock(qREPLAY,&msgREPLAY);
-					/* A single delay that is the full length of the period between button presses could result in a larg(ish) period of time between pressing stop
-					and the replay actually stopping. To overcome this I've split the delay into suitable sized chunks and make it check intermittently for stop messages. 
-					It's either this or implementing some other way of directly stopping the pwms. E.G an interrupt */
-					num_delays=replay_storage_array[replay_array_slot][replay_array_position].delayTime / STOP_POLL_DELAY;
-					leftover_time=replay_storage_array[replay_array_slot][replay_array_position].delayTime % STOP_POLL_DELAY;
-					while(num_delays){
-						vTaskDelay(STOP_POLL_DELAY);
+			if ( replay_storage_array[replay_array_slot][0].state ==REPLAY_RT ){
+				/*Keep sending commands whilst there are still replay steps left, not end of array and have not recieved stop message*/
+				while((replay_storage_array[replay_array_slot][replay_array_position].state !=REPLAY_END) && 
+					(replay_array_position != (NUM_REPLAY_STEPS+1)) && (msgREPLAY.messageID!=REPLAY_STOP_PLAY)){
+						/*Non blocking wait on Stop messages on replay queue*/
 						msg_recv_noblock(qREPLAY,&msgREPLAY);
+						/* A single delay that is the full length of the period between button presses could result in a larg(ish) period of time between pressing stop
+						and the replay actually stopping. To overcome this I've split the delay into suitable sized chunks and make it check intermittently for stop messages. 
+						It's either this or implementing some other way of directly stopping the pwms. E.G an interrupt */
+						num_delays=replay_storage_array[replay_array_slot][replay_array_position].delayTime / STOP_POLL_DELAY;
+						leftover_time=replay_storage_array[replay_array_slot][replay_array_position].delayTime % STOP_POLL_DELAY;
+						while(num_delays){
+							vTaskDelay(STOP_POLL_DELAY);
+							msg_recv_noblock(qREPLAY,&msgREPLAY);
+							if (msgREPLAY.messageID==REPLAY_STOP_PLAY)
+								break;
+							num_delays--;
+						}
 						if (msgREPLAY.messageID==REPLAY_STOP_PLAY)
 							break;
-						num_delays--;
-					}
-					if (msgREPLAY.messageID==REPLAY_STOP_PLAY)
-						break;
-					vTaskDelay(leftover_time);
-					if (replay_storage_array[replay_array_slot][replay_array_position].state == REPLAY_BUTTON_UP){
-						man_key_up(replay_storage_array[replay_array_slot][replay_array_position].keyPressed);
-					}
-					else if (replay_storage_array[replay_array_slot][replay_array_position].state == REPLAY_BUTTON_DOWN){
-						man_key_down(replay_storage_array[replay_array_slot][replay_array_position].keyPressed);
-					}
-					replay_array_position++;
+						vTaskDelay(leftover_time);
+						if (replay_storage_array[replay_array_slot][replay_array_position].state == REPLAY_BUTTON_UP){
+							man_key_up(replay_storage_array[replay_array_slot][replay_array_position].keyPressed);
+						}
+						else if (replay_storage_array[replay_array_slot][replay_array_position].state == REPLAY_BUTTON_DOWN){
+							man_key_down(replay_storage_array[replay_array_slot][replay_array_position].keyPressed);
+						}
+						replay_array_position++;
+				}
 			}
+			if ( replay_storage_array[replay_array_slot][0].state ==REPLAY_WP ){
+				while((replay_storage_array[replay_array_slot][replay_array_position].state !=REPLAY_END) && 
+					(replay_array_position != (NUM_REPLAY_STEPS+1)) && (msgREPLAY.messageID!=REPLAY_STOP_PLAY)){
+						/*Non blocking wait on Stop messages on replay queue*/
+						msg_recv_noblock(qREPLAY,&msgREPLAY);
+						ik_calc_IK(replay_storage_array[replay_array_slot][replay_array_position].ik_position, &msgMessage[0], &msgMessage[1], &msgMessage[2]); /*Calculate the values*/
+						msg_send(qMOVE,msgMessage[0]);/*send them off to the servos*/
+						msg_send(qMOVE,msgMessage[1]);
+						msg_send(qMOVE,msgMessage[2]);
+						/* Figure travel time for waypoint move */
+						servo_id=((msgMessage[0].messageDATA & M_MOVE_SERVOMASK_IK) >> 1);
+						pwm_get_pos(servo_id, &initialposition);
+						distance = M_MOVE_SPEC_POSITION(msgMessage[0].messageDATA), - (signed int) initialposition;
+						speed = M_MOVE_SPEC_SPEED(msgMessage[0].messageDATA);
+						totaltime = (fabs((float) distance) / (float) speed);
+						num_delays=totaltime / STOP_POLL_DELAY;
+						leftover_time=(int)totaltime % STOP_POLL_DELAY+20;
+						while(num_delays){
+							vTaskDelay(STOP_POLL_DELAY);
+							msg_recv_noblock(qREPLAY,&msgREPLAY);
+							if (msgREPLAY.messageID==REPLAY_STOP_PLAY)
+								break;
+							num_delays--;
+						}
+						if (msgREPLAY.messageID==REPLAY_STOP_PLAY)
+							break;
+						vTaskDelay(leftover_time);
+						replay_array_position++;
+				}
+			}
+			
 			if (replay_storage_array[replay_array_slot][replay_array_position].state ==REPLAY_END){
 				printf("Replay finished\nSucessfully\n");
 			}
@@ -74,8 +117,16 @@ static void man_replay(void*params){
 			man_stop_all_pwm();
 			break;
 		case REPLAY_START_RECORD:
+			replay_mode.state=REPLAY_RT;
 			replay_array_slot=msgREPLAY.messageDATA;
-			replay_array_position=0;
+			replay_storage_array[replay_array_slot][0]=replay_mode;
+			replay_array_position=1;
+			break;
+		case REPLAY_START_RECORD_WP:
+			replay_mode.state=REPLAY_WP;
+			replay_array_slot=msgREPLAY.messageDATA;
+			replay_storage_array[replay_array_slot][0]=replay_mode;
+			replay_array_position=1;
 			break;
 		case REPLAY_RECORD:
 			replay_storage_array[replay_array_slot][replay_array_position]=*(replay_storage_s *)msgREPLAY.messageDATA;
