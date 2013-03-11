@@ -28,3 +28,5 @@ WIN32.sdf
 WIN32.suo
 WIN32.vcxproj.filters
 WIN32.vcxproj.user
+manager.c.orig
+manager.h.orig
