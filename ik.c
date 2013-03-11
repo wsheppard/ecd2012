@@ -39,7 +39,7 @@ const double d5 = 6.7;
 
 /* calculates joint angles from Cartesian position
 */
-int ik_calc_IK(ik_cart_pos_s position, msg_message_s *msgMessage0, msg_message_s *msgMessage1, msg_message_s *msgMessage2 int *move_time ){
+int ik_calc_IK(ik_cart_pos_s position, msg_message_s *msgMessage0, msg_message_s *msgMessage1, msg_message_s *msgMessage2, int *move_time ){
 
 	double xc, yc,zc,q1,q22,q32;
 	int servoReturn = ECD_ERROR;
@@ -257,7 +257,7 @@ int ik_move_delta(xQueueHandle qMOVE, ik_cart_pos_s delta){/*moves the arm along
 	next_position.z_pos = current_position.z_pos + delta.z_pos;
 
 	/*calculate the pwm values needed to reach the next position and check if we are within the workspace boundaries of our arm*/
-	rVal = ik_calc_IK(next_position, &msgMessage[0], &msgMessage[1], &msgMessage[2] &move_time);
+	rVal = ik_calc_IK(next_position, &msgMessage[0], &msgMessage[1], &msgMessage[2], &move_time);
 
 
 	if(rVal == ECD_OK){/*if we can move to that position*/
