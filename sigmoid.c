@@ -7,6 +7,7 @@
 #include "sigmoid.h"
 #include "task.h"
 #include <io.h>
+#include <math.h>
 
 static xSemaphoreHandle xSemaphore = NULL;
 
@@ -98,6 +99,7 @@ int sigmoid(float M, float time, float*result) {
 			//while (IORD(EULERBLOCK_0_BASE,2)==0);
 
 			//output.ui = IORD(EULERBLOCK_0_BASE, 1);
+			output.fl=expf(input.fl);
 
 			xSemaphoreGive( xSemaphore);
 
@@ -114,8 +116,7 @@ int sigmoid(float M, float time, float*result) {
 		return ECD_ERROR;
 		}
 
-	//*result = 1.0/(1 + output.fl);
-	*result=0.5;
+	*result = 1.0/(1 + output.fl);
 	return ECD_OK;
 }
 
