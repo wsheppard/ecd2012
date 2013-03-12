@@ -40,18 +40,13 @@ int man_start(void){
 
 	/* Start keypad task and give it the queue handle */
 	kp_startTask(qKP);
-
 	/* Create queue for movement module */
 	msg_newQueue(&qMOVE);
-
+	/* Create queues for replay task and Menu */
+	msg_newQueue(&qREPLAY);
+	msg_newQueue(&qMENU);
 	/* Start movement task and give it the queue handle */
 	move_Start(qMOVE);
-
-	/* Create queue for replay task */
-	msg_newQueue(&qREPLAY);
-
-	msg_newQueue(&qMENU);
-	
 	replay_init(qMOVE,qREPLAY,qMENU);
 	menu_init(qMOVE,qREPLAY,qMENU);
 	ik_init(qMOVE);
@@ -92,7 +87,7 @@ static void man_main(void*params){
 	stopIK.z_pos = -9.08;
 
 
-	ik_move_goal(centerIK);
+	vTaskDelay(MS2TICKS(ik_move_goal(centerIK)));
 
 
 	for (;;) {

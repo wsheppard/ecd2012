@@ -15,11 +15,8 @@
 #include "sigmoid.h"
 #include "pwm.h"
 
-
 /* This is the INCOMING queue */
 static xQueueHandle qMove;
-
-
 
 /* Position info is kept in the servo task */
 typedef struct {
@@ -343,6 +340,7 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, int speed) {
 	float m, totaltime;
 	float res = 0;
 	unsigned int latency_ms = 0, tick = 0;
+	portTickType FirstWakeTime;
 
 	float totaltime_ms;
 
@@ -352,9 +350,9 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, int speed) {
 	distance = place - (signed int) initialposition;
 
 	/* We've got no-where to go */
-	if (abs(distance) < 10)
+	if (abs(distance) < 10){
 		return;
-
+	}
 
 	/* This distance value will act as the scale factor for the Sigmoid function
 	 * it's signed becuase we can of course be going in two directions */
@@ -363,7 +361,7 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, int speed) {
 	 * but it can't be negative. */
 	totaltime = fabs((float) distance) / (float) speed;
 
-	totaltime_ms = totaltime * configTICK_RATE_HZ;
+	totaltime_ms = totaltime * 1000;
 
 	/* M is the half-way point which is passed to the sigmoid function */
 	m = totaltime_ms / 2;
@@ -380,7 +378,7 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, int speed) {
 			initialposition,
 			latency_ms);
 
-
+	FirstWakeTime=xTaskGetTickCount();
 	/* So start main loop */
 	for (;;) {
 
@@ -388,7 +386,7 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, int speed) {
 		if (msg_recv_noblock(sData->qServo, &msgMessage) != ECD_NOMSG) {
 			if (msgMessage.messageID == M_MOVE_STOP) {
 				printf(
-						"STOP message received before SIGMOID move finshed. Stopping. \n");
+						"STOP message received before SIGMOID move finished. Stopping. \n");
 				return;
 			} else {
 				printf("Servo MID-SIGMOID-MOVE and received non-STOP message! Ignoring.\n");
@@ -431,11 +429,10 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, int speed) {
 		else {
 
 			//printf("Servo [%d] Returns from sigmoid.\n",sData->iServoID);
-
 			return;
 		}
-
-		vTaskDelay(MOVE_SIGMOID_LATENCY);
+		 
+		vTaskDelayUntil(&FirstWakeTime,MOVE_SIGMOID_LATENCY);
 
 	} /* End of for loop */
 

@@ -27,16 +27,12 @@ int replay_init(xQueueHandle qMoveHandle,xQueueHandle qRHandle,xQueueHandle qMen
 stop messages intermittently whilst performing the replay operations*/
 static void man_replay(void*params){
 	int replay_array_position=0,replay_array_slot=0;
-	int num_delays,leftover_time;
+	portTickType xLastWakeTime;
+	int num_delays;
 	replay_storage_s replay_mode;
 	msg_message_s msgREPLAY;
-	msg_message_s msgMessage[3];
 	msg_message_s mMessage;
-	unsigned int servo_id;
-	unsigned int initialposition;
-	int speed;
-	signed int distance;
-	float totaltime;
+	unsigned int totaltime;
 	for(;;){
 		msg_recv_block(qREPLAY,&msgREPLAY);
 		switch (msgREPLAY.messageID){
@@ -54,7 +50,7 @@ static void man_replay(void*params){
 						and the replay actually stopping. To overcome this I've split the delay into suitable sized chunks and make it check intermittently for stop messages. 
 						It's either this or implementing some other way of directly stopping the pwms. E.G an interrupt */
 						num_delays=replay_storage_array[replay_array_slot][replay_array_position].delayTime / STOP_POLL_DELAY;
-						leftover_time=replay_storage_array[replay_array_slot][replay_array_position].delayTime % STOP_POLL_DELAY;
+						xLastWakeTime=xTaskGetTickCount();
 						while(num_delays){
 							vTaskDelay(STOP_POLL_DELAY);
 							msg_recv_noblock(qREPLAY,&msgREPLAY);
@@ -64,7 +60,7 @@ static void man_replay(void*params){
 						}
 						if (msgREPLAY.messageID==REPLAY_STOP_PLAY)
 							break;
-						vTaskDelay(leftover_time);
+						vTaskDelayUntil(&xLastWakeTime,replay_storage_array[replay_array_slot][replay_array_position].delayTime);
 						if (replay_storage_array[replay_array_slot][replay_array_position].state == REPLAY_BUTTON_UP){
 							man_key_up(replay_storage_array[replay_array_slot][replay_array_position].keyPressed);
 						}
@@ -79,18 +75,9 @@ static void man_replay(void*params){
 					(replay_array_position != (NUM_REPLAY_STEPS+1)) && (msgREPLAY.messageID!=REPLAY_STOP_PLAY)){
 						/*Non blocking wait on Stop messages on replay queue*/
 						msg_recv_noblock(qREPLAY,&msgREPLAY);
-						ik_calc_IK(replay_storage_array[replay_array_slot][replay_array_position].ik_position, &msgMessage[0], &msgMessage[1], &msgMessage[2]); /*Calculate the values*/
-						msg_send(qMOVE,msgMessage[0]);/*send them off to the servos*/
-						msg_send(qMOVE,msgMessage[1]);
-						msg_send(qMOVE,msgMessage[2]);
-						/* Figure travel time for waypoint move */
-						servo_id=((msgMessage[0].messageDATA & M_MOVE_SERVOMASK_IK) >> 1);
-						pwm_get_pos(servo_id, &initialposition);
-						distance = M_MOVE_SPEC_POSITION(msgMessage[0].messageDATA), - (signed int) initialposition;
-						speed = M_MOVE_SPEC_SPEED(msgMessage[0].messageDATA);
-						totaltime = (fabs((float) distance) / (float) speed);
+						totaltime=MS2TICKS(ik_move_goal(replay_storage_array[replay_array_slot][replay_array_position].ik_position))+20;/*extra 20 ticks just in case*/
 						num_delays=totaltime / STOP_POLL_DELAY;
-						leftover_time=(int)totaltime % STOP_POLL_DELAY+20;
+						xLastWakeTime=xTaskGetTickCount();
 						while(num_delays){
 							vTaskDelay(STOP_POLL_DELAY);
 							msg_recv_noblock(qREPLAY,&msgREPLAY);
@@ -100,7 +87,9 @@ static void man_replay(void*params){
 						}
 						if (msgREPLAY.messageID==REPLAY_STOP_PLAY)
 							break;
-						vTaskDelay(leftover_time);
+						vTaskDelayUntil(&xLastWakeTime,totaltime);
+						pwm_set_pos(0, replay_storage_array[replay_array_slot][replay_array_position].keyPressed);
+						vTaskDelay(10);
 						replay_array_position++;
 				}
 			}

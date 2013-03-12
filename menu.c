@@ -5,9 +5,10 @@
 #include "pwm.h"
 #include "replay.h"
 
-static void men_store_key_change(int key,int shifted, int replay_array_slot,int *M_MENMODE,
-						int state, portTickType *xLastStateChange,portTickType *xNewStateChange);
+static void men_store_key_change(int key,int shifted, int state, portTickType *xLastStateChange,
+	portTickType *xNewStateChange);
 static void men_enter_stopped_mode();
+static int men_ik_control(int key);
 
 static int key_mappings[] = {14,9,10,11,5,6,7,1,2,3};
 static xQueueHandle qMOVE;
@@ -58,8 +59,7 @@ int men_check_menu(unsigned state, int shifted){
 		if (M_MENMODE == M_MENMODE_STOPPED){
 			if (mode_changed == 1){
 				printf("Centering....\n\n");
-				ik_move_goal(centerIK);
-				vTaskDelay((1000/portTICK_RATE_MS));
+				vTaskDelay(MS2TICKS(ik_move_goal(centerIK)));
 				printf("Stopped\n\n");
 				mode_changed=0;
 			}
@@ -67,6 +67,11 @@ int men_check_menu(unsigned state, int shifted){
 				printf("Manual Control\n\n");
 				mode_changed = 1;
 				M_MENMODE=M_MENMODE_CONTROL;
+			}
+			else if (key == M_KP_KEY_D2){
+				printf("IK Control\n\n");
+				mode_changed = 1;
+				M_MENMODE=M_MENMODE_CONTROL_IK;
 			}
 			else if (key == M_KP_KEY_C2){
 				printf("RTRecord - Enter\na slot from 0-%d\n",NUM_REPLAY_SLOTS);
@@ -93,6 +98,13 @@ int men_check_menu(unsigned state, int shifted){
 				return 0;
 			}
 			return 1;
+		}
+		else if( M_MENMODE == M_MENMODE_CONTROL_IK){
+			if (key==M_KP_KEY_C4){
+				men_enter_stopped_mode(&M_MENMODE,&mode_changed);
+				return 0;
+			}
+			return men_ik_control(key);
 		}
 		/* Whilst in record mode fetch slot number to replay when mode first entered, otherwise log button
 		presses in array and pass info onto movement modules */
@@ -127,7 +139,7 @@ int men_check_menu(unsigned state, int shifted){
 			}
 			/* If not stop button and slot has been selected log button presses */
 			else{
-				men_store_key_change(key,shifted,replay_array_slot,&M_MENMODE,REPLAY_BUTTON_DOWN,&xLastStateChange,&xNewStateChange);
+				men_store_key_change(key,shifted,REPLAY_BUTTON_DOWN,&xLastStateChange,&xNewStateChange);
 				return 1;
 			}
 
@@ -162,6 +174,7 @@ int men_check_menu(unsigned state, int shifted){
 			else if ( key == M_KP_KEY_D4){
 				ik_calc_FK(&current_pos_ik);
 				stateChangeValue.ik_position=current_pos_ik;
+				pwm_get_pos(0,&stateChangeValue.keyPressed);
 				stateChangeValue.state=REPLAY_WP;
 				replayMSG.messageID=REPLAY_RECORD;
 				replayMSG.messageDATA=(unsigned int)&stateChangeValue;
@@ -216,8 +229,8 @@ int men_check_menu(unsigned state, int shifted){
 			}
 			/* Log button releases in array along with time since last release */
 			else if (mode_changed != 1){
-				men_store_key_change(key,shifted,replay_array_slot,
-					&M_MENMODE,REPLAY_BUTTON_UP,&xLastStateChange,&xNewStateChange);
+				men_store_key_change(key,shifted,
+					REPLAY_BUTTON_UP,&xLastStateChange,&xNewStateChange);
 				return 1;
 			}
 		}
@@ -245,6 +258,17 @@ int men_check_menu(unsigned state, int shifted){
 			}
 			return 1;
 		}
+		else if (M_MENMODE==M_MENMODE_CONTROL_IK){
+			/* wait till user lets go of manual control button before starting movement */
+			if(mode_changed == 1 && (key ==M_KP_KEY_C1)){
+				mode_changed=0;
+				return 0;
+			}
+			if (( key == M_KP_KEY_A1) || (key == M_KP_KEY_B1)){
+				return 1;
+			}
+			return 0;
+		}
 		else if (M_MENMODE==M_MENMODE_REPLAY){
 			if ((key == slot_key_binary) && (ignore_slot_key_release==1)){
 			replayMSG.messageID=REPLAY_START_PLAY;
@@ -270,8 +294,8 @@ void men_enter_stopped_mode(int *M_MENMODE,int *mode_changed){
 	return;
 }
 
-void men_store_key_change(int key,int shifted, int replay_array_slot,int *M_MENMODE,
-						int state, portTickType *xLastStateChange,portTickType *xNewStateChange){
+void men_store_key_change(int key,int shifted,int state, portTickType *xLastStateChange,
+	portTickType *xNewStateChange){
 
 	static replay_storage_s stateChangeValue;
 	msg_message_s replayMSG;
@@ -298,3 +322,35 @@ void men_store_key_change(int key,int shifted, int replay_array_slot,int *M_MENM
 	}
 }
 
+int men_ik_control(int key){
+
+	ik_cart_pos_s delta={0,0,0};
+
+	switch (key){
+	case M_KP_KEY_A1:
+	case M_KP_KEY_B1:
+		return 1;
+	case M_KP_KEY_A2:
+		delta.x_pos=(double)MANUAL_IK_DELTA;
+		break;
+	case M_KP_KEY_B2:
+		delta.x_pos=(double)-MANUAL_IK_DELTA;
+		break;
+	case M_KP_KEY_A3:
+		delta.y_pos=(double)MANUAL_IK_DELTA;
+		break;
+	case M_KP_KEY_B3:
+		delta.y_pos=(double)-MANUAL_IK_DELTA;
+		break;
+	case M_KP_KEY_A4:
+		delta.z_pos=(double)MANUAL_IK_DELTA;
+		break;
+	case M_KP_KEY_B4:
+		delta.z_pos=(double)-MANUAL_IK_DELTA;
+		break;
+	default:
+		return 0;
+	}
+	ik_move_delta(delta);
+	return 0;
+}

@@ -148,7 +148,6 @@
     <ClCompile Include="pwm.c" />
     <ClCompile Include="replay.c" />
     <ClCompile Include="sigmoid.c" />
-    <ClCompile Include="system.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\FreeRTOS\Source\portable\MSVC-MingW\portmacro.h" />

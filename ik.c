@@ -6,10 +6,12 @@
  *
  *      This holds the  kinematics calculations.
  */
+
  
 #ifndef M_PI
 #define M_PI	3.14159265358979323846
 #endif
+
  /* Standard includes. */
 #include <stdio.h>
 #include <stdlib.h>
@@ -41,14 +43,16 @@ const double l3 = 13 ;
 const double d5 = 6.7;
 static xQueueHandle qMOVE;
 
+
 int ik_init(xQueueHandle qMoveHandle){
 	qMOVE=qMoveHandle;
 	return ECD_OK;
 }
 
+
 /* calculates joint angles from Cartesian position
 */
-int ik_calc_IK(ik_cart_pos_s position, msg_message_s *msgMessage0, msg_message_s *msgMessage1, msg_message_s *msgMessage2 ){
+int ik_calc_IK(ik_cart_pos_s position, msg_message_s *msgMessage0, msg_message_s *msgMessage1, msg_message_s *msgMessage2, float *move_time ){
 
 	double xc, yc,zc,q1,q22,q32;
 	int servoReturn = ECD_ERROR;
@@ -65,8 +69,8 @@ int ik_calc_IK(ik_cart_pos_s position, msg_message_s *msgMessage0, msg_message_s
 	signed int longest_distance=0;
 	float longest_time;
 	unsigned int speed[4];
-		
-		
+
+
 	if(sqrt(pow(position.x_pos,2)+pow(position.y_pos,2)+pow(position.z_pos,2))>(l2+l3+d5)){/*check for valid input*/
 	//printf("Desired position outside of workspace.");
 		return ECD_ERROR;
@@ -146,6 +150,7 @@ int ik_calc_IK(ik_cart_pos_s position, msg_message_s *msgMessage0, msg_message_s
 			longest_distance = abs(goal[x]-pos[x]);
 		}
 		longest_time = (float)longest_distance/MOVE_SPEC_STD_SPEED;
+		*move_time = longest_time;
 	}
 	for(x=1;x<PWM_COUNT;x++){/*update the servo movement speeds, so that the time is the same on all of them*/
 		speed[x] = (unsigned int)((abs(goal[x]-pos[x]) / longest_time) / MOVE_IK_MSG_COMPRESSION); /*M_MOVE_SPECSPEEDMASK_IK / MOVE_IK_MSG_COMPRESSION is < 2^11. Ergo it fits within the msgData*/
@@ -238,22 +243,25 @@ static int ik_servo_to_rad(double * rad,unsigned int servoVal,int servoMax, int 
 
     }
 
-int ik_move_goal(ik_cart_pos_s goal){/*tries to move the arm to a goal position regardless of it being within the workspace */
+unsigned int ik_move_goal(ik_cart_pos_s goal){/*tries to move the arm to a goal position regardless of it being within the workspace */
 	msg_message_s msgMessage[3];
 	int rVal = ECD_ERROR;
-	rVal =  ik_calc_IK(goal, &msgMessage[0], &msgMessage[1], &msgMessage[2]); /*Calculate the values*/
+	float move_time = 0;
+	rVal =  ik_calc_IK(goal, &msgMessage[0], &msgMessage[1], &msgMessage[2], &move_time); /*Calculate the values*/
 
 	msg_send(qMOVE,msgMessage[0]);/*send them off to the servos*/
 	msg_send(qMOVE,msgMessage[1]);
 	msg_send(qMOVE,msgMessage[2]);
 
-	return rVal;
+	return (unsigned int)(move_time * 1000);
 }
 
 int ik_move_delta(ik_cart_pos_s delta){/*moves the arm along the x, y and z axis if it is possible.*/
 	ik_cart_pos_s current_position, next_position;
 	msg_message_s msgMessage[3];
 	int rVal = ECD_ERROR;
+	float move_time = 0;
+
 
 	ik_calc_FK(&current_position); /*find the current position*/
 
@@ -262,7 +270,7 @@ int ik_move_delta(ik_cart_pos_s delta){/*moves the arm along the x, y and z axis
 	next_position.z_pos = current_position.z_pos + delta.z_pos;
 
 	/*calculate the pwm values needed to reach the next position and check if we are within the workspace boundaries of our arm*/
-	rVal = ik_calc_IK(next_position, &msgMessage[0], &msgMessage[1], &msgMessage[2]);
+	rVal = ik_calc_IK(next_position, &msgMessage[0], &msgMessage[1], &msgMessage[2], &move_time);
 
 
 	if(rVal == ECD_OK){/*if we can move to that position*/
@@ -277,4 +285,3 @@ int ik_move_delta(ik_cart_pos_s delta){/*moves the arm along the x, y and z axis
 		return ECD_ERROR;
 	}
 }
-
