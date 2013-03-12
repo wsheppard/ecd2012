@@ -174,7 +174,7 @@ static void move_servo_task(void *params) {
 		case M_MOVE_IK:
 			ServoData[servoData.iServoID].state = MOVE_STATE_IK;
 
-			printf("Servo %d PWM value: %d \n", servoData.iServoID, M_IK_SERVO_GOAL(msgMessage.messageDATA));
+			printf("IK- Servo %d PWM value: %d \n", servoData.iServoID, M_IK_SERVO_GOAL(msgMessage.messageDATA));
 
 			if (M_IK_SERVO_SPEED(msgMessage.messageDATA)) {/*if a movement speed is defined */
 
@@ -277,7 +277,7 @@ static void move_servo_cont(move_servoData_s *sData, int direction) {
 
 	msg_message_s msgMessage;
 	int jumpval = MOVE_JUMPVAL;
-	int delta = 0;
+	float delta = 0;
 
 	if (direction & M_MOVE_DIRMASK)
 		ServoData[sData->iServoID].state = MOVE_STATE_INC;
@@ -306,7 +306,7 @@ static void move_servo_cont(move_servoData_s *sData, int direction) {
 
 		/* Increase movement speed until MOVE_JUMP_MAX */
 		if (jumpval < (MOVE_JUMP_MAX)) {
-			jumpval += delta;
+			jumpval += (int)delta;
 			delta += MOVE_DELTA;
 		}
 

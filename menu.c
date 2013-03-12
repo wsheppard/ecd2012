@@ -176,10 +176,15 @@ int men_check_menu(unsigned state, int shifted){
 				ik_calc_FK(&current_pos_ik);
 				stateChangeValue.ik_position=current_pos_ik;
 				pwm_get_pos(0,&stateChangeValue.keyPressed);
+				if (stateChangeValue.keyPressed> 100000)
+					stateChangeValue.keyPressed=100000;
+				else if (stateChangeValue.keyPressed< 50000)
+					stateChangeValue.keyPressed = 50000;
 				stateChangeValue.state=REPLAY_WP;
 				replayMSG.messageID=REPLAY_RECORD;
 				replayMSG.messageDATA=(unsigned int)&stateChangeValue;
 				msg_send(qREPLAY,replayMSG);
+				printf("Waypoint saved\n");
 				vTaskDelay((5/portTICK_RATE_MS));				
 			}
 			else {

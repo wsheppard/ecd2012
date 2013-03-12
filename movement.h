@@ -19,9 +19,9 @@
 #define SERVO_COUNT PWM_COUNT
 
 /* For continuous movement */
-#define MOVE_JUMPVAL 200
-#define MOVE_DELTA 1
-#define MOVE_JUMP_MAX 1500
+#define MOVE_JUMPVAL 10
+#define MOVE_DELTA 0.05
+#define MOVE_JUMP_MAX 300
 
 /* For specific movement */
 #define MOVE_SPEC_STD_SPEED 12500      //the time allowed for all movements - random at 50000pwmvalues/4s
