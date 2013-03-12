@@ -141,9 +141,9 @@ static void move_main_task(void* params) {
 
 /* This function is served to each of the servo tasks */
 static void move_servo_task(void *params) {
-	unsigned int pos[4];
-	int x = 0;
-	int state[4];
+//	unsigned int pos[4];
+//	int x = 0;
+//	int state[4];
 
 	move_servoData_s servoData;
 	msg_message_s msgMessage;
@@ -342,9 +342,9 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, int speed) {
 	unsigned int initialposition;
 	signed int distance;
 	float m, totaltime;
-	int n = 0;
 	float res = 0;
 	unsigned int latency_ms = 0, tick = 0;
+	portTickType FirstWakeTime;
 
 	float totaltime_ms;
 
@@ -382,7 +382,7 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, int speed) {
 			initialposition,
 			latency_ms);
 
-
+	FirstWakeTime=xTaskGetTickCount();
 	/* So start main loop */
 	for (;;) {
 
@@ -390,7 +390,7 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, int speed) {
 		if (msg_recv_noblock(sData->qServo, &msgMessage) != ECD_NOMSG) {
 			if (msgMessage.messageID == M_MOVE_STOP) {
 				printf(
-						"STOP message received before SIGMOID move finshed. Stopping. \n");
+						"STOP message received before SIGMOID move finished. Stopping. \n");
 				return;
 			} else {
 				printf("Servo MID-SIGMOID-MOVE and received non-STOP message! Ignoring.\n");
@@ -436,8 +436,8 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, int speed) {
 
 			return;
 		}
-
-		vTaskDelay(MOVE_SIGMOID_LATENCY);
+		 
+		vTaskDelayUntil(&FirstWakeTime,MOVE_SIGMOID_LATENCY);
 
 	} /* End of for loop */
 

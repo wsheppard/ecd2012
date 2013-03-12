@@ -7,6 +7,7 @@
 #include "sigmoid.h"
 #include "task.h"
 #include <io.h>
+#include <math.h>
 
 static xSemaphoreHandle xSemaphore = NULL;
 

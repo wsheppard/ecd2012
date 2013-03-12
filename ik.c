@@ -6,6 +6,7 @@
  *
  *      This holds the  kinematics calculations.
  */
+
  
  /* Standard includes. */
 #include <stdio.h>
@@ -36,10 +37,18 @@ unsigned int data_temp;
 const double  l2 = 10;
 const double l3 = 13 ;
 const double d5 = 6.7;
+static xQueueHandle qMOVE;
+
+
+int ik_init(xQueueHandle qMoveHandle){
+	qMOVE=qMoveHandle;
+	return ECD_OK;
+}
+
 
 /* calculates joint angles from Cartesian position
 */
-int ik_calc_IK(ik_cart_pos_s position, msg_message_s *msgMessage0, msg_message_s *msgMessage1, msg_message_s *msgMessage2, int *move_time ){
+int ik_calc_IK(ik_cart_pos_s position, msg_message_s *msgMessage0, msg_message_s *msgMessage1, msg_message_s *msgMessage2, float *move_time ){
 
 	double xc, yc,zc,q1,q22,q32;
 	int servoReturn = ECD_ERROR;
@@ -230,24 +239,24 @@ static int ik_servo_to_rad(double * rad,unsigned int servoVal,int servoMax, int 
 
     }
 
-int ik_move_goal(xQueueHandle qMOVE, ik_cart_pos_s goal){/*tries to move the arm to a goal position regardless of it being within the workspace */
+unsigned int ik_move_goal(ik_cart_pos_s goal){/*tries to move the arm to a goal position regardless of it being within the workspace */
 	msg_message_s msgMessage[3];
 	int rVal = ECD_ERROR;
-	int move_time = 0;
+	float move_time = 0;
 	rVal =  ik_calc_IK(goal, &msgMessage[0], &msgMessage[1], &msgMessage[2], &move_time); /*Calculate the values*/
 
 	msg_send(qMOVE,msgMessage[0]);/*send them off to the servos*/
 	msg_send(qMOVE,msgMessage[1]);
 	msg_send(qMOVE,msgMessage[2]);
 
-	return move_time;
+	return (unsigned int)(move_time * 1000);
 }
 
-int ik_move_delta(xQueueHandle qMOVE, ik_cart_pos_s delta){/*moves the arm along the x, y and z axis if it is possible.*/
+int ik_move_delta(ik_cart_pos_s delta){/*moves the arm along the x, y and z axis if it is possible.*/
 	ik_cart_pos_s current_position, next_position;
 	msg_message_s msgMessage[3];
 	int rVal = ECD_ERROR;
-	int move_time = 0;
+	float move_time = 0;
 
 
 	ik_calc_FK(&current_position); /*find the current position*/

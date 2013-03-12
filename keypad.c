@@ -24,6 +24,7 @@ xQueueHandle qKP;
 xTaskHandle tKP;
 
 
+
 int kp_startTask(xQueueHandle qHandle){
 	
 	if (qHandle == NULL)
@@ -60,10 +61,7 @@ static void kp_main(void*pvParams){
 
 
 	printf("Keypad starting...\n");
-
-	/* Wait for one second.. why? */
-	vTaskDelay(1000);
-
+	vTaskDelay(50);
 	/* Start checking for keypad changes and then send as message */
 	for (;;){
 	
