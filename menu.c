@@ -60,6 +60,7 @@ int men_check_menu(unsigned state, int shifted){
 			if (mode_changed == 1){
 				printf("Centering....\n\n");
 				vTaskDelay(MS2TICKS(ik_move_goal(centerIK)));
+				pwm_set_pos(0, 75000);
 				printf("Stopped\n\n");
 				mode_changed=0;
 			}
