@@ -285,3 +285,4 @@ int ik_move_delta(ik_cart_pos_s delta){/*moves the arm along the x, y and z axis
 		return ECD_ERROR;
 	}
 }
+
