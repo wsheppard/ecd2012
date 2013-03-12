@@ -324,7 +324,8 @@ void men_store_key_change(int key,int shifted,int state, portTickType *xLastStat
 		replayMSG.messageID=REPLAY_RECORD;
 		replayMSG.messageDATA=(unsigned int)&stateChangeValue;
 		msg_send(qREPLAY,replayMSG);
-		vTaskDelay((5/portTICK_RATE_MS));		
+		vTaskDelay((5/portTICK_RATE_MS));
+
 	}
 }
 
@@ -358,5 +359,6 @@ int men_ik_control(int key){
 		return 0;
 	}
 	ik_move_delta(delta);
+	//vTaskDelay(MS2TICKS(ik_move_delta(delta)));
 	return 0;
 }

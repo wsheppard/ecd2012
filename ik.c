@@ -114,8 +114,15 @@ int ik_calc_IK(ik_cart_pos_s position, msg_message_s *msgMessage0, msg_message_s
 	printf("Angles: q1 = %f, q2 = %f, q3 = %f\n",(q1*RAD2DEG),(q22*RAD2DEG),(q32*RAD2DEG));
 
 	if(ik_rad_to_servo(&goal[M_MOVE_SERVO4],q1,S_MAX_0, S_MIN_0, Q_MAX_0, Q_MIN_0) == ECD_OK){
-		servoReturn = ECD_OK;
+		if(servoReturn != ECD_ERROR){
+			servoReturn = ECD_OK;
+		}
+
+	}else{
+		servoReturn = ECD_ERROR;
+
 	}
+
 
 #if IK_DEBUG //revert the servo values back to degrees and print them
 	ik_servo_to_rad(&tq1,goal[M_MOVE_SERVO4],S_MAX_0, S_MIN_0, Q_MAX_0, Q_MIN_0);
@@ -123,14 +130,26 @@ int ik_calc_IK(ik_cart_pos_s position, msg_message_s *msgMessage0, msg_message_s
 #endif
 
 	if(ik_rad_to_servo(&goal[M_MOVE_SERVO3],q22,S_MAX_1, S_MIN_1, Q_MAX_1, Q_MIN_1) == ECD_OK){
-		servoReturn = ECD_OK;
+		if(servoReturn != ECD_ERROR){
+			servoReturn = ECD_OK;
+		}
+
+	}else{
+		servoReturn = ECD_ERROR;
+
 	}
 #if IK_DEBUG
 	ik_servo_to_rad(&tq22,goal[M_MOVE_SERVO3],S_MAX_1, S_MIN_1, Q_MAX_1, Q_MIN_1);
 	printf("tq22: %f\n",tq22*RAD2DEG);
 #endif
 	if(ik_rad_to_servo(&goal[M_MOVE_SERVO2],q32,S_MAX_2, S_MIN_2, Q_MAX_2, Q_MIN_2) == ECD_OK){
-		servoReturn = ECD_OK;
+		if(servoReturn != ECD_ERROR){
+			servoReturn = ECD_OK;
+		}
+
+	}else{
+		servoReturn = ECD_ERROR;
+
 	}
 #if IK_DEBUG
 	ik_servo_to_rad(&tq32,goal[M_MOVE_SERVO2],S_MAX_2, S_MIN_2, Q_MAX_2, Q_MIN_2);
@@ -210,21 +229,23 @@ static int ik_rad_to_servo(unsigned int *servoVal,double rad,int servoMax,int se
 
     *servoVal = (unsigned int)( (rad-qMin)*((double)(servoMax - servoMin)) / (qMax-qMin) + (double)servoMin);
 
-    if((*servoVal <=servoMax) && (*servoVal >= servoMin)){/*is the value within the servo range?*/
+    if((*servoVal >=49000) && (*servoVal <= 110000)){/*is the value within the servo range?*/
+               // return ECD_OK;
+
+            if((*servoVal > 100000)&&(*servoVal <110000)){
+                *servoVal = 100000;
                 return ECD_OK;
-        }
-        else{
-            if(*servoVal >servoMax){
-                *servoVal = servoMax;
             }
 
-            if(*servoVal <servoMin){
-                *servoVal = servoMin;
+            if((*servoVal < 50000)&& (*servoVal > 49000)){
+                *servoVal = 50000;
+                return ECD_OK;
+
             }
                 return ECD_ERROR;
         }
+}
 
-    }
 
 static int ik_servo_to_rad(double * rad,unsigned int servoVal,int servoMax, int servoMin, double qMax, double qMin){
     *rad = (double) ((((double)servoVal)-((double)servoMin)) * (qMax-qMin) / (((double)servoMax) - ((double)servoMin)) + qMin);
@@ -269,12 +290,13 @@ int ik_move_delta(ik_cart_pos_s delta){/*moves the arm along the x, y and z axis
 	rVal = ik_calc_IK(next_position, &msgMessage[0], &msgMessage[1], &msgMessage[2], &move_time);
 
 
-	if(rVal == ECD_OK){/*if we can move to that position*/
-		msg_send(qMOVE,msgMessage[0]);/*send the commands off to the servos*/
+//if(rVal == ECD_OK){/*if we can move to that position*/
+	if(1){
+	msg_send(qMOVE,msgMessage[0]);/*send the commands off to the servos*/
 		msg_send(qMOVE,msgMessage[1]);
 		msg_send(qMOVE,msgMessage[2]);
 
-		return ECD_OK;
+		return (unsigned int)(move_time * 1000);
 	}else{/*if we cannot move dont send the commands but print an error message*/
 		printf("Cannot move to that position\n");
 

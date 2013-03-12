@@ -112,28 +112,9 @@ static void man_main(void*params){
 				if(state & 1){
 						printf("Key at pos %d pressed.\n", shifted);
 						if (men_check_menu(state,shifted) == 1){
-						man_key_down(shifted);
-						if(shifted == 8){
-							if(do_ik_once){
-								ik_calc_FK(&current_pos);
-								printf("current_pos: x = %f, y = %f, z = %f\n",current_pos.x_pos,current_pos.y_pos,current_pos.z_pos);
+							man_key_down(shifted);
 
-								printf("Calculate inverse kinematics for the start position: x = %f, y = %f, z = %f\n",startIK.x_pos,startIK.y_pos,startIK.z_pos);
-								ik_move_goal(startIK);
-								do_ik_once = 0;
-							}
 						}
-						if(shifted == 12){
-								if(do_ik_once == 0){
-									ik_calc_FK(&current_pos);
-									printf("current_pos: x = %f, y = %f, z = %f\n",current_pos.x_pos,current_pos.y_pos,current_pos.z_pos);
-
-									printf("Calculate inverse kinematics for the stop position: x = %f, y = %f, z = %f\n",stopIK.x_pos,stopIK.y_pos,stopIK.z_pos);
-									ik_move_goal(stopIK);
-									do_ik_once = 1;
-								}
-							}
-				}
 
 				}
 				else{
