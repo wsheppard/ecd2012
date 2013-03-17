@@ -64,7 +64,7 @@ void display_main(void*params){
 	for(;;){
 
 #if 0
-		printf("EULER: In[%4.4f] State[%d] Out[%4.4f]\n",
+		fprintf(stderr,"EULER: In[%4.4f] State[%d] Out[%4.4f]\n",
 					p_euler->input,
 					p_euler->state,
 					p_euler->output);
@@ -73,7 +73,7 @@ void display_main(void*params){
 		p_euler->input = -2.25;
 #endif
 
-//		printf("KEYPAD: %X\n",*(p_keypad_data+2));
+//		fprintf(stderr,"KEYPAD: %X\n",*(p_keypad_data+2));
 
 
 #if 1
@@ -85,7 +85,7 @@ void display_main(void*params){
 
 
 
-		printf("[%u:%u],[%u:%u],[%u:%u],[%u:%u].\n",
+		fprintf(stderr,"[%u:%u],[%u:%u],[%u:%u],[%u:%u].\n",
 			pos[0],state[0],
 			pos[1],state[1],
 			pos[2],state[2],
@@ -94,7 +94,7 @@ void display_main(void*params){
 #endif
 
 #if 0
-		printf("PWM AT %u.\n",
+		fprintf(stderr,"PWM AT %u.\n",
 					pwm_value/2000);
 #endif
 

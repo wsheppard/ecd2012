@@ -38,6 +38,7 @@ int men_check_menu(unsigned state, int shifted){
 	static int replay_start=0;
 	static portTickType xLastStateChange, xNewStateChange;
 	replay_storage_s stateChangeValue;
+	static int waypoint_pos=0;
 	static int slot_key_binary=0;
 	int x,key;
 	static ik_cart_pos_s centerIK,current_pos_ik;
@@ -168,6 +169,7 @@ int men_check_menu(unsigned state, int shifted){
 						replay_array_slot=x;
 						ignore_slot_key_release=1;
 						slot_key_binary=key_mappings[x];
+						waypoint_pos = 0;
 					}
 				}
 			}
@@ -176,10 +178,16 @@ int men_check_menu(unsigned state, int shifted){
 				ik_calc_FK(&current_pos_ik);
 				stateChangeValue.ik_position=current_pos_ik;
 				pwm_get_pos(0,&stateChangeValue.keyPressed);
+				if (stateChangeValue.keyPressed> 100000)
+					stateChangeValue.keyPressed=100000;
+				else if (stateChangeValue.keyPressed< 50000)
+					stateChangeValue.keyPressed = 50000;
 				stateChangeValue.state=REPLAY_WP;
 				replayMSG.messageID=REPLAY_RECORD;
 				replayMSG.messageDATA=(unsigned int)&stateChangeValue;
 				msg_send(qREPLAY,replayMSG);
+				waypoint_pos++;
+				printf("Waypoint Record\nSlot %d, pos %d\n",replay_array_slot,waypoint_pos);
 				vTaskDelay((5/portTICK_RATE_MS));				
 			}
 			else {
@@ -220,7 +228,7 @@ int men_check_menu(unsigned state, int shifted){
 			/*Start up Record mode after slot choice button released*/
 			if ((key == slot_key_binary) && (ignore_slot_key_release==1)){
 				xNewStateChange = xTaskGetTickCount();
-				printf("RealTime\nRecording Slot %d\n",replay_array_slot);
+				printf("RealTime Record\nSlot %d\n",replay_array_slot);
 				replayMSG.messageID=REPLAY_START_RECORD;
 				replayMSG.messageDATA=replay_array_slot;
 				msg_send(qREPLAY,replayMSG);
@@ -238,7 +246,7 @@ int men_check_menu(unsigned state, int shifted){
 		if (M_MENMODE==M_MENMODE_RECORD_WP){
 			/*Start up Record mode after slot choice button released*/
 			if ((key == slot_key_binary) && (ignore_slot_key_release==1)){
-				printf("Waypoint\nRecording Slot %d\n",replay_array_slot);
+				printf("Waypoint Record\nSlot %d, pos 0\n",replay_array_slot);
 				replayMSG.messageID=REPLAY_START_RECORD_WP;
 				replayMSG.messageDATA=replay_array_slot;
 				msg_send(qREPLAY,replayMSG);
@@ -319,7 +327,8 @@ void men_store_key_change(int key,int shifted,int state, portTickType *xLastStat
 		replayMSG.messageID=REPLAY_RECORD;
 		replayMSG.messageDATA=(unsigned int)&stateChangeValue;
 		msg_send(qREPLAY,replayMSG);
-		vTaskDelay((5/portTICK_RATE_MS));		
+		vTaskDelay((5/portTICK_RATE_MS));
+
 	}
 }
 
@@ -353,5 +362,6 @@ int men_ik_control(int key){
 		return 0;
 	}
 	ik_move_delta(delta);
+	//vTaskDelay(MS2TICKS(ik_move_delta(delta)));
 	return 0;
 }

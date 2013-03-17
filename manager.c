@@ -76,7 +76,7 @@ static void man_main(void*params){
 	int shifted;
 	int do_ik_once = 1;
 
-	printf("Starting manager...\n");
+	fprintf(stderr,"Starting manager...\n");
 
 	startIK.x_pos = 15.13;
 	startIK.y_pos = 15.13;
@@ -85,7 +85,6 @@ static void man_main(void*params){
 	stopIK.x_pos = 19.53;
 	stopIK.y_pos = -19.53;
 	stopIK.z_pos = -9.08;
-
 
 	vTaskDelay(MS2TICKS(ik_move_goal(centerIK)));
 
@@ -96,13 +95,13 @@ static void man_main(void*params){
 			purposes? */
 		msg_recv_block(qKP,&msgKP);
 
-		//printf("Received a message... ID: %d, DATA: 0x%X.\n", msgKP.messageID, msgKP.messageDATA);
+		//fprintf(stderr,"Received a message... ID: %d, DATA: 0x%X.\n", msgKP.messageID, msgKP.messageDATA);
 	
 		changed = 65535U & msgKP.messageDATA;
 		state = msgKP.messageDATA >> 16;
 		shifted = 0;
 
-		//printf("Changed:[0x%X], State[0x%X].\n", changed, state);
+		//fprintf(stderr,"Changed:[0x%X], State[0x%X].\n", changed, state);
 
 		/* While there are still bits to deal with */
 		while(changed){
@@ -110,34 +109,15 @@ static void man_main(void*params){
 			/* The key at this postion is changed */
 			if (changed & 1){		
 				if(state & 1){
-						printf("Key at pos %d pressed.\n", shifted);
+						fprintf(stderr,"Key at pos %d pressed.\n", shifted);
 						if (men_check_menu(state,shifted) == 1){
-						man_key_down(shifted);
-						if(shifted == 8){
-							if(do_ik_once){
-								ik_calc_FK(&current_pos);
-								printf("current_pos: x = %f, y = %f, z = %f\n",current_pos.x_pos,current_pos.y_pos,current_pos.z_pos);
+							man_key_down(shifted);
 
-								printf("Calculate inverse kinematics for the start position: x = %f, y = %f, z = %f\n",startIK.x_pos,startIK.y_pos,startIK.z_pos);
-								ik_move_goal(startIK);
-								do_ik_once = 0;
-							}
 						}
-						if(shifted == 12){
-								if(do_ik_once == 0){
-									ik_calc_FK(&current_pos);
-									printf("current_pos: x = %f, y = %f, z = %f\n",current_pos.x_pos,current_pos.y_pos,current_pos.z_pos);
-
-									printf("Calculate inverse kinematics for the stop position: x = %f, y = %f, z = %f\n",stopIK.x_pos,stopIK.y_pos,stopIK.z_pos);
-									ik_move_goal(stopIK);
-									do_ik_once = 1;
-								}
-							}
-				}
 
 				}
 				else{
-						printf("Key at pos %d released.\n", shifted);
+						fprintf(stderr,"Key at pos %d released.\n", shifted);
 						if (men_check_menu(state,shifted) == 1){
 						man_key_up(shifted);
 						}

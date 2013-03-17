@@ -72,7 +72,7 @@ int ik_calc_IK(ik_cart_pos_s position, msg_message_s *msgMessage0, msg_message_s
 
 
 	if(sqrt(pow(position.x_pos,2)+pow(position.y_pos,2)+pow(position.z_pos,2))>(l2+l3+d5)){/*check for valid input*/
-	//printf("Desired position outside of workspace.");
+	//fprintf(stderr,"Desired position outside of workspace.");
 		return ECD_ERROR;
 	}
 
@@ -85,7 +85,7 @@ int ik_calc_IK(ik_cart_pos_s position, msg_message_s *msgMessage0, msg_message_s
 	xc = position.x_pos - d5*cos(q1);
 	yc = position.y_pos - d5*sin(q1);
 	zc = position.z_pos;
-	//printf("Wrist position: (%.3f,%.3f,%.3f)\n",xc,yc,zc);
+	//fprintf(stderr,"Wrist position: (%.3f,%.3f,%.3f)\n",xc,yc,zc);
 
 	/*Only solution 2 is used as solution 1 always produces a negative q2
 	 * which isn't a possible configuration for this arm*/
@@ -96,7 +96,7 @@ int ik_calc_IK(ik_cart_pos_s position, msg_message_s *msgMessage0, msg_message_s
 	q22 = -atan2(((l3*sin(q32))/sqrt(pow(xc,2)+pow(yc,2)+pow(zc,2))),+sqrt(1-pow((l3*sin(q32))/sqrt(pow(xc,2)+pow(yc,2)+pow(zc,2)),2)))+atan2(zc,sqrt(pow(xc,2)+pow(yc,2)));
 #if 0 //move all servos at the same speed
 	//solution 2
-	printf("Angles: q1 = %f, q2 = %f, q3 = %f\n",(q1*RAD2DEG),(q22*RAD2DEG),(q32*RAD2DEG));
+	fprintf(stderr,"Angles: q1 = %f, q2 = %f, q3 = %f\n",(q1*RAD2DEG),(q22*RAD2DEG),(q32*RAD2DEG));
 	msgMessage.messageID = M_MOVE_IK;
 	ik_rad_to_servo(&data_temp,q1,S_MAX_0, S_MIN_0, Q_MAX_0, Q_MIN_0);
 	msgMessage.messageDATA = (((M_MOVE_SERVO4<<1) & M_MOVE_SERVOMASK_IK) | (((data_temp - PWM_OFFSET)<<M_MOVE_PWMOFFSET_IK) & M_MOVE_PWMMASK_IK)); /**/
@@ -115,33 +115,52 @@ int ik_calc_IK(ik_cart_pos_s position, msg_message_s *msgMessage0, msg_message_s
 	msg_send(qMOVE,msgMessage);
 
 #else //change each servos movement speed so that the movement time is equal to the largest move - all servos start and finish at the same time
-	printf("Angles: q1 = %f, q2 = %f, q3 = %f\n",(q1*RAD2DEG),(q22*RAD2DEG),(q32*RAD2DEG));
+	fprintf(stderr,"Angles: q1 = %f, q2 = %f, q3 = %f\n",(q1*RAD2DEG),(q22*RAD2DEG),(q32*RAD2DEG));
 
 	if(ik_rad_to_servo(&goal[M_MOVE_SERVO4],q1,S_MAX_0, S_MIN_0, Q_MAX_0, Q_MIN_0) == ECD_OK){
-		servoReturn = ECD_OK;
+		if(servoReturn != ECD_ERROR){
+			servoReturn = ECD_OK;
+		}
+
+	}else{
+		servoReturn = ECD_ERROR;
+
 	}
+
 
 #if IK_DEBUG //revert the servo values back to degrees and print them
 	ik_servo_to_rad(&tq1,goal[M_MOVE_SERVO4],S_MAX_0, S_MIN_0, Q_MAX_0, Q_MIN_0);
-	printf("tq1: %f\n",tq1*RAD2DEG);
+	fprintf(stderr,"tq1: %f\n",tq1*RAD2DEG);
 #endif
 
 	if(ik_rad_to_servo(&goal[M_MOVE_SERVO3],q22,S_MAX_1, S_MIN_1, Q_MAX_1, Q_MIN_1) == ECD_OK){
-		servoReturn = ECD_OK;
+		if(servoReturn != ECD_ERROR){
+			servoReturn = ECD_OK;
+		}
+
+	}else{
+		servoReturn = ECD_ERROR;
+
 	}
 #if IK_DEBUG
 	ik_servo_to_rad(&tq22,goal[M_MOVE_SERVO3],S_MAX_1, S_MIN_1, Q_MAX_1, Q_MIN_1);
-	printf("tq22: %f\n",tq22*RAD2DEG);
+	fprintf(stderr,"tq22: %f\n",tq22*RAD2DEG);
 #endif
 	if(ik_rad_to_servo(&goal[M_MOVE_SERVO2],q32,S_MAX_2, S_MIN_2, Q_MAX_2, Q_MIN_2) == ECD_OK){
-		servoReturn = ECD_OK;
+		if(servoReturn != ECD_ERROR){
+			servoReturn = ECD_OK;
+		}
+
+	}else{
+		servoReturn = ECD_ERROR;
+
 	}
 #if IK_DEBUG
 	ik_servo_to_rad(&tq32,goal[M_MOVE_SERVO2],S_MAX_2, S_MIN_2, Q_MAX_2, Q_MIN_2);
-	printf("tq32: %f\n",tq32*RAD2DEG);
+	fprintf(stderr,"tq32: %f\n",tq32*RAD2DEG);
 
-	printf("servo values: s-q1: %d, s-q2: %d, s-q3: %d\n",goal[Q1],goal[Q2], goal[Q3]);
-	printf("recalc Angles: q1 = %f, q2 = %f, q3 = %f\n",(tq1*RAD2DEG),(tq22*RAD2DEG),(tq32*RAD2DEG));
+	fprintf(stderr,"servo values: s-q1: %d, s-q2: %d, s-q3: %d\n",goal[Q1],goal[Q2], goal[Q3]);
+	fprintf(stderr,"recalc Angles: q1 = %f, q2 = %f, q3 = %f\n",(tq1*RAD2DEG),(tq22*RAD2DEG),(tq32*RAD2DEG));
 #endif
 
 	for(x=1;x<PWM_COUNT;x++){ /*find the longest distance to move from all servos and calculate the time needed for that move*/
@@ -194,7 +213,7 @@ int ik_calc_FK(ik_cart_pos_s *gripper_position){ /*reads the current pwm values 
 	ik_servo_to_rad(&pos[Q3],pwm_val[M_MOVE_SERVO2],S_MAX_2, S_MIN_2, Q_MAX_2, Q_MIN_2); /*convert pwm values to rad*/
 	pos[Q4]= (M_PI/2) -(pos[Q3]+pos[Q2]);
 								/*pos[0] = wrist - q4 - M_MOVE_SERVO1 - passive joint: always parallel to ground.*/
-//printf("Current angles: q1 = %f, q2 = %f, q3 = %f, q4 = %f\n", pos[Q1]*RAD2DEG, pos[Q2]*RAD2DEG, pos[Q3]*RAD2DEG, pos[4]*RAD2DEG);
+//fprintf(stderr,"Current angles: q1 = %f, q2 = %f, q3 = %f, q4 = %f\n", pos[Q1]*RAD2DEG, pos[Q2]*RAD2DEG, pos[Q3]*RAD2DEG, pos[4]*RAD2DEG);
 
 	/*Forward Kinematics - find the gripper position from the angular values.*/
 	gripper_position->x_pos = cos(pos[Q1]) * sin(pos[Q2]+pos[Q3]+pos[Q4]) * d5 + cos(pos[Q1]) * cos(pos[Q2]+pos[Q3]) * l3 + cos(pos[Q1]) * cos(pos[Q2]) * l2 ;	/*xt = c1.*s234.*d5+c1.*c23.*l3+c1.*c2.*l2;*/
@@ -214,21 +233,23 @@ static int ik_rad_to_servo(unsigned int *servoVal,double rad,int servoMax,int se
 
     *servoVal = (unsigned int)( (rad-qMin)*((double)(servoMax - servoMin)) / (qMax-qMin) + (double)servoMin);
 
-    if((*servoVal <=servoMax) && (*servoVal >= servoMin)){/*is the value within the servo range?*/
+    if((*servoVal >=49000) && (*servoVal <= 110000)){/*is the value within the servo range?*/
+               // return ECD_OK;
+
+            if((*servoVal > 100000)&&(*servoVal <110000)){
+                *servoVal = 100000;
                 return ECD_OK;
-        }
-        else{
-            if(*servoVal >servoMax){
-                *servoVal = servoMax;
             }
 
-            if(*servoVal <servoMin){
-                *servoVal = servoMin;
+            if((*servoVal < 50000)&& (*servoVal > 49000)){
+                *servoVal = 50000;
+                return ECD_OK;
+
             }
                 return ECD_ERROR;
         }
+}
 
-    }
 
 static int ik_servo_to_rad(double * rad,unsigned int servoVal,int servoMax, int servoMin, double qMax, double qMin){
     *rad = (double) ((((double)servoVal)-((double)servoMin)) * (qMax-qMin) / (((double)servoMax) - ((double)servoMin)) + qMin);
@@ -273,14 +294,15 @@ int ik_move_delta(ik_cart_pos_s delta){/*moves the arm along the x, y and z axis
 	rVal = ik_calc_IK(next_position, &msgMessage[0], &msgMessage[1], &msgMessage[2], &move_time);
 
 
-	if(rVal == ECD_OK){/*if we can move to that position*/
-		msg_send(qMOVE,msgMessage[0]);/*send the commands off to the servos*/
+//if(rVal == ECD_OK){/*if we can move to that position*/
+	if(1){
+	msg_send(qMOVE,msgMessage[0]);/*send the commands off to the servos*/
 		msg_send(qMOVE,msgMessage[1]);
 		msg_send(qMOVE,msgMessage[2]);
 
-		return ECD_OK;
+		return (unsigned int)(move_time * 1000);
 	}else{/*if we cannot move dont send the commands but print an error message*/
-		printf("Cannot move to that position\n");
+		fprintf(stderr,"Cannot move to that position\n");
 
 		return ECD_ERROR;
 	}

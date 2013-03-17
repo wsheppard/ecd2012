@@ -89,7 +89,7 @@ static void move_main_task(void* params) {
 	int servoID;
 
 
-	printf("Movement main task created...\n");
+	fprintf(stderr,"Movement main task created...\n");
 
 	for (;;) {
 		/* So now wait for commands to come through from the Main Manager
@@ -107,7 +107,7 @@ static void move_main_task(void* params) {
 
 			/* If bad servo id quit */
 			if (servoID >= PWM_COUNT) {
-				printf("Bad Servo ID! \n");
+				fprintf(stderr,"Bad Servo ID! \n");
 				break;
 			}
 
@@ -120,7 +120,7 @@ static void move_main_task(void* params) {
 			servoID = ((msgMessage.messageDATA & M_MOVE_SERVOMASK_IK) >> 1);
 			/* If bad servo id quit */
 			if (servoID >= PWM_COUNT) {
-				printf("Bad Servo ID! - IK \n");
+				fprintf(stderr,"Bad Servo ID! - IK \n");
 				break;
 			}
 			/* Send out message */
@@ -138,8 +138,9 @@ static void move_main_task(void* params) {
 
 /* This function is served to each of the servo tasks */
 static void move_servo_task(void *params) {
-	unsigned int pos[4];
-	int state[4];
+//	unsigned int pos[4];
+//	int x = 0;
+//	int state[4];
 
 	move_servoData_s servoData;
 	msg_message_s msgMessage;
@@ -147,7 +148,7 @@ static void move_servo_task(void *params) {
 	/* Grab local copy of the queue handle */
 	servoData = *(move_servoData_s*) params;
 
-	//printf("I am servo task %d.\n", servoData.iServoID);
+	//fprintf(stderr,"I am servo task %d.\n", servoData.iServoID);
 
 	for (;;) {
 
@@ -170,7 +171,7 @@ static void move_servo_task(void *params) {
 		case M_MOVE_IK:
 			ServoData[servoData.iServoID].state = MOVE_STATE_IK;
 
-			printf("Servo %d PWM value: %d \n", servoData.iServoID, M_IK_SERVO_GOAL(msgMessage.messageDATA));
+			fprintf(stderr,"IK- Servo %d PWM value: %d \n", servoData.iServoID, M_IK_SERVO_GOAL(msgMessage.messageDATA));
 
 			if (M_IK_SERVO_SPEED(msgMessage.messageDATA)) {/*if a movement speed is defined */
 
@@ -192,7 +193,7 @@ static void move_servo_task(void *params) {
 
 
 
-			printf("move done [%u:%u],[%u:%u],[%u:%u],[%u:%u].\n",
+			fprintf(stderr,"move done [%u:%u],[%u:%u],[%u:%u],[%u:%u].\n",
 			pos[0],state[0],
 			pos[1],state[1],
 			pos[2],state[2],
@@ -225,7 +226,7 @@ static void move_servo_task(void *params) {
 
 
 
-				printf("move done [%u:%u],[%u:%u],[%u:%u],[%u:%u].\n",
+				fprintf(stderr,"move done [%u:%u],[%u:%u],[%u:%u],[%u:%u].\n",
 						pos[0],state[0],
 						pos[1],state[1],
 						pos[2],state[2],
@@ -255,9 +256,9 @@ static void move_servo_task(void *params) {
 
 		case M_MOVE_STOP:
 			/* This means the motor is stopped, but we've received a pointless STOP request */
-			printf("Servo task %d received unneccessary stop message.\n",
+			fprintf(stderr,"Servo task %d received unneccessary stop message.\n",
 					servoData.iServoID);
-			//printf("Stopping movement on servo %d.\n",msgMessage.messageDATA);
+			//fprintf(stderr,"Stopping movement on servo %d.\n",msgMessage.messageDATA);
 			break;
 		default:
 			break;
@@ -273,7 +274,7 @@ static void move_servo_cont(move_servoData_s *sData, int direction) {
 
 	msg_message_s msgMessage;
 	int jumpval = MOVE_JUMPVAL;
-	int delta = 0;
+	float delta = 0;
 
 	if (direction & M_MOVE_DIRMASK)
 		ServoData[sData->iServoID].state = MOVE_STATE_INC;
@@ -285,16 +286,16 @@ static void move_servo_cont(move_servoData_s *sData, int direction) {
 		/* Quick message check  */
 		if (msg_recv_noblock(sData->qServo, &msgMessage) != ECD_NOMSG) {
 			if (msgMessage.messageID != M_MOVE_STOP) {
-				printf("Expecting STOP message but received something else!\n");
+				fprintf(stderr,"Expecting STOP message but received something else!\n");
 				return;
 			} else {
-				//printf("Servo task %d STOPPING %s.\n", sData->iServoID,direction ? "INC": "DEC");
+				//fprintf(stderr,"Servo task %d STOPPING %s.\n", sData->iServoID,direction ? "INC": "DEC");
 				return;
 			}
 		}
 
 		/* So no message received, move one step */
-		//printf("Servo task %d moving %s STEP.\n", sData->iServoID,direction ? "INC": "DEC");
+		//fprintf(stderr,"Servo task %d moving %s STEP.\n", sData->iServoID,direction ? "INC": "DEC");
 		if (direction & M_MOVE_DIRMASK)
 			pwm_jump(sData->iServoID, jumpval);
 		else
@@ -302,7 +303,7 @@ static void move_servo_cont(move_servoData_s *sData, int direction) {
 
 		/* Increase movement speed until MOVE_JUMP_MAX */
 		if (jumpval < (MOVE_JUMP_MAX)) {
-			jumpval += delta;
+			jumpval += (int)delta;
 			delta += MOVE_DELTA;
 		}
 
@@ -369,7 +370,7 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, int speed) {
 	latency_ms = TICKS2MS(MOVE_SIGMOID_LATENCY);
 
 
-	printf("Servo[%d] To[%d] Time[%d] Distance[%d] Speed [%d] Init[%d] LatencyMS[%d]\n",
+	fprintf(stderr,"Servo[%d] To[%d] Time[%d] Distance[%d] Speed [%d] Init[%d] LatencyMS[%d]\n",
 			sData->iServoID,
 			place,
 			(unsigned int)totaltime_ms,
@@ -385,11 +386,11 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, int speed) {
 		/* Quick message check */
 		if (msg_recv_noblock(sData->qServo, &msgMessage) != ECD_NOMSG) {
 			if (msgMessage.messageID == M_MOVE_STOP) {
-				printf(
+				fprintf(stderr,
 						"STOP message received before SIGMOID move finished. Stopping. \n");
 				return;
 			} else {
-				printf("Servo MID-SIGMOID-MOVE and received non-STOP message! Ignoring.\n");
+				fprintf(stderr,"Servo MID-SIGMOID-MOVE and received non-STOP message! Ignoring.\n");
 
 			}
 		}
@@ -399,7 +400,7 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, int speed) {
 		/* Get normalized value */
 		sigmoid(m, (float)tick, &res);
 
-		//printf("Sigmoid result: [%4.2f]\n",res);
+		//fprintf(stderr,"Sigmoid result: [%4.2f]\n",res);
 
 		/* Now scale it */
 		res *= distance;
@@ -414,7 +415,7 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, int speed) {
 
 #if 0
 			if(sData->iServoID==3){
-				printf("Latency [%d] and TotalTimeMS [%d] PWM [%d].\n",
+				fprintf(stderr,"Latency [%d] and TotalTimeMS [%d] PWM [%d].\n",
 						(int)tick,
 						(int)totaltime_ms,
 						(int)res);
@@ -428,7 +429,7 @@ static void move_servo_sigmoid(move_servoData_s *sData, int place, int speed) {
 		}
 		else {
 
-			//printf("Servo [%d] Returns from sigmoid.\n",sData->iServoID);
+			//fprintf(stderr,"Servo [%d] Returns from sigmoid.\n",sData->iServoID);
 			return;
 		}
 		 

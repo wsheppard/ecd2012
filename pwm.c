@@ -51,6 +51,14 @@ int pwm_jump(int servo, int jump){
 
 	position += jump;
 
+	if ( (position<50000) ){
+		position =50000;
+	}
+
+	if ( (position>100000) ){
+			position =100000;
+		}
+
 	/* Write out new servo position */
 	pwm_set_pos(servo, position);
 
@@ -59,10 +67,13 @@ int pwm_jump(int servo, int jump){
 
 int pwm_set_pos(int servo, unsigned int position){
 
+	static unsigned int last_error = 0;
+
 	/* Boundary check */
-	if ((position>100000) || (position<50000)){
-		printf("Servo [%d] bounary error! Value: %d.\n",servo, position);
-			return ECD_ERROR;
+	if (  ((position>100000) || (position<50000)) && (position!=last_error)   ){
+		fprintf(stderr,"Servo [%d] bounary error! Value: %d.\n",servo, position);
+		last_error = position;
+		return ECD_ERROR;
 	}
 	/* 	Write to hardware using HAL provided functions.
 		these prevent data caching by the NIOS */
@@ -89,7 +100,7 @@ int pwm_set_pos(int servo, unsigned int position){
         }
         else
         {
-			printf("PWM_SET Couldn't get semaphore...\n");
+			fprintf(stderr,"PWM_SET Couldn't get semaphore...\n");
             // We could not obtain the semaphore and can therefore not access
             // the shared resource safely.
         }
@@ -119,7 +130,7 @@ int pwm_get_pos(int servo, unsigned int* position){
         }
         else
         {
-			printf("Couldn't get semaphore...\n");
+			fprintf(stderr,"Couldn't get semaphore...\n");
             // We could not obtain the semaphore and can therefore not access
             // the shared resource safely.
         }

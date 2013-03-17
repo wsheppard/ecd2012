@@ -27,13 +27,13 @@ int main( void )
 {
 
 
-	printf("Starting the RTOS demo.....\n");
+	fprintf(stderr,"Starting the RTOS demo.....\n");
 
 
 	/* Starting off the manager thread */
 	if (man_start()!=ECD_OK){
 	
-		printf("Cannot start, halting system!\n");
+		fprintf(stderr,"Cannot start, halting system!\n");
 
                 while(1);	
 	}
