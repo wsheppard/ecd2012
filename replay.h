@@ -28,7 +28,7 @@ enum {
 #define STOP_POLL_DELAY 50
 
 typedef struct replay_storage_ss{
-	unsigned int keyPressed;
+	unsigned int rValue;
 	portTickType delayTime;
 	unsigned int state;
 	ik_cart_pos_s  ik_position;

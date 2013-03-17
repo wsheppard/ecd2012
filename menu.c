@@ -34,7 +34,7 @@ int men_check_menu(unsigned state, int shifted){
 	static int ignore_slot_key_release=0;
 	/*initiallising emu mode to stopped on first call*/
 	static int M_MENMODE = M_MENMODE_STOPPED;
-	static int replay_array_slot,replay_array_position;
+	static int replay_array_slot;
 	static int replay_start=0;
 	static portTickType xLastStateChange, xNewStateChange;
 	replay_storage_s stateChangeValue;
@@ -177,11 +177,11 @@ int men_check_menu(unsigned state, int shifted){
 			else if ( key == M_KP_KEY_D4){
 				ik_calc_FK(&current_pos_ik);
 				stateChangeValue.ik_position=current_pos_ik;
-				pwm_get_pos(0,&stateChangeValue.keyPressed);
-				if (stateChangeValue.keyPressed> 100000)
-					stateChangeValue.keyPressed=100000;
-				else if (stateChangeValue.keyPressed< 50000)
-					stateChangeValue.keyPressed = 50000;
+				pwm_get_pos(0,&stateChangeValue.rValue);
+				if (stateChangeValue.rValue> 100000)
+					stateChangeValue.rValue=100000;
+				else if (stateChangeValue.rValue< 50000)
+					stateChangeValue.rValue = 50000;
 				stateChangeValue.state=REPLAY_WP;
 				replayMSG.messageID=REPLAY_RECORD;
 				replayMSG.messageDATA=(unsigned int)&stateChangeValue;
@@ -321,7 +321,7 @@ void men_store_key_change(int key,int shifted,int state, portTickType *xLastStat
 	case M_KP_KEY_B4:
 		*xLastStateChange=*xNewStateChange;
 		*xNewStateChange=xTaskGetTickCount();
-		stateChangeValue.keyPressed=shifted;
+		stateChangeValue.rValue=shifted;
 		stateChangeValue.delayTime=*xNewStateChange-*xLastStateChange;
 		stateChangeValue.state=state;
 		replayMSG.messageID=REPLAY_RECORD;
