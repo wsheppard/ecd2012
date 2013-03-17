@@ -67,7 +67,7 @@ static void man_replay(void*params){
 						xLastWakeTime=xTaskGetTickCount();
 						
 						while(num_delays){
-							xQueueReceive( qREPLAY, msgREPLAY, STOP_POLL_DELAY );
+							xQueueReceive( qREPLAY, &msgREPLAY, STOP_POLL_DELAY );
 							
 							if (msgREPLAY.messageID==REPLAY_STOP_PLAY)
 								goto replay_stop;
@@ -106,7 +106,7 @@ static void man_replay(void*params){
 						
 						while(num_delays){
 							/* block wait on queue for STOP_POLL_DELAY length of time */
-							xQueueReceive( qREPLAY, msgREPLAY, STOP_POLL_DELAY );
+							xQueueReceive( qREPLAY, &msgREPLAY, STOP_POLL_DELAY );
 							
 							if (msgREPLAY.messageID==REPLAY_STOP_PLAY)
 								goto replay_stop;
