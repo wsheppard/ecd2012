@@ -76,7 +76,7 @@ static void man_main(void*params){
 	int shifted;
 	int do_ik_once = 1;
 
-	printf("Starting manager...\n");
+	fprintf(stderr,"Starting manager...\n");
 
 	startIK.x_pos = 15.13;
 	startIK.y_pos = 15.13;
@@ -96,13 +96,13 @@ static void man_main(void*params){
 			purposes? */
 		msg_recv_block(qKP,&msgKP);
 
-		//printf("Received a message... ID: %d, DATA: 0x%X.\n", msgKP.messageID, msgKP.messageDATA);
+		//fprintf(stderr,"Received a message... ID: %d, DATA: 0x%X.\n", msgKP.messageID, msgKP.messageDATA);
 	
 		changed = 65535U & msgKP.messageDATA;
 		state = msgKP.messageDATA >> 16;
 		shifted = 0;
 
-		//printf("Changed:[0x%X], State[0x%X].\n", changed, state);
+		//fprintf(stderr,"Changed:[0x%X], State[0x%X].\n", changed, state);
 
 		/* While there are still bits to deal with */
 		while(changed){
@@ -110,7 +110,7 @@ static void man_main(void*params){
 			/* The key at this postion is changed */
 			if (changed & 1){		
 				if(state & 1){
-						printf("Key at pos %d pressed.\n", shifted);
+						fprintf(stderr,"Key at pos %d pressed.\n", shifted);
 						if (men_check_menu(state,shifted) == 1){
 							man_key_down(shifted);
 
@@ -118,7 +118,7 @@ static void man_main(void*params){
 
 				}
 				else{
-						printf("Key at pos %d released.\n", shifted);
+						fprintf(stderr,"Key at pos %d released.\n", shifted);
 						if (men_check_menu(state,shifted) == 1){
 						man_key_up(shifted);
 						}

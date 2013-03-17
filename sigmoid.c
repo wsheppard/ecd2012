@@ -38,11 +38,11 @@ int test_sigmoid(void){
 	time = 3.8;
 	result = 0;
 
-	printf("Starting sigmoid test....\n");
+	fprintf(stderr,"Starting sigmoid test....\n");
 
-	printf("Sigmoid block test register returns [%X].\n", IORD(EULERBLOCK_0_BASE,3));
+	fprintf(stderr,"Sigmoid block test register returns [%X].\n", IORD(EULERBLOCK_0_BASE,3));
 
-	printf("Floats have byte count of [%d].\n",(int)sizeof(float));
+	fprintf(stderr,"Floats have byte count of [%d].\n",(int)sizeof(float));
 
 	input.fl = M;
 
@@ -52,13 +52,13 @@ int test_sigmoid(void){
 	input.ui = IORD(EULERBLOCK_0_BASE, 0);
 
 
-	printf("Inputs are M=[%4.2f], time=[%4.2f].\n",M,time);
+	fprintf(stderr,"Inputs are M=[%4.2f], time=[%4.2f].\n",M,time);
 
-	printf("IORD returns [%4.8f].\n", input.fl);
+	fprintf(stderr,"IORD returns [%4.8f].\n", input.fl);
 
 	sigmoid(M, time, &result);
 
-	printf("Sigmoid returned [%4.8f].\n", result);
+	fprintf(stderr,"Sigmoid returned [%4.8f].\n", result);
 
 	return 0;
 }
@@ -103,7 +103,7 @@ int sigmoid(float M, float time, float*result) {
 			xSemaphoreGive( xSemaphore);
 
 		} else {
-			printf("Servo couldn't get EULERBLOCK semaphore! \n");
+			fprintf(stderr,"Servo couldn't get EULERBLOCK semaphore! \n");
 			// We could not obtain the semaphore and can therefore not access
 			// the shared resource safely.
 		}
@@ -111,7 +111,7 @@ int sigmoid(float M, float time, float*result) {
 	}
 
 	else{
-		printf("ERROR: Sigmoid sempahore is NULL. Returning.\n");
+		fprintf(stderr,"ERROR: Sigmoid sempahore is NULL. Returning.\n");
 		return ECD_ERROR;
 		}
 

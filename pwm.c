@@ -70,7 +70,7 @@ int pwm_set_pos(int servo, unsigned int position){
 
 	/* Boundary check */
 	if (  ((position>100000) || (position<50000)) && (position!=last_error)   ){
-		printf("Servo [%d] bounary error! Value: %d.\n",servo, position);
+		fprintf(stderr,"Servo [%d] bounary error! Value: %d.\n",servo, position);
 		last_error = position;
 		return ECD_ERROR;
 	}
@@ -99,7 +99,7 @@ int pwm_set_pos(int servo, unsigned int position){
         }
         else
         {
-			printf("PWM_SET Couldn't get semaphore...\n");
+			fprintf(stderr,"PWM_SET Couldn't get semaphore...\n");
             // We could not obtain the semaphore and can therefore not access
             // the shared resource safely.
         }
@@ -129,7 +129,7 @@ int pwm_get_pos(int servo, unsigned int* position){
         }
         else
         {
-			printf("Couldn't get semaphore...\n");
+			fprintf(stderr,"Couldn't get semaphore...\n");
             // We could not obtain the semaphore and can therefore not access
             // the shared resource safely.
         }

@@ -60,14 +60,14 @@ static void kp_main(void*pvParams){
 	kp_previousData = 0;
 
 
-	printf("Keypad starting...\n");
+	fprintf(stderr,"Keypad starting...\n");
 	vTaskDelay(50);
 	/* Start checking for keypad changes and then send as message */
 	for (;;){
 	
 		//kp_getCurrent(&kp_currentData);
 		kp_getDebounced(&kp_currentData);
-		//printf("Data: Previous[%x], Current:[%x].\n", kp_previousData, kp_currentData);
+		//fprintf(stderr,"Data: Previous[%x], Current:[%x].\n", kp_previousData, kp_currentData);
 		
 		/* If there is a change */
 		if (kp_previousData ^ kp_currentData){
@@ -101,7 +101,7 @@ static void kp_getCurrent(unsigned short *KP_data){
 	 * keypad
 	 */
 
-	//printf("Reading: %X\n",*p_keypad_data);
+	//fprintf(stderr,"Reading: %X\n",*p_keypad_data);
 
 	*KP_data = (unsigned short)IORD(KP_BASE_ADDRESS, 2);
 
