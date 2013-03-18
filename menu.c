@@ -10,7 +10,7 @@ static void men_store_key_change(int key,int shifted, int state, portTickType *x
 static void men_enter_stopped_mode();
 static int men_ik_control(int key);
 
-static int key_mappings[] = {14,9,10,11,5,6,7,1,2,3};
+static int key_mappings[] = {12,13,9,5,14,10,6,15,11,7};
 static xQueueHandle qMOVE;
 static xQueueHandle qREPLAY;
 static xQueueHandle qMENU;
