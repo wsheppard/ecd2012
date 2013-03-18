@@ -20,7 +20,10 @@ int menu_init(xQueueHandle qMoveHandle,xQueueHandle qRHandle,xQueueHandle qMenuH
 	qMOVE=qMoveHandle;
 	qREPLAY=qRHandle;
 	qMENU=qMenuHandle;
+	printf( M_POS1_1 M_CLEAR_LINE "Menu: 1:WP 2:MAN");
+	printf( M_POS2_1 M_CLEAR_LINE "4:IK 5:RT 8:RP");
 	return ECD_OK;
+
 }
 
 
@@ -56,37 +59,41 @@ int men_check_menu(unsigned state, int shifted){
 	/*******************on detecting a key pressed*************************/
 	/**********************************************************************/
 	/**********************************************************************/
+
 	if(state & 1){
+
 		if (M_MENMODE == M_MENMODE_STOPPED){
 			if (mode_changed == 1){
-				printf("Centering....\n\n");
+				printf(M_CLEAR_SCREEN "Centering....\n\n");
 				vTaskDelay(MS2TICKS(ik_move_goal(centerIK)));
 				pwm_set_pos(0, 75000);
 				printf("Stopped\n\n");
+				printf( M_POS1_1 M_CLEAR_LINE "Menu: 1:WP 2:MAN");
+				printf( M_POS2_1 M_CLEAR_LINE "4:IK 5:RT 8:RP");
 				mode_changed=0;
 			}
 			else if (key == M_KP_KEY_C1){
-				printf("Manual Control\n\n");
+				printf(M_POS1_1 M_CLEAR_SCREEN "Manual Control");
 				mode_changed = 1;
 				M_MENMODE=M_MENMODE_CONTROL;
 			}
 			else if (key == M_KP_KEY_D2){
-				printf("IK Control\n\n");
+				printf(M_POS1_1 M_CLEAR_SCREEN "IK Control");
 				mode_changed = 1;
 				M_MENMODE=M_MENMODE_CONTROL_IK;
 			}
 			else if (key == M_KP_KEY_C2){
-				printf("RTRecord - Enter\na slot from 0-%d\n",NUM_REPLAY_SLOTS);
+				printf(M_POS1_1 M_CLEAR_SCREEN "RTRecord - Enter\na slot from 0-%d",NUM_REPLAY_SLOTS);
 				mode_changed=1;
 				M_MENMODE=M_MENMODE_RECORD_RT;
 			}
 			else if (key == M_KP_KEY_D1){
-				printf("WPRecord - Enter\na slot from 0-%d\n",NUM_REPLAY_SLOTS);
+				printf( M_POS1_1 M_CLEAR_SCREEN "WPRecord - Enter\na slot from 0-%d",NUM_REPLAY_SLOTS);
 				mode_changed=1;
 				M_MENMODE=M_MENMODE_RECORD_WP;
 			}
 			else if (key == M_KP_KEY_C3){
-				printf("Replay - Enter a\nreplay slot from 0-%d\n",NUM_REPLAY_SLOTS);
+				printf(M_POS1_1 M_CLEAR_SCREEN"Replay - Enter a\nreplay slot from 0-%d",NUM_REPLAY_SLOTS);
 				mode_changed=1;
 				M_MENMODE=M_MENMODE_REPLAY;
 			}
