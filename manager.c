@@ -164,7 +164,7 @@ void man_key_down(int key){
 		break;
 	case M_KP_KEY_A4:
 		msgMessage.messageID = M_MOVE_CONT;
-		msgMessage.messageDATA = M_MOVE_SERVO4 | M_MOVE_DIRMASK;
+		msgMessage.messageDATA = M_MOVE_SERVO4;
 		msg_send(qMOVE,msgMessage);
 		break;
 	
@@ -185,7 +185,7 @@ void man_key_down(int key){
 		break;
 	case M_KP_KEY_B4:
 		msgMessage.messageID = M_MOVE_CONT;
-		msgMessage.messageDATA = M_MOVE_SERVO4;
+		msgMessage.messageDATA = M_MOVE_SERVO4 | M_MOVE_DIRMASK;
 		msg_send(qMOVE,msgMessage);
 		break;
 	/* Save / replay functions */
