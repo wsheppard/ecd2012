@@ -10,7 +10,8 @@ static void men_store_key_change(int key,int shifted, int state, portTickType *x
 static void men_enter_stopped_mode();
 static int men_ik_control(int key);
 
-static int key_mappings[] = {12,13,9,5,14,10,6,15,11,7};
+static int key_mappings[] = {11,12,8,4,13,9,5,14,10,6};
+//static int key_mappings[] = {14,9,10,11,5,6,7,1,2,3};
 static xQueueHandle qMOVE;
 static xQueueHandle qREPLAY;
 static xQueueHandle qMENU;
@@ -93,7 +94,7 @@ int men_check_menu(unsigned state, int shifted){
 				M_MENMODE=M_MENMODE_RECORD_WP;
 			}
 			else if (key == M_KP_KEY_C3){
-				printf(M_POS1_1 M_CLEAR_SCREEN"Replay - Enter a\nreplay slot from 0-%d",NUM_REPLAY_SLOTS);
+				printf(M_POS1_1 M_CLEAR_SCREEN "Replay - Enter a\na slot from 0-%d",NUM_REPLAY_SLOTS);
 				mode_changed=1;
 				M_MENMODE=M_MENMODE_REPLAY;
 			}
@@ -135,14 +136,14 @@ int men_check_menu(unsigned state, int shifted){
 			/*If just started replay mode get slot from user*/
 			else if(mode_changed==1){
 				for (x=0;x<NUM_REPLAY_SLOTS;x++){
-					if (key==key_mappings[x]){
+					if (shifted==key_mappings[x]){
 						/* set mode changed to 0 so key state changes can start being logged*/
 						mode_changed=0;
 						replay_array_slot=x;
 						ignore_slot_key_release=1;
 						/* Possible TODO:get and store current position of PWM's as first value in array if not centered.
 						and use specific move to that position at start of replay */
-						slot_key_binary=key_mappings[x];
+						slot_key_binary=key;
 					}
 				}
 			}
@@ -170,12 +171,12 @@ int men_check_menu(unsigned state, int shifted){
 			/*If just started replay mode get slot from user*/
 			else if(mode_changed==1){
 				for (x=0;x<NUM_REPLAY_SLOTS;x++){
-					if (key==key_mappings[x]){
+					if (shifted==key_mappings[x]){
 						/* set mode changed to 0 so key state changes can start being logged*/
 						mode_changed=0;
 						replay_array_slot=x;
 						ignore_slot_key_release=1;
-						slot_key_binary=key_mappings[x];
+						slot_key_binary=key;
 						waypoint_pos = 0;
 					}
 				}
@@ -194,7 +195,7 @@ int men_check_menu(unsigned state, int shifted){
 				replayMSG.messageDATA=(unsigned int)&stateChangeValue;
 				msg_send(qREPLAY,replayMSG);
 				waypoint_pos++;
-				printf("Waypoint Record\nSlot %d, pos %d\n",replay_array_slot,waypoint_pos);
+				printf( M_POS1_1 M_CLEAR_SCREEN "Waypoint Record\nSlot %d, pos %d\n",replay_array_slot,waypoint_pos);
 				vTaskDelay((5/portTICK_RATE_MS));				
 			}
 			else {
@@ -208,6 +209,7 @@ int men_check_menu(unsigned state, int shifted){
 			if (key==M_KP_KEY_C4){
 				replayMSG.messageID=REPLAY_STOP_PLAY;
 				msg_send(qREPLAY,replayMSG);
+				vTaskDelay(1000);
 				vTaskDelay((3/portTICK_RATE_MS));		
 				men_enter_stopped_mode(&M_MENMODE,&mode_changed);
 				return 0;
@@ -215,11 +217,11 @@ int men_check_menu(unsigned state, int shifted){
 			/*Get Replay slot from user*/
 			else if (mode_changed==1){
 				for (x=0;x<NUM_REPLAY_SLOTS;x++){
-					if (key==key_mappings[x]){
+					if (shifted==key_mappings[x]){
 						mode_changed=0;
 						replay_array_slot=x;
 						ignore_slot_key_release=1;
-						slot_key_binary=key_mappings[x];				
+						slot_key_binary=key;
 					}
 				}
 			}
@@ -235,7 +237,7 @@ int men_check_menu(unsigned state, int shifted){
 			/*Start up Record mode after slot choice button released*/
 			if ((key == slot_key_binary) && (ignore_slot_key_release==1)){
 				xNewStateChange = xTaskGetTickCount();
-				printf("RealTime Record\nSlot %d\n",replay_array_slot);
+				printf( M_POS1_1 M_CLEAR_SCREEN "RealTime Record\nSlot %d\n",replay_array_slot);
 				replayMSG.messageID=REPLAY_START_RECORD;
 				replayMSG.messageDATA=replay_array_slot;
 				msg_send(qREPLAY,replayMSG);
@@ -253,7 +255,7 @@ int men_check_menu(unsigned state, int shifted){
 		if (M_MENMODE==M_MENMODE_RECORD_WP){
 			/*Start up Record mode after slot choice button released*/
 			if ((key == slot_key_binary) && (ignore_slot_key_release==1)){
-				printf("Waypoint Record\nSlot %d, pos 0\n",replay_array_slot);
+				printf( M_POS1_1 M_CLEAR_SCREEN "Waypoint Record\nSlot %d, pos 0\n",replay_array_slot);
 				replayMSG.messageID=REPLAY_START_RECORD_WP;
 				replayMSG.messageDATA=replay_array_slot;
 				msg_send(qREPLAY,replayMSG);
@@ -289,9 +291,9 @@ int men_check_menu(unsigned state, int shifted){
 			if ((key == slot_key_binary) && (ignore_slot_key_release==1)){
 			replayMSG.messageID=REPLAY_START_PLAY;
 			replayMSG.messageDATA=replay_array_slot;
+			printf( M_POS1_1 M_CLEAR_SCREEN "Replaying Slot %d\n\n",replay_array_slot);
 			msg_send(qREPLAY,replayMSG);
 			vTaskDelay((3/portTICK_RATE_MS));
-			printf("Replaying Slot %d\n\n",replay_array_slot);
 			ignore_slot_key_release=0;
 			slot_key_binary=0;
 			}
@@ -302,9 +304,9 @@ int men_check_menu(unsigned state, int shifted){
 }
 
 void men_enter_stopped_mode(int *M_MENMODE,int *mode_changed){
-	printf("Stopped\n\n");
+	printf( M_POS1_1 M_CLEAR_SCREEN "Stopped\n\n");
 	vTaskDelay(100);
-	printf("Hit any key to\ncentre arm.\n");
+	printf( M_POS1_1 M_CLEAR_SCREEN "Hit any key to\ncentre arm.\n");
 	*mode_changed=1;
 	*M_MENMODE=M_MENMODE_STOPPED;
 	return;

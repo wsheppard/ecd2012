@@ -4,6 +4,7 @@
 #include "manager.h"
 #include "ik.h"
 #include "math.h"
+#include "menu.h"
 
 static xQueueHandle qMOVE;
 static xQueueHandle qREPLAY;
@@ -67,7 +68,9 @@ static void man_replay(void*params){
 						xLastWakeTime=xTaskGetTickCount();
 						
 						while(num_delays){
-							xQueueReceive( qREPLAY, &msgREPLAY, STOP_POLL_DELAY );
+							//xQueueReceive( qREPLAY, &msgREPLAY, STOP_POLL_DELAY );
+							vTaskDelay(STOP_POLL_DELAY);
+							msg_recv_noblock(qREPLAY,&msgREPLAY);
 							
 							if (msgREPLAY.messageID==REPLAY_STOP_PLAY)
 								goto replay_stop;
@@ -106,7 +109,9 @@ static void man_replay(void*params){
 						
 						while(num_delays){
 							/* block wait on queue for STOP_POLL_DELAY length of time */
-							xQueueReceive( qREPLAY, &msgREPLAY, STOP_POLL_DELAY );
+							//xQueueReceive( qREPLAY, &msgREPLAY, STOP_POLL_DELAY );
+							vTaskDelay(STOP_POLL_DELAY);
+							msg_recv_noblock(qREPLAY,&msgREPLAY);
 							
 							if (msgREPLAY.messageID==REPLAY_STOP_PLAY)
 								goto replay_stop;
@@ -127,11 +132,11 @@ static void man_replay(void*params){
 			replay_stop:
 			
 			if (replay_storage_array[slot][x].state ==REPLAY_END){
-				printf("Replay finished\nSucessfully\n");
+				printf( M_POS1_1 M_CLEAR_SCREEN "Replay finished\nSucessfully\n");
 			}
 			
 			else if (msgREPLAY.messageID==REPLAY_STOP_PLAY){
-				printf("Replay was\nstopped\n");
+				printf( M_POS1_1 M_CLEAR_SCREEN "Replay was\nstopped\n");
 			}
 			
 			/* Send stop message to all pwms in case of forced stop message */
