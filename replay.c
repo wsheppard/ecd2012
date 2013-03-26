@@ -101,7 +101,7 @@ static void man_replay(void*params){
 						/* Use ik move function to move arm to saved waypoint */
 						/* ik_move_goal returns time move will take in ms which is then converted to Ticks*/
 						/*add extra 20 ticks to total time to wait to ensure arm is always fully settled before commencing next move*/
-						totaltime=MS2TICKS(ik_move_goal(replay_storage_array[slot][x].ik_position))+20;
+						totaltime=MS2TICKS(ik_move_goal(replay_storage_array[slot][x].ik_position))+30;
 						
 						num_delays=totaltime / STOP_POLL_DELAY;
 						
@@ -123,7 +123,7 @@ static void man_replay(void*params){
 						
 						/* Send gripper position stored in rValue Variable straight to servos */
 						pwm_set_pos(0, replay_storage_array[slot][x].rValue);
-						vTaskDelay(10);
+						vTaskDelay(100);
 						
 						x++;
 				}
