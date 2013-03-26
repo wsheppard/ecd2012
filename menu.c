@@ -84,17 +84,17 @@ int men_check_menu(unsigned state, int shifted){
 				M_MENMODE=M_MENMODE_CONTROL_IK;
 			}
 			else if (key == M_KP_KEY_C2){
-				printf(M_POS1_1 M_CLEAR_SCREEN "RTRecord - Enter\na slot from 0-%d",NUM_REPLAY_SLOTS);
+				printf(M_POS1_1 M_CLEAR_SCREEN "RTRecord - Enter\na slot from 1-9");
 				mode_changed=1;
 				M_MENMODE=M_MENMODE_RECORD_RT;
 			}
 			else if (key == M_KP_KEY_D1){
-				printf( M_POS1_1 M_CLEAR_SCREEN "WPRecord - Enter\na slot from 0-%d",NUM_REPLAY_SLOTS);
+				printf( M_POS1_1 M_CLEAR_SCREEN "WPRecord - Enter\na slot from 1-9");
 				mode_changed=1;
 				M_MENMODE=M_MENMODE_RECORD_WP;
 			}
 			else if (key == M_KP_KEY_C3){
-				printf(M_POS1_1 M_CLEAR_SCREEN "Replay - Enter a\na slot from 0-%d",NUM_REPLAY_SLOTS);
+				printf(M_POS1_1 M_CLEAR_SCREEN "Replay - Enter a\na slot from 1-9");
 				mode_changed=1;
 				M_MENMODE=M_MENMODE_REPLAY;
 			}
