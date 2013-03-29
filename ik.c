@@ -90,11 +90,11 @@ int ik_calc_IK(ik_cart_pos_s position, msg_message_s *msgMessage0, msg_message_s
 	//set 2
 	q32 = atan2(-sqrt(1-pow((pow(xc,2)+pow(yc,2)+pow(zc,2)-pow(l2,2)-pow(l3,2))/(2*l2*l3),2)),((pow(xc,2)+pow(yc,2)+pow(zc,2)-pow(l2,2)-pow(l3,2))/(2*l2*l3)));
 	q22 = -atan2(((l3*sin(q32))/sqrt(pow(xc,2)+pow(yc,2)+pow(zc,2))),+sqrt(1-pow((l3*sin(q32))/sqrt(pow(xc,2)+pow(yc,2)+pow(zc,2)),2)))+atan2(zc,sqrt(pow(xc,2)+pow(yc,2)));
-	// Check if this position is reachable, if it is not calculate the other possible configuration
-	if((q22 > Q_MIN_1) || q22 < Q_MAX_1 || q32 > Q_MIN_2 || q32 < Q_MAX_2 ){
+	// Check if this position is reachable, if it is not calculate the other possible configuration. We are relaxing the constraing by 1° so that some 45.003 degree will be accepted
+	if((q22 > (Q_MIN_1+RELAX_CONSTRAINTS)) || (q22 < (Q_MAX_1-RELAX_CONSTRAINTS)) || (q32 > (Q_MIN_2+RELAX_CONSTRAINTS)) || (q32 < (Q_MAX_2-RELAX_CONSTRAINTS)) ){
 		q32 = atan2(+sqrt(1-pow(((pow(xc,2)+pow(yc,2)+pow(zc,2)-pow(l2,2)-pow(l3,2))/(2*l2*l3)),2)),((pow(xc,2)+pow(yc,2)+pow(zc,2)-pow(l2,2)-pow(l3,2))/(2*l2*l3)));
 		q22 = -atan2(((l3*sin(q32))/sqrt(pow(xc,2)+pow(yc,2)+pow(zc,2))),+sqrt(1-pow((l3*sin(q32))/sqrt(pow(xc,2)+pow(yc,2)+pow(zc,2)),2)))+atan2(zc,sqrt(pow(xc,2)+pow(yc,2)));
-		if((q22 > Q_MIN_1) || q22 < Q_MAX_1 || q32 > Q_MIN_2 || q32 < Q_MAX_2 ){
+		if((q22 > (Q_MIN_1+RELAX_CONSTRAINTS)) || (q22 < (Q_MAX_1-RELAX_CONSTRAINTS)) || (q32 > (Q_MIN_2+RELAX_CONSTRAINTS)) || (q32 < (Q_MAX_2-RELAX_CONSTRAINTS)) ){
 			return ECD_ERROR;
 		}
 	}
