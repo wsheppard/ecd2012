@@ -27,6 +27,7 @@ Inverse kinematics
 #define Q4 0
 
 #define RAD2DEG 180/M_PI
+#define RELAX_CONSTRAINTS 0.0175
 
 
 
