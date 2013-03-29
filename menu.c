@@ -183,13 +183,11 @@ int men_check_menu(unsigned state, int shifted){
 			}
 			/* If not stop button and slot has been selected log button presses */
 			else if ( key == M_KP_KEY_D4){
-				ik_calc_FK(&current_pos_ik);
-				stateChangeValue.ik_position=current_pos_ik;
-				pwm_get_pos(0,&stateChangeValue.rValue);
-				if (stateChangeValue.rValue> 100000)
-					stateChangeValue.rValue=100000;
-				else if (stateChangeValue.rValue< 50000)
-					stateChangeValue.rValue = 50000;
+//				ik_calc_FK(&current_pos_ik);
+//				stateChangeValue.ik_position=current_pos_ik;
+				for(x=0;x<PWM_COUNT;x++){
+					pwm_get_pos(x,&stateChangeValue.servoValues[x]);
+				}
 				stateChangeValue.state=REPLAY_WP;
 				replayMSG.messageID=REPLAY_RECORD;
 				replayMSG.messageDATA=(unsigned int)&stateChangeValue;
@@ -304,8 +302,6 @@ int men_check_menu(unsigned state, int shifted){
 }
 
 void men_enter_stopped_mode(int *M_MENMODE,int *mode_changed){
-	printf( M_POS1_1 M_CLEAR_SCREEN "Stopped\n\n");
-	vTaskDelay(100);
 	printf( M_POS1_1 M_CLEAR_SCREEN "Hit any key to\ncentre arm.\n");
 	*mode_changed=1;
 	*M_MENMODE=M_MENMODE_STOPPED;
@@ -330,7 +326,7 @@ void men_store_key_change(int key,int shifted,int state, portTickType *xLastStat
 	case M_KP_KEY_B4:
 		*xLastStateChange=*xNewStateChange;
 		*xNewStateChange=xTaskGetTickCount();
-		stateChangeValue.rValue=shifted;
+		stateChangeValue.keyPressed=shifted;
 		stateChangeValue.delayTime=*xNewStateChange-*xLastStateChange;
 		stateChangeValue.state=state;
 		replayMSG.messageID=REPLAY_RECORD;
@@ -340,6 +336,7 @@ void men_store_key_change(int key,int shifted,int state, portTickType *xLastStat
 
 	}
 }
+
 
 int men_ik_control(int key){
 

@@ -1,8 +1,9 @@
 #include "messaging.h"
 #include "replay.h"
 #include "pwm.h"
-#include "manager.h"
 #include "ik.h"
+#include "manager.h"
+#include "movement.h"
 #include "math.h"
 #include "menu.h"
 
@@ -82,11 +83,11 @@ static void man_replay(void*params){
 						vTaskDelayUntil(&xLastWakeTime,replay_storage_array[slot][x].delayTime);
 						
 						if (replay_storage_array[slot][x].state == REPLAY_BUTTON_UP){
-							man_key_up(replay_storage_array[slot][x].rValue);
+							man_key_up(replay_storage_array[slot][x].keyPressed);
 						}
 						
 						else if (replay_storage_array[slot][x].state == REPLAY_BUTTON_DOWN){
-							man_key_down(replay_storage_array[slot][x].rValue);
+							man_key_down(replay_storage_array[slot][x].keyPressed);
 						}
 
 						x++;
@@ -101,7 +102,8 @@ static void man_replay(void*params){
 						/* Use ik move function to move arm to saved waypoint */
 						/* ik_move_goal returns time move will take in ms which is then converted to Ticks*/
 						/*add extra 20 ticks to total time to wait to ensure arm is always fully settled before commencing next move*/
-						totaltime=MS2TICKS(ik_move_goal(replay_storage_array[slot][x].ik_position))+30;
+						totaltime=MS2TICKS(man_send_move(replay_storage_array[slot][x].servoValues))+30;
+						//ik_move_goal(replay_storage_array[slot][x].ik_position))+30;
 						
 						num_delays=totaltime / STOP_POLL_DELAY;
 						
@@ -122,8 +124,8 @@ static void man_replay(void*params){
 						vTaskDelayUntil(&xLastWakeTime,totaltime);
 						
 						/* Send gripper position stored in rValue Variable straight to servos */
-						pwm_set_pos(0, replay_storage_array[slot][x].rValue);
-						vTaskDelay(100);
+						//pwm_set_pos(0, replay_storage_array[slot][x].rValue);
+						//vTaskDelay(100);
 						
 						x++;
 				}
@@ -185,4 +187,29 @@ void man_stop_all_pwm(){
 		msg_send(qMOVE,msgSTOP);
 	}
 	return;
+}
+
+unsigned int man_send_move(unsigned int *nextPos){
+	int x;
+	unsigned int currentPos[4];
+	unsigned int servoSpeed;
+	unsigned int longest_distance=0;
+	float longest_time;
+	float move_time;
+	msg_message_s servo_msg={M_MOVE_IK,0};
+
+	for(x=0;x<PWM_COUNT;x++){ /*find the longest distance to move from all servos and calculate the time needed for that move*/
+		pwm_get_pos(x,&currentPos[x]); /*get the currrent pwm position for servos all but the gripper*/
+		if(abs((nextPos[x]-currentPos[x]))> longest_distance){
+			longest_distance = abs(nextPos[x]-currentPos[x]);
+		}
+		longest_time = (float)longest_distance/MOVE_SPEC_STD_SPEED;
+		move_time = longest_time;
+	}
+	for(x=0;x<PWM_COUNT;x++){/*update the servo movement speeds, so that the time is the same on all of them*/
+		servoSpeed = (unsigned int)((abs(nextPos[x]-currentPos[x]) / longest_time) / MOVE_IK_MSG_COMPRESSION); /*M_MOVE_SPECSPEEDMASK_IK / MOVE_IK_MSG_COMPRESSION is < 2^11. Ergo it fits within the msgData*/
+		servo_msg.messageDATA=M_IK_SERVO_MESSAGE(x,nextPos[x],servoSpeed);
+		msg_send(qMOVE,servo_msg);
+	}
+ return (unsigned int)(move_time * 1000);
 }

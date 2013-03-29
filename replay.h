@@ -5,7 +5,6 @@
 #define NUM_REPLAY_SLOTS 10
 #define NUM_REPLAY_STEPS 1000
 
-#include "ik.h"
 
 enum {
 	REPLAY_END,
@@ -27,11 +26,18 @@ enum {
 
 #define STOP_POLL_DELAY 50
 
-typedef struct replay_storage_ss{
+/*typedef struct replay_storage_ss{
 	unsigned int rValue;
 	portTickType delayTime;
 	unsigned int state;
 	ik_cart_pos_s  ik_position;
+}replay_storage_s;*/
+
+typedef struct {
+	unsigned int servoValues[4];
+	portTickType delayTime;
+	unsigned int state;
+	unsigned int keyPressed;
 }replay_storage_s;
 
 
