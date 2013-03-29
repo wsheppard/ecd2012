@@ -94,7 +94,7 @@ int ik_calc_IK(ik_cart_pos_s position, msg_message_s *msgMessage0, msg_message_s
 	if((q22 > Q_MIN_1) || q22 < Q_MAX_1 || q32 > Q_MIN_2 || q32 < Q_MAX_2 ){
 		q32 = atan2(+sqrt(1-pow(((pow(xc,2)+pow(yc,2)+pow(zc,2)-pow(l2,2)-pow(l3,2))/(2*l2*l3)),2)),((pow(xc,2)+pow(yc,2)+pow(zc,2)-pow(l2,2)-pow(l3,2))/(2*l2*l3)));
 		q22 = -atan2(((l3*sin(q32))/sqrt(pow(xc,2)+pow(yc,2)+pow(zc,2))),+sqrt(1-pow((l3*sin(q32))/sqrt(pow(xc,2)+pow(yc,2)+pow(zc,2)),2)))+atan2(zc,sqrt(pow(xc,2)+pow(yc,2)));
-		if((q22 < Q_MIN_1) || q22 > Q_MAX_1 || q32 < Q_MIN_2 || q32 > Q_MAX_2 ){
+		if((q22 > Q_MIN_1) || q22 < Q_MAX_1 || q32 > Q_MIN_2 || q32 < Q_MAX_2 ){
 			return ECD_ERROR;
 		}
 	}
