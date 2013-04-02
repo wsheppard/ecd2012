@@ -1,6 +1,20 @@
-/*
-Inverse kinematics 
-*/
+ /******************************************************************************
+*
+*       File: ik.h
+*       Language: C
+*	AUTHOR: Raphael Nagel
+*       E-Mail: Raphael.nagel-at-online.de
+*       github:https://github.com/wsheppard/ecd2012/blob/master/ik.h
+*       
+*
+* Description:  Header for ik.c:
+* 		Calculates the forward as well as inverse kinematics for the
+* 		ECD 2012/2013 group project.
+* 		Further documentation at: 
+* 		http://wiki.willshep.co.uk/index.php/IK_SW_Module
+*
+*
+*******************************************************************************/
 
 #ifndef IK_H
 #define IK_H
