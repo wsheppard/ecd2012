@@ -1,12 +1,20 @@
-/*
- * ik.c
- *
- *  Created on: 12 Dec 2012
- *      Author: Raphael Nagel
- *
- *      This holds the  kinematics calculations.
- */
 
+ /******************************************************************************
+*
+*       File: ik.c
+*       Language: C
+*	AUTHOR: Raphael Nagel
+*       E-Mail: Raphael.nagel-at-online.de
+*       github:https://github.com/wsheppard/ecd2012/blob/master/ik.c
+*       
+*
+* Description:  Calculates the forward as well as inverse kinematics for the
+* 		ECD 2012/2013 group project.
+* 		Further documentation at: 
+* 		http://wiki.willshep.co.uk/index.php/IK_SW_Module
+*
+*
+*******************************************************************************/
  
  /* Standard includes. */
 #include <stdio.h>
