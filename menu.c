@@ -1,3 +1,15 @@
+/******************************************************************************
+*
+*       File: menu.c
+*       Language: c
+*	AUTHOR: Joshua Baxter
+*       E-Mail: joshuagbaxter<at>gmail.com
+*       git:https://github.com/wsheppard/ecd2012/
+*       
+*
+* Description:  Menu module with functions for taking user input and performing
+* 		the appropriate actions.
+*******************************************************************************/
 #include "FreeRTOS.h"
 #include "messaging.h"
 #include "menu.h"
