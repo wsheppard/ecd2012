@@ -1,3 +1,16 @@
+/******************************************************************************
+*
+*       File: replay.c
+*       Language: C
+*	AUTHOR: Joshua Baxter
+*       E-Mail: joshuagbaxter<at>gmail.com
+*       git:https://github.com/wsheppard/ecd2012/
+*       
+*
+* Description:  This module implements replay functionality within the project.
+*		It recieves messages telling it either to store replay data or
+*		to play it back.
+*******************************************************************************/
 #include "messaging.h"
 #include "replay.h"
 #include "pwm.h"
