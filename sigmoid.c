@@ -1,3 +1,19 @@
+/******************************************************************************
+*
+*       File: sigmoid.c
+*       Language: C
+*       AUTHOR: S. W. Sheppard
+*       E-Mail: sheppard.will@gmail.com
+*       https://github.com/wsheppard/ecd2012
+*       
+*
+*       Description:  
+*           Sigmoid code for smooth movement.
+*
+*
+*******************************************************************************/
+
+
 /* Sigmoid module. */
 #include <system.h>
 #include <FreeRTOS.h>

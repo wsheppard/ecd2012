@@ -1,3 +1,18 @@
+/******************************************************************************
+*
+*       File: replay.h
+*       Language: C
+*       AUTHOR: J. Baxter
+*       E-Mail: jbaxter@gmail.com
+*       https://github.com/wsheppard/ecd2012
+*       
+*
+*       Description:  
+*           Declarations for replay module.
+*
+*
+*******************************************************************************/
+
 #ifndef REPLAY_H
 #define REPLAY_H
 

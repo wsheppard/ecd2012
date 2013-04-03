@@ -1,11 +1,17 @@
-/*
- *
- *
- *   Display Modules
- *   Looks after displaying info to the user.
- *
- *
- */
+/******************************************************************************
+*
+*       File: display.c
+*       Language: C
+*       AUTHOR: S. W. Sheppard
+*       E-Mail: sheppard.will@gmail.com
+*       https://github.com/wsheppard/ecd2012
+*       
+*
+*       Description:  
+*           Display module - looks after displaying info to the user.
+*
+*
+*******************************************************************************/
 
 /* Local Includes */
 #include "display.h"

@@ -1,3 +1,19 @@
+/******************************************************************************
+*
+*       File: menu.h
+*       Language: C
+*       AUTHOR: J. Baxter
+*       E-Mail: jbaxter@gmail.com
+*       https://github.com/wsheppard/ecd2012
+*       
+*
+*       Description:  
+*           Defines / Declartions for menu module.
+*
+*
+*******************************************************************************/
+
+
 #ifndef MENU_H
 #define MENU_H
 

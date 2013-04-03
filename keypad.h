@@ -1,3 +1,20 @@
+/******************************************************************************
+*
+*       File: keypad.h
+*       Language: C
+*       AUTHOR: S. W. Sheppard
+*       E-Mail: sheppard.will@gmail.com
+*       https://github.com/wsheppard/ecd2012
+*       
+*
+*       Description:  
+*           Declarations for keypad module.
+*
+*
+*******************************************************************************/
+
+
+
 #ifndef KEYPAD_H
 #define KEYPAD_H
 

@@ -1,3 +1,19 @@
+/******************************************************************************
+*
+*       File: messages.h
+*       Language: C
+*       AUTHOR: S. W. Sheppard
+*       E-Mail: sheppard.will@gmail.com
+*       https://github.com/wsheppard/ecd2012
+*       
+*
+*       Description:  
+*           Defines representing the messages in the system.
+*
+*
+*******************************************************************************/
+
+
 /* All the different messages and what they mean */
 
 #ifndef MESSAGES_H

@@ -1,3 +1,21 @@
+/******************************************************************************
+*
+*       File: pwm.c
+*       Language: C
+*       AUTHOR: S. W. Sheppard
+*       E-Mail: sheppard.will@gmail.com
+*       https://github.com/wsheppard/ecd2012
+*       
+*
+*       Description:  
+*           Module with code for the servos. Servo thread prototypes.
+*
+*
+*******************************************************************************/
+
+
+
+
 /*
  *
  *

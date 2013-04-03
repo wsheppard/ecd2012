@@ -1,7 +1,18 @@
-/*
- *
- *  Will's first attempt at writing FreeRTOS code....
- */
+/******************************************************************************
+*
+*       File: main.c
+*       Language: C
+*       AUTHOR: S. W. Sheppard
+*       E-Mail: sheppard.will@gmail.com
+*       https://github.com/wsheppard/ecd2012
+*       
+*
+*       Description:  
+*           Entry point for the system.
+*
+*
+*******************************************************************************/
+
 
 /* Standard includes. */
 #include <stdio.h>

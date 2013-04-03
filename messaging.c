@@ -1,3 +1,20 @@
+/******************************************************************************
+*
+*       File: messaging.c
+*       Language: C
+*       AUTHOR: S. W. Sheppard
+*       E-Mail: sheppard.will@gmail.com
+*       https://github.com/wsheppard/ecd2012
+*       
+*
+*       Description:  
+*           Wrappers for FreeRTOS queue functions.
+*
+*
+*******************************************************************************/
+
+
+
 #include "messaging.h"
 
 int msg_newQueue(xQueueHandle*qhandle){

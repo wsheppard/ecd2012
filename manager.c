@@ -1,6 +1,18 @@
-/* Manager thread. Looking after the basic control of the whole system. Marshalling of inputs
-	to the correct output context. */
-
+/******************************************************************************
+*
+*       File: manager.c
+*       Language: C
+*       AUTHOR: S. W. Sheppard
+*       E-Mail: sheppard.will@gmail.com
+*       https://github.com/wsheppard/ecd2012
+*       
+*
+*       Description:  
+*           Manager thread. Looking after the basic control of the whole system. 
+*			Marshalling of inputs to the correct output context.
+*
+*
+*******************************************************************************/
 
 /* Standard includes. */
 #include <stdio.h>

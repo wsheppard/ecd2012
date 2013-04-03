@@ -1,9 +1,17 @@
-/*
- * test.h
- *
- *  Created on: 20 Feb 2013
- *      Author: Will
- */
+/******************************************************************************
+*
+*       File: test.h
+*       Language: C
+*       AUTHOR: S. W. Sheppard
+*       E-Mail: sheppard.will@gmail.com
+*       https://github.com/wsheppard/ecd2012
+*       
+*
+*       Description:  
+*           prototypes for test fuctions. Included when testing required.
+*
+*
+*******************************************************************************/
 
 #ifndef TEST_H_
 #define TEST_H_

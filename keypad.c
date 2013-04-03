@@ -1,3 +1,21 @@
+/******************************************************************************
+*
+*       File: keypad.c
+*       Language: C
+*       AUTHOR: S. W. Sheppard
+*       E-Mail: sheppard.will@gmail.com
+*       https://github.com/wsheppard/ecd2012
+*       
+*
+*       Description:  
+*           Keypad module including the thread which reads the VHDL keypad module
+*			and sends messages when appropriate.
+*
+*
+*******************************************************************************/
+
+
+
 /*
  *
  *
