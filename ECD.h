@@ -1,5 +1,20 @@
+/******************************************************************************
+*
+*       File: ECD.h
+*       Language: C
+*       AUTHOR: S. W. Sheppard
+*       E-Mail: sheppard.will@gmail.com
+*       https://github.com/wsheppard/ecd2012
+*       
+*
+*       Description:  
+*           Contains the project-wide defines / variables etc..
+*
+*
+*******************************************************************************/
+
 /* 
-* Contains the project-wide defines / variables etc..
+* 
 */
 #ifndef ECD_H
 #define ECD_H
